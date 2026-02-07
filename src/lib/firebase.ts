@@ -20,14 +20,17 @@ let db: Firestore;
 let messaging: Messaging | null = null;
 let analytics: Analytics | null = null;
 
-if (!getApps().length) {
-    app = initializeApp(firebaseConfig);
-} else {
-    app = getApp();
-}
+import { initializeFirestore, persistentLocalCache, persistentMultipleTabManager } from 'firebase/firestore';
 
+app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
 auth = getAuth(app);
-db = getFirestore(app);
+
+// Initialize Firestore with offline persistence
+db = initializeFirestore(app, {
+    localCache: persistentLocalCache({
+        tabManager: persistentMultipleTabManager()
+    })
+});
 
 if (typeof window !== 'undefined') {
     // Analytics

@@ -1,7 +1,16 @@
 <script lang="ts">
-	import { deletePrayer, markAnswered, type Prayer } from '$lib/stores/prayers';
+	import { deletePrayer, markAnswered, subscribeToPrayerUpdates, prayerUpdates, type Prayer } from '$lib/stores/prayers';
+	import { onMount, onDestroy } from 'svelte';
+	import EditPrayerModal from './EditPrayerModal.svelte';
+	import PrayerUpdates from './PrayerUpdates.svelte';
     
     let { prayer } = $props<{ prayer: Prayer }>();
+	let showEditModal = $state(false);
+	let showUpdates = $state(false);
+	let unsubscribe: (() => void) | null = null;
+	
+	// Use $derived instead of $: for Svelte 5 runes mode
+	let updates = $derived($prayerUpdates[prayer.id] || []);
     
     async function handleDelete() {
         if (confirm('Are you sure you want to delete this prayer?')) {
@@ -12,13 +21,43 @@
     async function handleAnswered() {
         await markAnswered(prayer.id);
     }
+	
+	onMount(() => {
+		unsubscribe = subscribeToPrayerUpdates(prayer.id);
+	});
+	
+	onDestroy(() => {
+		if (unsubscribe) unsubscribe();
+	});
 </script>
 
 <div class="relative overflow-hidden rounded-xl bg-slate-900/50 border border-white/10 p-6 backdrop-blur-sm transition-all hover:bg-slate-900/80 hover:border-indigo-500/30 group">
     <div class="flex justify-between items-start">
-        <p class="text-lg text-slate-200 leading-relaxed whitespace-pre-wrap">{prayer.content}</p>
+		<div class="flex-1">
+			{#if prayer.summary && prayer.description}
+				<!-- New format with summary and description -->
+				<h4 class="text-xl font-semibold text-white mb-2">{prayer.summary}</h4>
+				<p class="text-slate-300 leading-relaxed whitespace-pre-wrap">{prayer.description}</p>
+			{:else if (prayer as any).content}
+				<!-- Old format with just content - fallback for existing prayers -->
+				<p class="text-lg text-slate-200 leading-relaxed whitespace-pre-wrap">{(prayer as any).content}</p>
+			{:else}
+				<!-- No content at all -->
+				<p class="text-slate-500 italic">No content available</p>
+			{/if}
+		</div>
         
         <div class="flex items-center space-x-2 ml-4 opacity-0 group-hover:opacity-100 transition-opacity">
+			<button 
+				onclick={() => showEditModal = true}
+				class="p-2 text-blue-400 hover:text-blue-300 hover:bg-blue-400/10 rounded-full transition-colors"
+				title="Edit Prayer"
+			>
+				<svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+				</svg>
+			</button>
+			
             {#if prayer.status !== 'answered'}
                 <button 
                     onclick={handleAnswered}
@@ -51,4 +90,24 @@
             {prayer.createdAt?.toDate().toLocaleDateString() || 'Just now'}
         </span>
     </div>
+	
+	{#if updates.length > 0}
+		<div class="mt-4 pt-4 border-t border-white/10">
+			<button 
+				onclick={() => showUpdates = !showUpdates}
+				class="flex items-center text-sm text-indigo-400 hover:text-indigo-300 transition-colors"
+			>
+				<svg class="w-4 h-4 mr-1 transition-transform {showUpdates ? 'rotate-90' : ''}" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+				</svg>
+				{updates.length} {updates.length === 1 ? 'Update' : 'Updates'}
+			</button>
+		</div>
+	{/if}
 </div>
+
+{#if showUpdates}
+	<PrayerUpdates prayerId={prayer.id} {updates} bind:isOpen={showUpdates} />
+{/if}
+
+<EditPrayerModal {prayer} bind:isOpen={showEditModal} />

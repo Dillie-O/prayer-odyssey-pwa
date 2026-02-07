@@ -44,5 +44,32 @@ service cloud.firestore {
       allow delete: if isAuthenticated() && 
                        request.auth.uid in resource.data.admins;
     }
+    
+    // Prayer Updates subcollection
+    match /prayers/{prayerId}/updates/{updateId} {
+      // Helper to get the parent prayer
+      function getPrayer() {
+        return get(/databases/$(database)/documents/prayers/$(prayerId)).data;
+      }
+      
+      // Helper to check if user can access the prayer
+      function canAccessPrayer() {
+        return isAuthenticated() && 
+               (getPrayer().ownerId == request.auth.uid ||
+                request.auth.uid in getPrayer().sharedWith);
+      }
+      
+      // Allow reading updates if user can read the parent prayer
+      allow read: if canAccessPrayer();
+      
+      // Allow creating updates if user can read the prayer
+      allow create: if isAuthenticated() && 
+                       canAccessPrayer() &&
+                       request.resource.data.authorId == request.auth.uid;
+      
+      // Allow updating/deleting own updates
+      allow update, delete: if isAuthenticated() && 
+                               resource.data.authorId == request.auth.uid;
+    }
   }
 }

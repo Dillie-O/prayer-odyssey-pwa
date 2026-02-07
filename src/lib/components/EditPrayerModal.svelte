@@ -1,13 +1,21 @@
 <script lang="ts">
-	import { addPrayer } from '$lib/stores/prayers';
-    import { groups } from '$lib/stores/groups';
+	import { updatePrayer, type Prayer } from '$lib/stores/prayers';
 	
-	let { isOpen = $bindable(false) } = $props();
-	let summary = $state('');
-	let description = $state('');
-    let selectedGroups = $state<string[]>([]);
+	let { prayer, isOpen = $bindable(false) } = $props<{ prayer: Prayer; isOpen: boolean }>();
+	// Handle both new format (summary/description) and old format (content)
+	let summary = $state(prayer.summary || '');
+	let description = $state(prayer.description || (prayer as any).content || '');
 	let isSubmitting = $state(false);
 	let errorMessage = $state('');
+	
+	// Reset form when modal opens
+	$effect(() => {
+		if (isOpen) {
+			summary = prayer.summary || '';
+			description = prayer.description || (prayer as any).content || '';
+			errorMessage = '';
+		}
+	});
 
 	async function handleSubmit() {
 		if (!summary.trim() || !description.trim()) return;
@@ -15,14 +23,11 @@
 		isSubmitting = true;
 		errorMessage = '';
 		try {
-			await addPrayer(summary, description, selectedGroups);
-			summary = '';
-			description = '';
-            selectedGroups = [];
+			await updatePrayer(prayer.id, summary, description);
 			isOpen = false;
 		} catch (e: any) {
 			console.error(e);
-			errorMessage = e.message || 'Failed to save prayer. Please try again.';
+			errorMessage = e.message || 'Failed to update prayer. Please try again.';
 		} finally {
 			isSubmitting = false;
 		}
@@ -55,7 +60,7 @@
 			</div>
 
 			<div class="mt-2">
-				<h3 class="text-xl font-semibold leading-6 text-white">New Prayer Request</h3>
+				<h3 class="text-xl font-semibold leading-6 text-white">Edit Prayer</h3>
 				<div class="mt-4">
 					{#if errorMessage}
 						<div class="mb-4 rounded-md bg-red-500/10 p-4 border border-red-500/20">
@@ -77,11 +82,11 @@
 					
 					<div class="space-y-4">
 						<div>
-							<label for="prayer-summary" class="block text-sm font-medium leading-6 text-gray-300 mb-2">
+							<label for="edit-prayer-summary" class="block text-sm font-medium leading-6 text-gray-300 mb-2">
 								Summary <span class="text-red-400">*</span>
 							</label>
 							<input
-								id="prayer-summary"
+								id="edit-prayer-summary"
 								type="text"
 								bind:value={summary}
 								maxlength="100"
@@ -93,11 +98,11 @@
 						</div>
 						
 						<div>
-							<label for="prayer-description" class="block text-sm font-medium leading-6 text-gray-300 mb-2">
+							<label for="edit-prayer-description" class="block text-sm font-medium leading-6 text-gray-300 mb-2">
 								Description <span class="text-red-400">*</span>
 							</label>
 							<textarea
-								id="prayer-description"
+								id="edit-prayer-description"
 								bind:value={description}
 								rows="4"
 								class="block w-full rounded-md border-0 bg-slate-950/50 py-3 text-white shadow-sm ring-1 ring-inset ring-white/10 placeholder:text-gray-500 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6"
@@ -106,25 +111,6 @@
 						</div>
 					</div>
 				</div>
-                
-                {#if $groups.length > 0}
-                    <div class="mt-4">
-                        <label class="block text-sm font-medium leading-6 text-gray-300 mb-2">Share with groups (optional)</label>
-                        <div class="space-y-2 max-h-40 overflow-y-auto pr-2 custom-scrollbar">
-                            {#each $groups as group}
-                                <label class="flex items-center space-x-3 rounded-lg border border-white/5 bg-white/5 p-3 hover:bg-white/10 transition-colors cursor-pointer">
-                                    <input 
-                                        type="checkbox" 
-                                        value={group.id} 
-                                        bind:group={selectedGroups}
-                                        class="h-4 w-4 rounded border-gray-600 bg-slate-800 text-indigo-600 focus:ring-indigo-600 focus:ring-offset-slate-900"
-                                    />
-                                    <span class="text-sm font-medium text-white">{group.name}</span>
-                                </label>
-                            {/each}
-                        </div>
-                    </div>
-                {/if}
 			</div>
 
 			<div class="mt-6 flex justify-end gap-3">
@@ -141,7 +127,7 @@
 					onclick={handleSubmit}
 					disabled={!summary.trim() || !description.trim() || isSubmitting}
 				>
-					{isSubmitting ? 'Saving...' : 'Save Prayer'}
+					{isSubmitting ? 'Saving...' : 'Save Changes'}
 				</button>
 			</div>
 		</div>

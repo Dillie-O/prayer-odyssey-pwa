@@ -20,17 +20,24 @@ export default defineConfig({
 					{
 						src: 'prayer_icon_logo_192.png',
 						sizes: '192x192',
-						type: 'image/png'
+						type: 'image/png',
+						purpose: 'any maskable'
 					},
 					{
 						src: 'prayer_icon_logo_512.png',
 						sizes: '512x512',
-						type: 'image/png'
+						type: 'image/png',
+						purpose: 'any maskable'
 					}
-				]
+				],
+				prefer_related_applications: false
 			},
 			devOptions: {
 				enabled: true
+			},
+			workbox: {
+				importScripts: ['/firebase-messaging-sw.js'],
+				globPatterns: ['**/*.{js,css,html,png,svg,ico}']
 			}
 		})
 	]

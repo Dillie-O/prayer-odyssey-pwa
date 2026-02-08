@@ -11,6 +11,7 @@
 <svelte:head>
 	<link rel="icon" href="{favicon}" />
 	{@html pwaInfo?.webManifest.linkTag}
+	{@html pwaInfo?.registerSW?.scriptTag}
 </svelte:head>
 
 <div class="min-h-screen bg-slate-950 text-slate-50 font-sans selection:bg-indigo-500 selection:text-white">

@@ -3,22 +3,22 @@ importScripts('https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js')
 importScripts('https://www.gstatic.com/firebasejs/9.0.0/firebase-messaging-compat.js');
 
 const firebaseConfig = {
-    // We can't import.meta.env here easily without build steps, so we might need hardcoded values or a different strategy.
-    // For PWA SW, we usually just need basic config.
-    // Ideally, this file is generated or we use a fetch to get config.
-    // For this prototype, we'll use a placeholder or assume the user will fill it.
-    // HOWEVER, we can try to use the same config as the app if we inject it.
-    apiKey: "YOUR_API_KEY",
-    authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-    projectId: "YOUR_PROJECT_ID",
-    storageBucket: "YOUR_PROJECT_ID.appspot.com",
-    messagingSenderId: "YOUR_SENDER_ID",
-    appId: "YOUR_APP_ID"
+    apiKey: "AIzaSyBeUvGy9EJnSpidHtowReLC0Ded5kQxc-s",
+    authDomain: "prayer-odyssey-96025.firebaseapp.com",
+    projectId: "prayer-odyssey-96025",
+    storageBucket: "prayer-odyssey-96025.firebasestorage.app",
+    messagingSenderId: "14697961820",
+    appId: "1:14697961820:web:7cb79d83090779800c0999"
 };
 
 firebase.initializeApp(firebaseConfig);
 
 const messaging = firebase.messaging();
+
+// Add empty fetch listener to satisfy Chrome's PWA requirement
+self.addEventListener('fetch', (event) => {
+    // This can be empty, but it MUST exist for the PWA to be installable in some browsers
+});
 
 messaging.onBackgroundMessage(function (payload) {
     console.log('[firebase-messaging-sw.js] Received background message ', payload);

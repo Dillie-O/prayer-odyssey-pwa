@@ -3,12 +3,14 @@
 	import Navbar from '$lib/components/Navbar.svelte';
 	import { user, loading } from '$lib/stores/auth';
 	import favicon from '$lib/assets/prayer_logo.svg';
+	import { pwaInfo } from 'virtual:pwa-info';
     
     let { children } = $props();
 </script>
 
 <svelte:head>
 	<link rel="icon" href="{favicon}" />
+	{@html pwaInfo?.webManifest.linkTag}
 </svelte:head>
 
 <div class="min-h-screen bg-slate-950 text-slate-50 font-sans selection:bg-indigo-500 selection:text-white">

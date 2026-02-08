@@ -9,9 +9,13 @@ export default defineConfig({
 			registerType: 'autoUpdate',
 			manifest: {
 				name: 'Prayer Odyssey',
-				short_name: 'PrayerOdyssey',
+				short_name: 'Prayer Odyssey',
 				description: 'Track your prayers and share with groups.',
 				theme_color: '#ffffff',
+				background_color: '#0f172a',
+				display: 'standalone',
+				start_url: '/',
+				scope: '/',
 				icons: [
 					{
 						src: 'prayer_icon_logo_192.png',
@@ -24,6 +28,9 @@ export default defineConfig({
 						type: 'image/png'
 					}
 				]
+			},
+			devOptions: {
+				enabled: true
 			}
 		})
 	]

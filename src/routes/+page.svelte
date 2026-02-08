@@ -5,6 +5,12 @@
 	import PrayerCard from '$lib/components/PrayerCard.svelte';
 	
 	let isModalOpen = $state(false);
+	let filter = $state<'all' | 'active' | 'answered'>('active');
+	
+	let filteredPrayers = $derived($prayers.filter(p => {
+		if (filter === 'all') return true;
+		return p.status === filter;
+	}));
 </script>
 
 <AddPrayerModal bind:isOpen={isModalOpen} />
@@ -15,11 +21,33 @@
 			<h1 class="text-3xl font-bold text-white">My Prayers</h1>
 			<button 
                 onclick={() => isModalOpen = true}
-                class="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 transition-colors"
+                class="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 transition-colors whitespace-nowrap"
             >
 				+ New Prayer
 			</button>
 		</header>
+
+		<!-- Filter Tabs -->
+		<div class="flex items-center space-x-1 rounded-xl bg-slate-900/50 p-1 border border-white/5 backdrop-blur-sm w-fit">
+			<button 
+				onclick={() => filter = 'active'}
+				class="px-4 py-2 text-sm font-medium rounded-lg transition-all {filter === 'active' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/20' : 'text-slate-400 hover:text-white hover:bg-white/5'}"
+			>
+				Active
+			</button>
+			<button 
+				onclick={() => filter = 'answered'}
+				class="px-4 py-2 text-sm font-medium rounded-lg transition-all {filter === 'answered' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/20' : 'text-slate-400 hover:text-white hover:bg-white/5'}"
+			>
+				Answered
+			</button>
+			<button 
+				onclick={() => filter = 'all'}
+				class="px-4 py-2 text-sm font-medium rounded-lg transition-all {filter === 'all' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/20' : 'text-slate-400 hover:text-white hover:bg-white/5'}"
+			>
+				All
+			</button>
+		</div>
 
         {#if $loadingPrayers}
             <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -54,9 +82,13 @@
                     </div>
                 </div>
             </div>
+		{:else if filteredPrayers.length === 0}
+			<div class="rounded-lg border border-white/10 bg-white/5 p-12 text-center backdrop-blur-sm">
+				<p class="text-slate-400">No {filter === 'all' ? '' : filter} prayers found.</p>
+			</div>
         {:else}
             <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                {#each $prayers as prayer (prayer.id)}
+                {#each filteredPrayers as prayer (prayer.id)}
                     <PrayerCard {prayer} />
                 {/each}
             </div>

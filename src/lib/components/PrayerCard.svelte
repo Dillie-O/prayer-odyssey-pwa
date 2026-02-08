@@ -40,7 +40,7 @@
 			{/if}
 		</a>
         
-        <div class="flex items-center space-x-2 ml-4 opacity-0 group-hover:opacity-100 transition-opacity">
+        <div class="flex items-center space-x-2 ml-4">
             {#if prayer.status !== 'answered'}
                 <button 
                     onclick={(e) => { e.preventDefault(); e.stopPropagation(); handleAnswered(); }}

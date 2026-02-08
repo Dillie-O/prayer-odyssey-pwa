@@ -6,7 +6,7 @@ import { user } from './auth';
 export interface Prayer {
     id: string;
     summary: string;
-    description: string;
+    description?: string;
     ownerId: string;
     status: 'active' | 'answered' | 'archived';
     createdAt: Timestamp;
@@ -52,12 +52,12 @@ user.subscribe(u => {
     }
 });
 
-export const addPrayer = async (summary: string, description: string, sharedWith: string[] = []) => {
+export const addPrayer = async (summary: string, description?: string, sharedWith: string[] = []) => {
     if (!auth.currentUser) throw new Error("User not logged in");
 
     await addDoc(collection(db, 'prayers'), {
         summary,
-        description,
+        ...(description ? { description } : {}),
         ownerId: auth.currentUser.uid,
         status: 'active',
         createdAt: serverTimestamp(),
@@ -70,11 +70,11 @@ export const deletePrayer = async (id: string) => {
     await deleteDoc(doc(db, 'prayers', id));
 };
 
-export const updatePrayer = async (id: string, summary: string, description: string) => {
+export const updatePrayer = async (id: string, summary: string, description?: string) => {
     if (!auth.currentUser) throw new Error("User not logged in");
     await updateDoc(doc(db, 'prayers', id), {
         summary,
-        description,
+        ...(description ? { description } : {}),
         updatedAt: serverTimestamp()
     });
 };

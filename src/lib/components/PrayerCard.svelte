@@ -25,13 +25,15 @@
     <div class="flex justify-between items-start">
 		<!-- Clickable prayer content -->
 		<a href="/prayers/{prayer.id}" class="flex-1 cursor-pointer">
-			{#if prayer.summary && prayer.description}
-				<!-- New format with summary and description -->
+			{#if prayer.summary}
+				<!-- Summary is always shown -->
 				<h4 class="text-xl font-semibold text-white mb-2 hover:text-indigo-300 transition-colors">{prayer.summary}</h4>
-				<p class="text-slate-300 leading-relaxed whitespace-pre-wrap line-clamp-3">{prayer.description}</p>
+				{#if prayer.description}
+					<p class="text-slate-300 leading-relaxed whitespace-pre-wrap line-clamp-1">{prayer.description}</p>
+				{/if}
 			{:else if (prayer as any).content}
 				<!-- Old format with just content - fallback for existing prayers -->
-				<p class="text-lg text-slate-200 leading-relaxed whitespace-pre-wrap line-clamp-3">{(prayer as any).content}</p>
+				<p class="text-lg text-slate-200 leading-relaxed whitespace-pre-wrap line-clamp-1">{(prayer as any).content}</p>
 			{:else}
 				<!-- No content at all -->
 				<p class="text-slate-500 italic">No content available</p>
@@ -42,11 +44,12 @@
             {#if prayer.status !== 'answered'}
                 <button 
                     onclick={(e) => { e.preventDefault(); e.stopPropagation(); handleAnswered(); }}
-                    class="p-2 text-indigo-400 hover:text-indigo-300 hover:bg-indigo-400/10 rounded-full transition-colors"
+                    class="p-2 text-rose-400 hover:text-rose-300 hover:bg-rose-400/10 rounded-full transition-colors"
                     title="Mark as Answered"
                 >
-                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 14.5c.667 0 1.333-.333 2-1 1.333-1.333 1.333-3.333 0-4.667l-2-2.333-2 2.333c-1.333 1.333-1.333 3.333 0 4.667.667.667 1.333 1 2 1Z" />
+                        <path d="M17.5 19c3-2 4.5-4.5 4.5-7.5H2c0 3 1.5 5.5 4.5 7.5.667 0 1.333-.333 2-1a4 4 0 0 0 6 0c.667.667 1.333 1 2 1" />
                     </svg>
                 </button>
             {/if}

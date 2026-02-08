@@ -8,7 +8,7 @@
 	<div class="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
 		<div class="flex items-center">
 			<a href="/" class="flex items-center space-x-3">
-				<img src="/pwa-192x192.png" alt="Logo" class="h-8 w-8 rounded-lg" />
+				<img src="/prayer_icon_logo_192.png" alt="Logo" class="h-8 w-8 rounded-lg" />
 				<span class="text-lg font-bold text-white">Prayer Odyssey</span>
 			</a>
 		</div>

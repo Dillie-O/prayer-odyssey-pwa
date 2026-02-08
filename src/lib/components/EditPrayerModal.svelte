@@ -18,12 +18,12 @@
 	});
 
 	async function handleSubmit() {
-		if (!summary.trim() || !description.trim()) return;
+		if (!summary.trim()) return;
 		
 		isSubmitting = true;
 		errorMessage = '';
 		try {
-			await updatePrayer(prayer.id, summary, description);
+			await updatePrayer(prayer.id, summary, description.trim() || undefined);
 			isOpen = false;
 		} catch (e: any) {
 			console.error(e);
@@ -99,7 +99,7 @@
 						
 						<div>
 							<label for="edit-prayer-description" class="block text-sm font-medium leading-6 text-gray-300 mb-2">
-								Description <span class="text-red-400">*</span>
+								Description <span class="text-slate-500 italic text-xs ml-1">(optional)</span>
 							</label>
 							<textarea
 								id="edit-prayer-description"
@@ -125,7 +125,7 @@
 					type="button"
 					class="inline-flex justify-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:opacity-50 disabled:cursor-not-allowed"
 					onclick={handleSubmit}
-					disabled={!summary.trim() || !description.trim() || isSubmitting}
+					disabled={!summary.trim() || isSubmitting}
 				>
 					{isSubmitting ? 'Saving...' : 'Save Changes'}
 				</button>

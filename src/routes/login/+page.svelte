@@ -70,7 +70,7 @@
 <div class="flex min-h-[80vh] flex-col items-center justify-center">
 	<div class="w-full max-w-md space-y-8 rounded-2xl bg-slate-900/50 p-8 shadow-xl backdrop-blur-sm ring-1 ring-white/10">
 		<div class="text-center">
-			<img src="/pwa-192x192.png" alt="Prayer Odyssey" class="mx-auto h-20 w-20 rounded-2xl shadow-lg shadow-indigo-500/20" />
+			<img src="/prayer_icon_logo_192.png" alt="Prayer Odyssey" class="mx-auto h-20 w-20 rounded-2xl shadow-lg shadow-indigo-500/20" />
 			<h2 class="mt-6 text-3xl font-bold tracking-tight text-white">{isSignUp ? 'Create Account' : 'Welcome Back'}</h2>
 			<p class="mt-2 text-sm text-gray-400">{isSignUp ? 'Sign up to start your journey' : 'Sign in to track your prayer journey'}</p>
 		</div>

@@ -2,7 +2,7 @@
 	import '../app.css';
 	import Navbar from '$lib/components/Navbar.svelte';
 	import { user, loading } from '$lib/stores/auth';
-	import favicon from '$lib/assets/favicon.svg';
+	import favicon from '$lib/assets/prayer_logo.svg';
     
     let { children } = $props();
 </script>

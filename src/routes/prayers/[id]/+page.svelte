@@ -184,8 +184,9 @@
 							class="p-2 text-indigo-400 hover:text-indigo-300 hover:bg-indigo-400/10 rounded-full transition-colors"
 							title="Mark as Answered"
 						>
-							<svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+							<svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+								<path d="M12 14.5c.667 0 1.333-.333 2-1 1.333-1.333 1.333-3.333 0-4.667l-2-2.333-2 2.333c-1.333 1.333-1.333 3.333 0 4.667.667.667 1.333 1 2 1Z" />
+								<path d="M17.5 19c3-2 4.5-4.5 4.5-7.5H2c0 3 1.5 5.5 4.5 7.5.667 0 1.333-.333 2-1a4 4 0 0 0 6 0c.667.667 1.333 1 2 1" />
 							</svg>
 						</button>
 					{/if}
@@ -216,30 +217,6 @@
 		<div class="rounded-xl bg-slate-900/50 border border-white/10 p-6 backdrop-blur-sm">
 			<h3 class="text-xl font-semibold text-white mb-4">Updates</h3>
 			
-			<!-- Add New Update -->
-			<div class="mb-6 rounded-lg bg-slate-800/50 border border-white/10 p-4">
-				<label for="new-update" class="block text-sm font-medium leading-6 text-gray-300 mb-2">
-					Add Update
-				</label>
-				<textarea
-					id="new-update"
-					bind:value={newUpdateContent}
-					rows="3"
-					class="block w-full rounded-md border-0 bg-slate-950/50 py-3 text-white shadow-sm ring-1 ring-inset ring-white/10 placeholder:text-gray-500 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6"
-					placeholder="Share an update on this prayer..."
-				></textarea>
-				<div class="mt-3 flex justify-end">
-					<button
-						type="button"
-						class="inline-flex justify-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
-						onclick={handleAddUpdate}
-						disabled={!newUpdateContent.trim() || isSubmitting}
-					>
-						{isSubmitting ? 'Adding...' : 'Add Update'}
-					</button>
-				</div>
-			</div>
-
 			<!-- Updates List -->
 			<div class="space-y-3">
 				{#each updates as update (update.id)}
@@ -305,7 +282,33 @@
 					</div>
 				{/if}
 			</div>
+
+			
 		</div>
+
+		<!-- Add New Update -->
+			<div class="mb-6 rounded-lg bg-slate-800/50 border border-white/10 p-4">
+				<label for="new-update" class="block text-sm font-medium leading-6 text-gray-300 mb-2">
+					Add Update
+				</label>
+				<textarea
+					id="new-update"
+					bind:value={newUpdateContent}
+					rows="3"
+					class="block w-full rounded-md border-0 bg-slate-950/50 py-3 text-white shadow-sm ring-1 ring-inset ring-white/10 placeholder:text-gray-500 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6"
+					placeholder="Share an update on this prayer..."
+				></textarea>
+				<div class="mt-3 flex justify-end">
+					<button
+						type="button"
+						class="inline-flex justify-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
+						onclick={handleAddUpdate}
+						disabled={!newUpdateContent.trim() || isSubmitting}
+					>
+						{isSubmitting ? 'Adding...' : 'Add Update'}
+					</button>
+				</div>
+			</div>
 	</div>
 
 	<EditPrayerModal {prayer} bind:isOpen={showEditModal} />

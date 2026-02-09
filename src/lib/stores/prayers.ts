@@ -85,6 +85,12 @@ export const markAnswered = async (id: string) => {
     });
 };
 
+export const markActive = async (id: string) => {
+    await updateDoc(doc(db, 'prayers', id), {
+        status: 'active'
+    });
+};
+
 // Prayer Updates
 export const prayerUpdates = writable<Record<string, PrayerUpdate[]>>({});
 

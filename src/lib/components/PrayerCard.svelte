@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { markAnswered, subscribeToPrayerUpdates, prayerUpdates, type Prayer } from '$lib/stores/prayers';
+	import { markAnswered, markActive, subscribeToPrayerUpdates, prayerUpdates, type Prayer } from '$lib/stores/prayers';
 	import { onMount, onDestroy } from 'svelte';
     
     let { prayer } = $props<{ prayer: Prayer }>();
@@ -8,8 +8,12 @@
 	// Use $derived instead of $: for Svelte 5 runes mode
 	let updates = $derived($prayerUpdates[prayer.id] || []);
 
-    async function handleAnswered() {
-        await markAnswered(prayer.id);
+    async function handleToggleStatus() {
+        if (prayer.status === 'answered') {
+            await markActive(prayer.id);
+        } else {
+            await markAnswered(prayer.id);
+        }
     }
 	
 	onMount(() => {
@@ -41,18 +45,22 @@
 		</a>
         
         <div class="flex items-center space-x-2 ml-4">
-            {#if prayer.status !== 'answered'}
-                <button 
-                    onclick={(e) => { e.preventDefault(); e.stopPropagation(); handleAnswered(); }}
-                    class="p-2 text-rose-400 hover:text-rose-300 hover:bg-rose-400/10 rounded-full transition-colors"
-                    title="Mark as Answered"
-                >
+            <button 
+                onclick={(e) => { e.preventDefault(); e.stopPropagation(); handleToggleStatus(); }}
+                class="p-2 {prayer.status === 'answered' ? 'text-indigo-400 hover:text-indigo-300 hover:bg-indigo-400/10' : 'text-rose-400 hover:text-rose-300 hover:bg-rose-400/10'} rounded-full transition-colors"
+                title={prayer.status === 'answered' ? "Mark as Active" : "Mark as Answered"}
+            >
+                {#if prayer.status === 'answered'}
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l5 5m-5-5l5-5" />
+                    </svg>
+                {:else}
                     <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M12 14.5c.667 0 1.333-.333 2-1 1.333-1.333 1.333-3.333 0-4.667l-2-2.333-2 2.333c-1.333 1.333-1.333 3.333 0 4.667.667.667 1.333 1 2 1Z" />
                         <path d="M17.5 19c3-2 4.5-4.5 4.5-7.5H2c0 3 1.5 5.5 4.5 7.5.667 0 1.333-.333 2-1a4 4 0 0 0 6 0c.667.667 1.333 1 2 1" />
                     </svg>
-                </button>
-            {/if}
+                {/if}
+            </button>
         </div>
     </div>
     

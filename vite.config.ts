@@ -21,13 +21,41 @@ export default defineConfig({
 						src: 'prayer_icon_logo_192.png',
 						sizes: '192x192',
 						type: 'image/png',
-						purpose: 'any maskable'
+						purpose: 'any'
+					},
+					{
+						src: 'prayer_icon_logo_192.png',
+						sizes: '192x192',
+						type: 'image/png',
+						purpose: 'maskable'
 					},
 					{
 						src: 'prayer_icon_logo_512.png',
 						sizes: '512x512',
 						type: 'image/png',
-						purpose: 'any maskable'
+						purpose: 'any'
+					},
+					{
+						src: 'prayer_icon_logo_512.png',
+						sizes: '512x512',
+						type: 'image/png',
+						purpose: 'maskable'
+					}
+				],
+				screenshots: [
+					{
+						src: 'screenshot-desktop.png',
+						sizes: '1280x720',
+						type: 'image/png',
+						form_factor: 'wide',
+						label: 'Desktop App'
+					},
+					{
+						src: 'screenshot-mobile.png',
+						sizes: '720x1280',
+						type: 'image/png',
+						form_factor: 'narrow',
+						label: 'Mobile App'
 					}
 				],
 				prefer_related_applications: false

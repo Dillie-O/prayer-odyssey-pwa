@@ -1,7 +1,7 @@
 import { writable } from 'svelte/store';
 import { messaging, db, auth } from '$lib/firebase';
 import { getToken, onMessage, deleteToken } from 'firebase/messaging';
-import { doc, updateDoc, arrayUnion, arrayRemove, collection, query, where, orderBy, onSnapshot, addDoc, serverTimestamp, deleteDoc, getDoc } from 'firebase/firestore';
+import { doc, updateDoc, arrayUnion, arrayRemove, collection, query, where, orderBy, onSnapshot, addDoc, serverTimestamp, deleteDoc, getDoc, getDocs, writeBatch } from 'firebase/firestore';
 
 export interface AppNotification {
     id: string;
@@ -152,6 +152,32 @@ export const deleteNotification = async (notificationId: string) => {
     await deleteDoc(doc(db, 'notifications', notificationId));
 };
 
+export const clearAllNotifications = async () => {
+    if (!auth.currentUser) return;
+
+    try {
+        // Get all notifications for current user
+        const q = query(
+            collection(db, 'notifications'),
+            where('receiverId', '==', auth.currentUser.uid)
+        );
+        
+        const querySnapshot = await getDocs(q);
+        const batch = writeBatch(db);
+        
+        // Delete all notifications in batch
+        querySnapshot.forEach((docSnapshot) => {
+            batch.delete(docSnapshot.ref);
+        });
+        
+        await batch.commit();
+        console.log(`Cleared ${querySnapshot.size} notifications for user`);
+    } catch (error) {
+        console.error('Error clearing all notifications:', error);
+        throw error;
+    }
+};
+
 export const requestNotificationPermission = async () => {
     if (typeof window === 'undefined' || !messaging) return;
 
@@ -160,6 +186,9 @@ export const requestNotificationPermission = async () => {
         notificationPermission.set(permission);
 
         if (permission === 'granted') {
+            // Clean up stale tokens before getting new one
+            await cleanupStaleTokens();
+            
             const token = await getToken(messaging, {
                 vapidKey: import.meta.env.VITE_FIREBASE_VAPID_KEY
             });
@@ -205,13 +234,15 @@ export const clearAllFCMTokens = async () => {
     try {
         const userRef = doc(db, 'users', auth.currentUser.uid);
         
-        // Clear all FCM tokens for this user
+        // Clear all FCM tokens and token info for this user
         await updateDoc(userRef, {
             fcmTokens: [],
-            lastTokenSync: serverTimestamp()
+            fcmTokenInfo: {},
+            lastTokenSync: serverTimestamp(),
+            lastTokenCleanup: serverTimestamp()
         });
         
-        // Also delete the current device's FCM token if it exists
+        // Also delete current device's FCM token if it exists
         if (typeof window !== 'undefined' && messaging) {
             try {
                 const currentToken = await getToken(messaging, {
@@ -227,7 +258,6 @@ export const clearAllFCMTokens = async () => {
         
         // Update local state
         fcmToken.set(null);
-        
         console.log('All FCM tokens cleared for user');
     } catch (error) {
         console.error('Error clearing all FCM tokens:', error);
@@ -244,10 +274,84 @@ const removeTokenFromProfile = async (token: string) => {
             fcmTokens: arrayRemove(token),
             lastTokenSync: serverTimestamp()
         });
+        
+        // Also remove token info
+        const userDoc = await getDoc(userRef);
+        if (userDoc.exists()) {
+            const userData = userDoc.data();
+            const tokenInfo = userData.fcmTokenInfo || {};
+            const updatedTokenInfo = { ...tokenInfo };
+            delete updatedTokenInfo[token];
+            
+            await updateDoc(userRef, {
+                fcmTokenInfo: updatedTokenInfo
+            });
+        }
+        
         console.log('FCM Token removed from profile');
     } catch (e) {
         console.error("Error removing token from profile", e);
         throw e;
+    }
+};
+
+const getDeviceInfo = () => {
+    if (typeof window === 'undefined') return null;
+    
+    return {
+        platform: navigator.platform,
+        userAgent: navigator.userAgent.substring(0, 100), // Truncated for privacy
+        isPWA: window.matchMedia('(display-mode: standalone)').matches,
+        isStandalone: (window.navigator as any).standalone || false,
+        timestamp: new Date().toISOString()
+    };
+};
+
+const cleanupStaleTokens = async () => {
+    if (!auth.currentUser) return;
+
+    const userRef = doc(db, 'users', auth.currentUser.uid);
+    try {
+        const userDoc = await getDoc(userRef);
+        if (!userDoc.exists()) return;
+
+        const userData = userDoc.data();
+        const tokens = userData.fcmTokens || [];
+        const tokenInfo = userData.fcmTokenInfo || {};
+
+        // Remove tokens older than 30 days
+        const thirtyDaysAgo = new Date();
+        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+        const validTokens: string[] = [];
+        const validTokenInfo: any = {};
+
+        for (const token of tokens) {
+            const info = tokenInfo[token];
+            if (info && info.createdAt && info.createdAt.toDate) {
+                const createdDate = info.createdAt.toDate();
+                if (createdDate > thirtyDaysAgo) {
+                    validTokens.push(token);
+                    validTokenInfo[token] = info;
+                }
+            } else {
+                // Keep tokens without creation info (legacy support)
+                validTokens.push(token);
+                if (info) validTokenInfo[token] = info;
+            }
+        }
+
+        // Update with cleaned tokens
+        const { setDoc } = await import('firebase/firestore');
+        await setDoc(userRef, {
+            fcmTokens: validTokens,
+            fcmTokenInfo: validTokenInfo,
+            lastTokenCleanup: serverTimestamp()
+        }, { merge: true });
+
+        console.log(`Cleaned up ${tokens.length - validTokens.length} stale FCM tokens`);
+    } catch (e) {
+        console.error("Error cleaning up stale tokens", e);
     }
 };
 
@@ -256,13 +360,42 @@ const saveTokenToProfile = async (token: string) => {
 
     const userRef = doc(db, 'users', auth.currentUser.uid);
     try {
+        // Get current user data to check for duplicates
+        const userDoc = await getDoc(userRef);
+        const userData = userDoc.exists() ? userDoc.data() : { fcmTokens: [], fcmTokenInfo: {} };
+        const existingTokens = userData.fcmTokens || [];
+        const tokenInfo = userData.fcmTokenInfo || {};
+
+        // Check if token already exists
+        if (existingTokens.includes(token)) {
+            console.log('FCM Token already exists in profile');
+            return;
+        }
+
+        // Clean up old tokens (keep only last 10 tokens per user)
+        const cleanedTokens = existingTokens.slice(-9); // Keep last 9, will add 1 more = 10 total
+        
+        // Add new token with device info
+        const updatedTokens = [...cleanedTokens, token];
+        const deviceInfo = getDeviceInfo();
+        
+        const updatedTokenInfo = {
+            ...tokenInfo,
+            [token]: {
+                ...deviceInfo,
+                createdAt: serverTimestamp(),
+                lastUsed: serverTimestamp()
+            }
+        };
+
         // Use setDoc with merge to ensure doc exists
         const { setDoc } = await import('firebase/firestore');
         await setDoc(userRef, {
-            fcmTokens: arrayUnion(token),
+            fcmTokens: updatedTokens,
+            fcmTokenInfo: updatedTokenInfo,
             lastTokenSync: serverTimestamp()
         }, { merge: true });
-        console.log('FCM Token synced to profile');
+        console.log('FCM Token synced to profile with device info');
     } catch (e) {
         console.error("Error saving token to profile", e);
     }
@@ -276,12 +409,27 @@ if (typeof window !== 'undefined' && messaging) {
         if (Notification.permission === 'granted') {
             const title = payload.notification?.title || 'New Message';
             const body = payload.notification?.body || 'You have a new notification';
+            const url = payload.data?.url;
 
-            new Notification(title, {
+            const notification = new Notification(title, {
                 body,
                 icon: '/prayer_icon_logo_192.png',
                 tag: 'prayer-odyssey-notification' // Prevent duplicate overlapping
             });
+
+            // Add click handler for navigation if URL is provided
+            if (url) {
+                notification.onclick = () => {
+                    // Focus the window first
+                    window.focus();
+                    
+                    // Navigate to the URL
+                    window.location.href = url;
+                    
+                    // Close the notification
+                    notification.close();
+                };
+            }
         }
     });
 }

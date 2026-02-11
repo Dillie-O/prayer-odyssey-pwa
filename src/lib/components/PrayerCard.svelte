@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { markAnswered, markActive, subscribeToPrayerUpdates, prayerUpdates, type Prayer } from '$lib/stores/prayers';
+	import { markAnswered, markActive, subscribeToPrayerUpdates, prayerUpdates, prayedFor, type Prayer } from '$lib/stores/prayers';
     import { groups } from '$lib/stores/groups';
     import { user } from '$lib/stores/auth';
 	import { onMount, onDestroy } from 'svelte';
@@ -14,14 +14,32 @@
     let isOwner = $derived($user?.uid === prayer.ownerId);
     let sharedGroups = $derived($groups.filter(g => prayer.sharedWith?.includes(g.id)));
     let ownerProfile = $derived($profiles[prayer.ownerId]);
+    let hasPrayed = $derived(prayer.prayedBy?.includes($user?.uid || ''));
 
     let isShareModalOpen = $state(false);
+    let isPraying = $state(false);
 
     async function handleToggleStatus() {
         if (prayer.status === 'answered') {
             await markActive(prayer.id);
         } else {
             await markAnswered(prayer.id);
+        }
+    }
+
+    async function handlePrayedFor() {
+        if (isPraying) return;
+        
+        isPraying = true;
+        try {
+            await prayedFor(prayer);
+            // Debounce for 1 second to prevent double-taps
+            setTimeout(() => {
+                isPraying = false;
+            }, 1000);
+        } catch (error) {
+            console.error("Error updating prayer count:", error);
+            isPraying = false;
         }
     }
 	
@@ -71,7 +89,7 @@
 		</a>
         
         <div class="flex items-center space-x-2 ml-4">
-            {#if isOwner}
+            {#if isOwner && prayer.status !== 'answered'}
                 <button 
                     onclick={(e) => { e.preventDefault(); e.stopPropagation(); isShareModalOpen = true; }}
                     class="p-2 text-indigo-400 hover:text-indigo-300 hover:bg-indigo-400/10 rounded-full transition-colors"
@@ -115,9 +133,29 @@
     {/if}
     
     <div class="mt-4 flex items-center justify-between">
-        <span class="inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset {prayer.status === 'answered' ? 'bg-green-400/10 text-green-400 ring-green-400/20' : 'bg-indigo-400/10 text-indigo-400 ring-indigo-400/30'}">
-            {prayer.status.charAt(0).toUpperCase() + prayer.status.slice(1)}
-        </span>
+        <div class="flex items-center space-x-3">
+            <span class="inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset {prayer.status === 'answered' ? 'bg-green-400/10 text-green-400 ring-green-400/20' : 'bg-indigo-400/10 text-indigo-400 ring-indigo-400/30'}">
+                {prayer.status.charAt(0).toUpperCase() + prayer.status.slice(1)}
+            </span>
+            
+            {#if !isOwner}
+                <button 
+                    onclick={(e) => { e.preventDefault(); e.stopPropagation(); handlePrayedFor(); }}
+                    class="inline-flex items-center space-x-1.5 px-2 py-1 rounded-md text-xs font-medium transition-all {isPraying ? 'scale-95 bg-indigo-600 text-white' : hasPrayed ? 'bg-indigo-500/20 text-indigo-300 hover:bg-indigo-500/30 ring-1 ring-inset ring-indigo-500/40' : 'bg-indigo-400/10 text-indigo-400 hover:bg-indigo-400/20 ring-1 ring-inset ring-indigo-400/30'}"
+                    disabled={isPraying}
+                    title="I'm praying for this"
+                >
+                    <span class="text-sm {isPraying ? 'animate-bounce' : ''}">🙏</span>
+                    <span>{prayer.prayedCount || 0}</span>
+                </button>
+            {:else if (prayer.prayedCount || 0) > 0}
+                <div class="inline-flex items-center space-x-1.5 px-2 py-1 rounded-md text-xs font-medium bg-indigo-400/5 text-indigo-300 ring-1 ring-inset ring-indigo-400/20">
+                    <span class="text-sm">🙏</span>
+                    <span>{prayer.prayedCount}</span>
+                </div>
+            {/if}
+        </div>
+
 		<div class="flex items-center gap-3">
 			{#if updates.length > 0}
 				<span class="text-xs text-indigo-400">

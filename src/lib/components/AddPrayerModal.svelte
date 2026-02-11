@@ -2,12 +2,25 @@
 	import { addPrayer } from '$lib/stores/prayers';
     import { groups } from '$lib/stores/groups';
 	
-	let { isOpen = $bindable(false) } = $props();
+	let { isOpen = $bindable(false), initialGroupIds = [] } = $props<{
+        isOpen: boolean;
+        initialGroupIds?: string[];
+    }>();
 	let summary = $state('');
 	let description = $state('');
     let selectedGroups = $state<string[]>([]);
 	let isSubmitting = $state(false);
 	let errorMessage = $state('');
+
+	// Reset form when modal opens
+	$effect(() => {
+		if (isOpen) {
+			summary = '';
+			description = '';
+            selectedGroups = [...initialGroupIds];
+			errorMessage = '';
+		}
+	});
 
 	async function handleSubmit() {
 		if (!summary.trim()) return;
@@ -18,7 +31,7 @@
 			await addPrayer(summary, description.trim() || undefined, selectedGroups);
 			summary = '';
 			description = '';
-            selectedGroups = [];
+            selectedGroups = [...initialGroupIds];
 			isOpen = false;
 		} catch (e: any) {
 			console.error(e);

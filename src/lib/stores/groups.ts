@@ -1,6 +1,6 @@
 import { writable } from 'svelte/store';
 import { db, auth } from '$lib/firebase';
-import { collection, addDoc, query, where, onSnapshot, doc, getDoc, updateDoc, arrayUnion, type Timestamp, serverTimestamp } from 'firebase/firestore';
+import { collection, addDoc, query, where, onSnapshot, doc, getDoc, updateDoc, setDoc, arrayUnion, type Timestamp, serverTimestamp } from 'firebase/firestore';
 import { user } from './auth';
 
 export interface Group {
@@ -43,23 +43,54 @@ user.subscribe(u => {
 
 export const createGroup = async (name: string, description: string = '') => {
     if (!auth.currentUser) throw new Error("User not logged in");
+    const uid = auth.currentUser.uid;
 
-    await addDoc(collection(db, 'groups'), {
+    const groupDoc = await addDoc(collection(db, 'groups'), {
         name,
         description,
-        admins: [auth.currentUser.uid],
-        members: [auth.currentUser.uid],
+        admins: [uid],
+        members: [uid],
         createdAt: serverTimestamp()
+    });
+
+    // Update user's group list for security rules/queries
+    const userRef = doc(db, 'users', uid);
+    await updateDoc(userRef, {
+        groups: arrayUnion(groupDoc.id)
+    }).catch(async (err) => {
+        // If user doc doesn't exist, create it (lazy initialization)
+        if (err.code === 'not-found') {
+            await setDoc(userRef, {
+                groups: [groupDoc.id]
+            });
+        } else {
+            throw err;
+        }
     });
 };
 
 export const joinGroup = async (groupId: string) => {
     if (!auth.currentUser) throw new Error("User not logged in");
+    const uid = auth.currentUser.uid;
 
     const groupRef = doc(db, 'groups', groupId);
-    /* In a real app, you'd probably want an invite system or check visibility. 
-       For now, we'll assume open join if they have the ID (or we can implement invites later). */
+
+    // Add user to group members
     await updateDoc(groupRef, {
-        members: arrayUnion(auth.currentUser.uid)
+        members: arrayUnion(uid)
+    });
+
+    // Add group to user's list
+    const userRef = doc(db, 'users', uid);
+    await updateDoc(userRef, {
+        groups: arrayUnion(groupId)
+    }).catch(async (err) => {
+        if (err.code === 'not-found') {
+            await setDoc(userRef, {
+                groups: [groupId]
+            });
+        } else {
+            throw err;
+        }
     });
 };

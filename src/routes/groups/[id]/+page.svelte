@@ -4,18 +4,35 @@
     import { doc, getDoc, onSnapshot, collection, query, where, orderBy, type Timestamp } from 'firebase/firestore';
     import { onMount } from 'svelte';
     import { user } from '$lib/stores/auth';
-    import type { Group } from '$lib/stores/groups';
+    import { joinGroup, type Group } from '$lib/stores/groups';
     import type { Prayer } from '$lib/stores/prayers';
     import PrayerCard from '$lib/components/PrayerCard.svelte';
+    import AddPrayerModal from '$lib/components/AddPrayerModal.svelte';
     
     let groupId = $derived($page.params.id);
     let group = $state<Group | null>(null);
     let groupPrayers = $state<Prayer[]>([]);
     let loading = $state(true);
+    let joining = $state(false);
+    let isAddModalOpen = $state(false);
+
+    let isMember = $derived(group && $user && group.members.includes($user.uid));
+
+    async function handleJoin() {
+        if (!groupId || !$user) return;
+        joining = true;
+        try {
+            await joinGroup(groupId);
+        } catch (err) {
+            console.error("Failed to join group", err);
+            alert("Failed to join group");
+        } finally {
+            joining = false;
+        }
+    }
 
     async function copyInviteLink() {
-        /* Simple invite by ID for now */
-        const link = `${window.location.origin}/groups/${groupId}`; // In reality, maybe a join link
+        const link = window.location.href;
         await navigator.clipboard.writeText(link);
         alert('Group link copied to clipboard!');
     }
@@ -31,21 +48,31 @@
                 group = null; // Handle 404
             }
             loading = false;
+        }, (error) => {
+            console.error("Error fetching group details:", error);
+            loading = false;
         });
 
-        // Fetch Prayers for this group (this relies on 'sharedWith' array on prayers)
-        /* 
-           Note: We need to implement sharing prayers with groups first.
-           But we can query for it now.
-        */
-        const q = query(
-            collection(db, 'prayers'), 
-            where('sharedWith', 'array-contains', groupId),
-            orderBy('createdAt', 'desc')
-        );
+        let prayersUnsub = () => {};
 
-        const prayersUnsub = onSnapshot(q, (snapshot) => {
-             groupPrayers = snapshot.docs.map(d => ({ id: d.id, ...d.data() } as Prayer));
+        // Only subscribe to prayers if member (though security rules will block it anyway)
+        $effect(() => {
+            if (isMember) {
+                const q = query(
+                    collection(db, 'prayers'), 
+                    where('sharedWith', 'array-contains', groupId),
+                    orderBy('createdAt', 'desc')
+                );
+
+                prayersUnsub = onSnapshot(q, (snapshot) => {
+                     groupPrayers = snapshot.docs.map(d => ({ id: d.id, ...d.data() } as Prayer));
+                }, (err) => {
+                    console.error("Error fetching group prayers", err);
+                });
+            } else {
+                groupPrayers = [];
+                prayersUnsub();
+            }
         });
 
         return () => {
@@ -81,11 +108,31 @@
                         <p class="mt-2 text-gray-400">{group.description}</p>
                     {/if}
                     <div class="mt-4 flex items-center gap-4 text-sm text-gray-500">
-                         <span>{group.members.length} Members</span>
+                         <span>{group.members.length} member{group.members.length === 1 ? '' : 's'}</span>
+                         {#if isMember}
+                            <span class="inline-flex items-center rounded-md bg-green-400/10 px-2 py-0.5 text-xs font-medium text-green-400 ring-1 ring-inset ring-green-400/20">Member</span>
+                         {/if}
                     </div>
                 </div>
                 
                 <div class="flex gap-3">
+                    {#if isMember}
+                        <button 
+                            onclick={() => isAddModalOpen = true}
+                            class="inline-flex items-center rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 transition-colors whitespace-nowrap"
+                        >
+                            + New Prayer
+                        </button>
+                    {/if}
+                    {#if !isMember && $user}
+                        <button 
+                            onclick={handleJoin}
+                            disabled={joining}
+                            class="inline-flex items-center rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 transition-colors disabled:opacity-50"
+                        >
+                            {joining ? 'Joining...' : 'Join Group'}
+                        </button>
+                    {/if}
                     <button 
                         onclick={copyInviteLink}
                         class="inline-flex items-center rounded-lg bg-white/5 px-4 py-2 text-sm font-semibold text-white shadow-sm ring-1 ring-inset ring-white/10 hover:bg-white/10 transition-colors"
@@ -95,24 +142,44 @@
                         </svg>
                         Invite
                     </button>
-                    <!-- Add Prayer to Group Button could go here or in the general add modal -->
                 </div>
             </div>
         </header>
 
         <section>
             <h2 class="text-xl font-semibold text-white mb-4">Prayer Requests</h2>
-            {#if groupPrayers.length === 0}
+            {#if !isMember}
+                <div class="text-center py-24 rounded-xl border border-dashed border-white/10 bg-slate-900/20">
+                    <svg class="mx-auto h-12 w-12 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                    </svg>
+                    <h3 class="mt-4 text-lg font-medium text-white">Member Access Only</h3>
+                    <p class="mt-2 text-gray-400">Join this group to see and share prayer requests.</p>
+                    {#if $user}
+                        <button 
+                            onclick={handleJoin}
+                            disabled={joining}
+                            class="mt-6 inline-flex items-center rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 transition-colors"
+                        >
+                            {joining ? 'Joining...' : 'Join Group'}
+                        </button>
+                    {:else}
+                        <a href="/login" class="mt-6 inline-block text-indigo-400 hover:text-indigo-300">Login to join</a>
+                    {/if}
+                </div>
+            {:else if groupPrayers.length === 0}
                 <div class="text-center py-12 rounded-lg border border-dashed border-white/10">
                     <p class="text-gray-500">No prayer requests in this group yet.</p>
                 </div>
             {:else}
                 <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                     {#each groupPrayers as prayer (prayer.id)}
-                         <PrayerCard {prayer} />
+                         <PrayerCard {prayer} showGroupTags={false} />
                     {/each}
                 </div>
             {/if}
         </section>
     </div>
 {/if}
+
+<AddPrayerModal bind:isOpen={isAddModalOpen} initialGroupIds={[groupId]} />

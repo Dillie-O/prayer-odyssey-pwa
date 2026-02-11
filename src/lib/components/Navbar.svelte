@@ -1,16 +1,30 @@
 <script lang="ts">
 	import { user, logout } from '$lib/stores/auth';
+    import { page } from '$app/stores';
 	
 	let isOpen = false;
+    let path = $derived($page.url.pathname);
+
+    function isActive(href: string) {
+        if (href === '/') return path === '/';
+        return path.startsWith(href);
+    }
 </script>
 
 <nav class="fixed top-0 z-50 w-full border-b border-white/10 bg-slate-950/80 backdrop-blur-md">
 	<div class="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-		<div class="flex items-center">
+		<div class="flex items-center space-x-8">
 			<a href="/" class="flex items-center space-x-3">
 				<img src="/prayer_icon_logo_192.png" alt="Logo" class="h-8 w-8 rounded-lg" />
 				<span class="text-lg font-bold text-white">Prayer Odyssey</span>
 			</a>
+
+            <!-- Desktop Links -->
+            <div class="hidden sm:flex items-center space-x-4">
+                <a href="/" class="px-3 py-2 text-sm font-medium transition-colors {isActive('/') ? 'text-indigo-400' : 'text-gray-300 hover:text-white'}">Home</a>
+                <a href="/prayers" class="px-3 py-2 text-sm font-medium transition-colors {isActive('/prayers') ? 'text-indigo-400' : 'text-gray-300 hover:text-white'}">Prayers</a>
+                <a href="/groups" class="px-3 py-2 text-sm font-medium transition-colors {isActive('/groups') ? 'text-indigo-400' : 'text-gray-300 hover:text-white'}">Groups</a>
+            </div>
 		</div>
 
 		<div class="flex items-center space-x-4">

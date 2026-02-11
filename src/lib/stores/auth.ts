@@ -1,13 +1,23 @@
 import { writable } from 'svelte/store';
-import { auth } from '$lib/firebase';
+import { auth, db } from '$lib/firebase';
 import { GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged, type User, createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile } from 'firebase/auth';
 import { browser } from '$app/environment';
+import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
 
 export const user = writable<User | null>(null);
 export const loading = writable(true);
 
 if (browser) {
-    onAuthStateChanged(auth, (u) => {
+    onAuthStateChanged(auth, async (u) => {
+        if (u) {
+            // Sync user profile to Firestore
+            await setDoc(doc(db, 'users', u.uid), {
+                displayName: u.displayName,
+                photoURL: u.photoURL,
+                email: u.email,
+                lastLogin: serverTimestamp()
+            }, { merge: true });
+        }
         user.set(u);
         loading.set(false);
     });

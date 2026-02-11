@@ -60,6 +60,10 @@
                                         <div class="w-8 h-8 rounded-full bg-indigo-500/10 flex items-center justify-center text-sm">🙏</div>
                                     {:else if notification.type === 'prayer_update'}
                                         <div class="w-8 h-8 rounded-full bg-emerald-500/10 flex items-center justify-center text-lg">📝</div>
+                                    {:else if notification.type === 'prayer_answered'}
+                                        <div class="w-8 h-8 rounded-full bg-amber-500/10 flex items-center justify-center text-lg">✨</div>
+                                    {:else if notification.type === 'prayer_shared'}
+                                        <div class="w-8 h-8 rounded-full bg-blue-500/10 flex items-center justify-center text-lg">📤</div>
                                     {:else}
                                         <div class="w-8 h-8 rounded-full bg-slate-500/10 flex items-center justify-center text-lg">🔔</div>
                                     {/if}
@@ -71,6 +75,19 @@
                                             is praying for <span class="text-indigo-300 font-medium">"{notification.prayerSummary}"</span>
                                         {:else if notification.type === 'prayer_update'}
                                             added an update to <span class="text-emerald-300 font-medium">"{notification.prayerSummary}"</span>
+                                            {#if notification.groupName}
+                                                in <span class="text-purple-300 font-medium">{notification.groupName}</span>
+                                            {/if}
+                                        {:else if notification.type === 'prayer_shared'}
+                                            shared <span class="text-blue-300 font-medium">"{notification.prayerSummary}"</span> with your group
+                                            {#if notification.groupName}
+                                                in <span class="text-purple-300 font-medium">{notification.groupName}</span>
+                                            {/if}
+                                        {:else if notification.type === 'prayer_answered'}
+                                            marked <span class="text-amber-300 font-medium">"{notification.prayerSummary}"</span> as answered
+                                            {#if notification.groupName}
+                                                in <span class="text-purple-300 font-medium">{notification.groupName}</span>
+                                            {/if}
                                         {:else}
                                             sent you a notification
                                         {/if}

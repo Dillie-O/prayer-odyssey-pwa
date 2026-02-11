@@ -51,6 +51,12 @@ exports.sendPushNotification = onDocumentCreated("notifications/{notificationId}
     } else if (type === "prayer_update") {
         title = "📝 Prayer Update";
         body = `${senderName} added an update to "${prayerSummary}"`;
+    } else if (type === "prayer_answered") {
+        title = "✨ Prayer Answered!";
+        body = `${senderName} marked "${prayerSummary}" as answered`;
+    } else if (type === "prayer_shared") {
+        title = "📤 Prayer Shared";
+        body = `${senderName} shared "${prayerSummary}" with your group`;
     } else if (type === "group_invite") {
         title = "👥 Group Invitation";
         body = `${senderName} invited you to join a group.`;
@@ -73,6 +79,64 @@ exports.sendPushNotification = onDocumentCreated("notifications/{notificationId}
         console.log(`Successfully sent ${response.successCount} messages`);
     } catch (error) {
         console.error("Error sending push notification:", error);
+    }
+});
+
+/**
+ * Triggered when a new prayer is created.
+ * Fan-out notifications to all members of groups this prayer is shared with.
+ */
+exports.onPrayerCreated = onDocumentCreated("prayers/{prayerId}", async (event) => {
+    const prayerData = event.data?.data();
+    if (!prayerData) return;
+
+    const { prayerId } = event.params;
+    const ownerId = prayerData.ownerId;
+    const sharedGroups = prayerData.sharedWith || [];
+    const prayerSummary = prayerData.summary;
+
+    if (sharedGroups.length === 0) return;
+
+    // Fetch owner's name for notification
+    const ownerRef = admin.firestore().collection("users").doc(ownerId);
+    const ownerDoc = await ownerRef.get();
+    const ownerName = ownerDoc.exists ? (ownerDoc.data().displayName || "Someone") : "Someone";
+
+    // For each group, find members and create notifications
+    const batch = admin.firestore().batch();
+    const notifiedUsers = new Set();
+    notifiedUsers.add(ownerId); // Don't notify person who created the prayer
+
+    for (const groupId of sharedGroups) {
+        const groupRef = admin.firestore().collection("groups").doc(groupId);
+        const groupDoc = await groupRef.get();
+
+        if (groupDoc.exists) {
+            const members = groupDoc.data().members || [];
+            for (const memberId of members) {
+                if (!notifiedUsers.has(memberId)) {
+                    const notificationRef = admin.firestore().collection("notifications").doc();
+                    batch.set(notificationRef, {
+                        receiverId: memberId,
+                        senderId: ownerId,
+                        senderName: ownerName,
+                        type: 'prayer_shared',
+                        prayerId: prayerId,
+                        prayerSummary: prayerSummary,
+                        groupId: groupId,
+                        groupName: groupDoc.data().name || 'Unknown Group',
+                        read: false,
+                        createdAt: admin.firestore.FieldValue.serverTimestamp()
+                    });
+                    notifiedUsers.add(memberId);
+                }
+            }
+        }
+    }
+
+    if (notifiedUsers.size > 1) { // More than just owner
+        await batch.commit();
+        console.log(`Fanned out ${notifiedUsers.size - 1} notifications for shared prayer ${prayerId}`);
     }
 });
 
@@ -106,7 +170,7 @@ exports.onPrayerUpdateCreated = onDocumentCreated("prayers/{prayerId}/updates/{u
     // 3. For each group, find members and create notifications
     const batch = admin.firestore().batch();
     const notifiedUsers = new Set();
-    notifiedUsers.add(authorId); // Don't notify the person who wrote the update
+    notifiedUsers.add(authorId); // Don't notify person who wrote the update
 
     for (const groupId of sharedGroups) {
         const groupRef = admin.firestore().collection("groups").doc(groupId);
@@ -115,7 +179,7 @@ exports.onPrayerUpdateCreated = onDocumentCreated("prayers/{prayerId}/updates/{u
         if (groupDoc.exists) {
             const members = groupDoc.data().members || [];
             for (const memberId of members) {
-                if (!notifiedUsers.has(memberId)) {
+                if (!notifiedUsers.has(memberId) && memberId !== prayerData.ownerId) { // Exclude prayer owner too
                     const notificationRef = admin.firestore().collection("notifications").doc();
                     batch.set(notificationRef, {
                         receiverId: memberId,
@@ -124,6 +188,8 @@ exports.onPrayerUpdateCreated = onDocumentCreated("prayers/{prayerId}/updates/{u
                         type: 'prayer_update',
                         prayerId: prayerId,
                         prayerSummary: prayerSummary,
+                        groupId: groupId,
+                        groupName: groupDoc.data().name || 'Unknown Group',
                         read: false,
                         createdAt: admin.firestore.FieldValue.serverTimestamp()
                     });

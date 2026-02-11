@@ -6,7 +6,16 @@
 	import favicon from '$lib/assets/prayer_logo.svg';
 	import { pwaInfo } from 'virtual:pwa-info';
     
+    import { requestNotificationPermission } from '$lib/stores/notifications';
+    
     let { children } = $props();
+
+    // Request notification permission when user is logged in
+    $effect(() => {
+        if ($user) {
+            requestNotificationPermission();
+        }
+    });
 </script>
 
 <svelte:head>

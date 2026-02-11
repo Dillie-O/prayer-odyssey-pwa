@@ -1,9 +1,9 @@
 import { writable, derived, get } from 'svelte/store';
 import { db, auth } from '$lib/firebase';
-import { collection, addDoc, query, where, onSnapshot, orderBy, deleteDoc, doc, updateDoc, serverTimestamp, type Timestamp, or, arrayUnion, increment } from 'firebase/firestore';
+import { collection, addDoc, query, where, onSnapshot, orderBy, deleteDoc, doc, updateDoc, serverTimestamp, type Timestamp, or, arrayUnion, increment, getDoc } from 'firebase/firestore';
 import { user } from './auth';
 import { groups as groupsStore } from './groups';
-import { sendNotification } from './notifications';
+import { sendNotification, notifyGroupMembersPrayerAnswered, notifyGroupMembersPrayerShared } from './notifications';
 
 export interface Prayer {
     id: string;
@@ -101,10 +101,23 @@ export const addPrayer = async (summary: string, description?: string, sharedWit
 
 export const updatePrayerSharing = async (prayerId: string, groupIds: string[]) => {
     if (!auth.currentUser) throw new Error("User not logged in");
+    
+    // Get prayer details before updating
+    const prayerDoc = await getDoc(doc(db, 'prayers', prayerId));
+    if (!prayerDoc.exists()) return;
+    
+    const prayer = prayerDoc.data() as Prayer;
+    
+    // Update prayer sharing
     await updateDoc(doc(db, 'prayers', prayerId), {
         sharedWith: groupIds,
         updatedAt: serverTimestamp()
     });
+    
+    // Send notifications to group members if prayer is being shared with new groups
+    if (groupIds.length > 0) {
+        await notifyGroupMembersPrayerShared(prayerId, prayer.summary, groupIds);
+    }
 };
 
 export const deletePrayer = async (id: string) => {
@@ -122,9 +135,24 @@ export const updatePrayer = async (id: string, summary: string, description?: st
 };
 
 export const markAnswered = async (id: string) => {
+    if (!auth.currentUser) return;
+    
+    // Get the prayer details before updating
+    const prayerDoc = await getDoc(doc(db, 'prayers', id));
+    if (!prayerDoc.exists()) return;
+    
+    const prayer = prayerDoc.data() as Prayer;
+    
+    // Update the prayer status
     await updateDoc(doc(db, 'prayers', id), {
-        status: 'answered'
+        status: 'answered',
+        updatedAt: serverTimestamp()
     });
+    
+    // Send notifications to group members if prayer is shared with groups
+    if (prayer.sharedWith && prayer.sharedWith.length > 0) {
+        await notifyGroupMembersPrayerAnswered(id, prayer.summary, prayer.sharedWith);
+    }
 };
 
 export const markActive = async (id: string) => {

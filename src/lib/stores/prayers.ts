@@ -1,8 +1,9 @@
 import { writable, derived, get } from 'svelte/store';
 import { db, auth } from '$lib/firebase';
-import { collection, addDoc, query, where, onSnapshot, orderBy, deleteDoc, doc, updateDoc, serverTimestamp, type Timestamp, or, arrayUnion } from 'firebase/firestore';
+import { collection, addDoc, query, where, onSnapshot, orderBy, deleteDoc, doc, updateDoc, serverTimestamp, type Timestamp, or, arrayUnion, increment } from 'firebase/firestore';
 import { user } from './auth';
 import { groups as groupsStore } from './groups';
+import { sendNotification } from './notifications';
 
 export interface Prayer {
     id: string;
@@ -13,6 +14,8 @@ export interface Prayer {
     createdAt: Timestamp;
     updatedAt?: Timestamp;
     sharedWith: string[]; // groupIds
+    prayedCount?: number;
+    prayedBy?: string[];
 }
 
 export interface PrayerUpdate {
@@ -128,6 +131,22 @@ export const markActive = async (id: string) => {
     await updateDoc(doc(db, 'prayers', id), {
         status: 'active'
     });
+};
+
+export const prayedFor = async (prayer: Prayer) => {
+    if (!auth.currentUser) throw new Error("User not logged in");
+    const prayerRef = doc(db, 'prayers', prayer.id);
+
+    await updateDoc(prayerRef, {
+        prayedCount: increment(1),
+        prayedBy: arrayUnion(auth.currentUser.uid),
+        updatedAt: serverTimestamp()
+    });
+
+    // Notify owner
+    if (prayer.ownerId !== auth.currentUser.uid) {
+        await sendNotification(prayer.ownerId, 'prayer_reaction', prayer.id, prayer.summary);
+    }
 };
 
 // Prayer Updates

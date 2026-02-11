@@ -1,14 +1,38 @@
 <script lang="ts">
 	import { user, logout } from '$lib/stores/auth';
     import { page } from '$app/stores';
+    import { unreadCount, subscribeToNotifications } from '$lib/stores/notifications';
+    import NotificationDropdown from './NotificationDropdown.svelte';
+    import { onMount, onDestroy } from 'svelte';
 	
-	let isOpen = false;
+	let isOpen = $state(false);
+    let isNotificationsOpen = $state(false);
     let path = $derived($page.url.pathname);
+    let unsubscribe: (() => void) | null = null;
 
     function isActive(href: string) {
         if (href === '/') return path === '/';
         return path.startsWith(href);
     }
+
+    // Subscribe to notifications when user changes
+    $effect(() => {
+        if ($user) {
+            unsubscribe = subscribeToNotifications($user.uid);
+        } else if (unsubscribe) {
+            unsubscribe();
+            unsubscribe = null;
+        }
+    });
+
+    onMount(() => {
+        // Handle clicks outside to close dropdowns if needed, 
+        // but for now let's keep it simple.
+    });
+
+    onDestroy(() => {
+        if (unsubscribe) unsubscribe();
+    });
 </script>
 
 <nav class="fixed top-0 z-50 w-full border-b border-white/10 bg-slate-950/80 backdrop-blur-md">
@@ -27,8 +51,30 @@
             </div>
 		</div>
 
-		<div class="flex items-center space-x-4">
+		<div class="flex items-center space-x-2 sm:space-x-4">
 			{#if $user}
+                <!-- Notifications Bell -->
+                <div class="relative">
+                    <button 
+                        class="p-2 text-slate-400 hover:text-white transition-colors relative"
+                        onclick={() => isNotificationsOpen = !isNotificationsOpen}
+                    >
+                        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                        </svg>
+                        {#if $unreadCount > 0}
+                            <span class="absolute top-1.5 right-1.5 flex h-4 w-4">
+                                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
+                                <span class="relative inline-flex rounded-full h-4 w-4 bg-indigo-500 text-[10px] font-bold text-white items-center justify-center">
+                                    {$unreadCount > 9 ? '9+' : $unreadCount}
+                                </span>
+                            </span>
+                        {/if}
+                    </button>
+
+                    <NotificationDropdown bind:isOpen={isNotificationsOpen} />
+                </div>
+
 				<div class="relative">
 					<button 
 						class="flex items-center space-x-2 rounded-full bg-slate-800 p-1 pr-3 focus:outline-none focus:ring-2 focus:ring-indigo-500"

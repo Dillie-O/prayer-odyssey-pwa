@@ -1,7 +1,7 @@
 import { writable } from 'svelte/store';
 import { messaging, db, auth } from '$lib/firebase';
 import { getToken, onMessage, deleteToken } from 'firebase/messaging';
-import { doc, updateDoc, arrayUnion, arrayRemove, collection, query, where, orderBy, onSnapshot, addDoc, serverTimestamp, deleteDoc, getDoc } from 'firebase/firestore';
+import { doc, updateDoc, arrayUnion, arrayRemove, collection, query, where, orderBy, onSnapshot, addDoc, serverTimestamp, deleteDoc, getDoc, getDocs, writeBatch } from 'firebase/firestore';
 
 export interface AppNotification {
     id: string;
@@ -150,6 +150,32 @@ export const markAsRead = async (notificationId: string) => {
 
 export const deleteNotification = async (notificationId: string) => {
     await deleteDoc(doc(db, 'notifications', notificationId));
+};
+
+export const clearAllNotifications = async () => {
+    if (!auth.currentUser) return;
+
+    try {
+        // Get all notifications for current user
+        const q = query(
+            collection(db, 'notifications'),
+            where('receiverId', '==', auth.currentUser.uid)
+        );
+        
+        const querySnapshot = await getDocs(q);
+        const batch = writeBatch(db);
+        
+        // Delete all notifications in batch
+        querySnapshot.forEach((docSnapshot) => {
+            batch.delete(docSnapshot.ref);
+        });
+        
+        await batch.commit();
+        console.log(`Cleared ${querySnapshot.size} notifications for user`);
+    } catch (error) {
+        console.error('Error clearing all notifications:', error);
+        throw error;
+    }
 };
 
 export const requestNotificationPermission = async () => {
@@ -383,12 +409,27 @@ if (typeof window !== 'undefined' && messaging) {
         if (Notification.permission === 'granted') {
             const title = payload.notification?.title || 'New Message';
             const body = payload.notification?.body || 'You have a new notification';
+            const url = payload.data?.url;
 
-            new Notification(title, {
+            const notification = new Notification(title, {
                 body,
                 icon: '/prayer_icon_logo_192.png',
                 tag: 'prayer-odyssey-notification' // Prevent duplicate overlapping
             });
+
+            // Add click handler for navigation if URL is provided
+            if (url) {
+                notification.onclick = () => {
+                    // Focus the window first
+                    window.focus();
+                    
+                    // Navigate to the URL
+                    window.location.href = url;
+                    
+                    // Close the notification
+                    notification.close();
+                };
+            }
         }
     });
 }

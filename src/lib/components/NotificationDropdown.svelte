@@ -1,9 +1,11 @@
 <script lang="ts">
-    import { notifications, markAsRead, deleteNotification, type AppNotification } from '$lib/stores/notifications';
+    import { notifications, markAsRead, deleteNotification, clearAllNotifications, type AppNotification } from '$lib/stores/notifications';
     import { fly, fade } from 'svelte/transition';
     import { onMount } from 'svelte';
+    import { goto } from '$app/navigation';
 
     let { isOpen = $bindable(false) } = $props<{ isOpen: boolean }>();
+    let isClearing = false;
 
     function formatTime(timestamp: any) {
         if (!timestamp) return 'Just now';
@@ -18,6 +20,35 @@
     async function handleDelete(e: Event, id: string) {
         e.stopPropagation();
         await deleteNotification(id);
+    }
+
+    async function handleNavigateToPrayer(notification: AppNotification) {
+        // Only navigate if notification has a prayerId
+        if (!notification.prayerId) return;
+        
+        // Mark as read before navigating
+        if (!notification.read) {
+            await markAsRead(notification.id);
+        }
+        
+        // Navigate to prayer page
+        goto(`/prayers/${notification.prayerId}`);
+        
+        // Close dropdown
+        isOpen = false;
+    }
+
+    async function handleClearAll() {
+        if (isClearing) return;
+        
+        isClearing = true;
+        try {
+            await clearAllNotifications();
+        } catch (error) {
+            console.error('Failed to clear notifications:', error);
+        } finally {
+            isClearing = false;
+        }
     }
 </script>
 
@@ -49,10 +80,10 @@
                     {#each $notifications as notification (notification.id)}
                         <div 
                             class="w-full text-left px-4 py-3 hover:bg-slate-800/50 transition-colors relative group cursor-pointer {notification.read ? 'opacity-60' : ''}"
-                            onclick={() => handleMarkRead(notification.id)}
+                            onclick={() => handleNavigateToPrayer(notification)}
+                            onkeydown={(e) => e.key === 'Enter' && handleNavigateToPrayer(notification)}
                             role="button"
                             tabindex="0"
-                            onkeydown={(e) => e.key === 'Enter' && handleMarkRead(notification.id)}
                         >
                             <div class="flex gap-3">
                                 <div class="flex-shrink-0 mt-1">
@@ -102,6 +133,7 @@
                                         class="p-1 text-slate-600 hover:text-rose-400 opacity-0 group-hover:opacity-100 transition-all"
                                         onclick={(e) => handleDelete(e, notification.id)}
                                         title="Delete"
+                                        aria-label="Delete notification"
                                     >
                                         <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -116,6 +148,15 @@
         </div>
         
         <div class="border-t border-white/5 bg-slate-800/20">
+            {#if $notifications.length > 0}
+                <button 
+                    class="w-full py-2 text-[11px] font-bold text-rose-400 hover:text-rose-300 hover:bg-slate-800/40 transition-all uppercase tracking-widest disabled:opacity-50"
+                    onclick={handleClearAll}
+                    disabled={isClearing}
+                >
+                    {isClearing ? 'Clearing...' : 'Clear All'}
+                </button>
+            {/if}
             <button 
                 class="w-full py-3 text-[11px] font-bold text-slate-500 hover:text-indigo-400 hover:bg-slate-800/40 transition-all uppercase tracking-widest"
                 onclick={() => isOpen = false}

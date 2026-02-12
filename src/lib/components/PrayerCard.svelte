@@ -132,17 +132,6 @@
                         </svg>
                     </button>
                 {/if}
-            {:else}
-                <!-- Prayer button for non-owners -->
-                <button 
-                    onclick={(e) => { e.preventDefault(); e.stopPropagation(); handlePrayedFor(); }}
-                    class="inline-flex items-center space-x-1.5 px-2 py-1 rounded-md text-xs font-medium transition-all {isPraying ? 'scale-95 bg-indigo-600 text-white' : hasPrayed ? 'bg-indigo-500/20 text-indigo-300 hover:bg-indigo-500/30 ring-1 ring-inset ring-indigo-500/40' : 'bg-indigo-400/10 text-indigo-400 hover:bg-indigo-400/20 ring-1 ring-inset ring-indigo-400/30'}"
-                    disabled={isPraying}
-                    title="I'm praying for this"
-                >
-                    <span class="text-sm {isPraying ? 'animate-bounce' : ''}">🙏</span>
-                    <span>{prayer.prayedCount || 0}</span>
-                </button>
             {/if}
         </div>
         
@@ -159,7 +148,18 @@
             <span class="inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset {prayer.status === 'answered' ? 'bg-green-400/10 text-green-400 ring-green-400/20' : 'bg-indigo-400/10 text-indigo-400 ring-indigo-400/30'}">
                 {prayer.status.charAt(0).toUpperCase() + prayer.status.slice(1)}
             </span>
-            {#if isOwner && (prayer.prayedCount || 0) > 0}
+            {#if !isOwner}
+                <!-- Prayer button for non-owners -->
+                <button 
+                    onclick={(e) => { e.preventDefault(); e.stopPropagation(); handlePrayedFor(); }}
+                    class="inline-flex items-center space-x-1.5 px-2 py-1 rounded-md text-xs font-medium transition-all {isPraying ? 'scale-95 bg-indigo-600 text-white' : hasPrayed ? 'bg-indigo-500/20 text-indigo-300 hover:bg-indigo-500/30 ring-1 ring-inset ring-indigo-500/40' : 'bg-indigo-400/10 text-indigo-400 hover:bg-indigo-400/20 ring-1 ring-inset ring-indigo-400/30'}"
+                    disabled={isPraying}
+                    title="I'm praying for this"
+                >
+                    <span class="text-sm {isPraying ? 'animate-bounce' : ''}">🙏</span>
+                    <span>{prayer.prayedCount || 0}</span>
+                </button>
+            {:else if (prayer.prayedCount || 0) > 0}
                 <div class="inline-flex items-center space-x-1.5 px-2 py-1 rounded-md text-xs font-medium bg-indigo-400/5 text-indigo-300 ring-1 ring-inset ring-indigo-400/20">
                     <span class="text-sm">🙏</span>
                     <span>{prayer.prayedCount}</span>

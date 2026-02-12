@@ -94,45 +94,18 @@
 {:else}
     <div class="space-y-6">
         <header class="rounded-xl bg-slate-900/50 border border-white/10 p-6 backdrop-blur-sm">
-            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                <div>
-                     <div class="flex items-center gap-3">
+            <div class="flex flex-col gap-4">
+                <!-- Top row with group name and invite button -->
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-3">
                         <a href="/groups" class="text-gray-400 hover:text-white transition-colors" aria-label="Back to groups">
                             <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                                 <path fill-rule="evenodd" d="M17 10a.75.75 0 01-.75.75H5.612l4.158 3.96a.75.75 0 11-1.04 1.08l-5.5-5.25a.75.75 0 010-1.08l5.5-5.25a.75.75 0 111.04 1.08L5.612 9.25H16.25A.75.75 0 0117 10z" clip-rule="evenodd" />
                             </svg>
                         </a>
                         <h1 class="text-3xl font-bold text-white">{group.name}</h1>
-                     </div>
-                    {#if group.description}
-                        <p class="mt-2 text-gray-400">{group.description}</p>
-                    {/if}
-                    <div class="mt-4 flex items-center gap-4 text-sm text-gray-500">
-                         <span>{group.members.length} member{group.members.length === 1 ? '' : 's'}</span>
-                         {#if isMember}
-                            <span class="inline-flex items-center rounded-md bg-green-400/10 px-2 py-0.5 text-xs font-medium text-green-400 ring-1 ring-inset ring-green-400/20">Member</span>
-                         {/if}
                     </div>
-                </div>
-                
-                <div class="flex gap-3">
-                    {#if isMember}
-                        <button 
-                            onclick={() => isAddModalOpen = true}
-                            class="inline-flex items-center rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 transition-colors whitespace-nowrap"
-                        >
-                            + New Prayer
-                        </button>
-                    {/if}
-                    {#if !isMember && $user}
-                        <button 
-                            onclick={handleJoin}
-                            disabled={joining}
-                            class="inline-flex items-center rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 transition-colors disabled:opacity-50"
-                        >
-                            {joining ? 'Joining...' : 'Join Group'}
-                        </button>
-                    {/if}
+                    
                     {#if $user}
                         <button 
                             onclick={copyInviteLink}
@@ -145,11 +118,48 @@
                         </button>
                     {/if}
                 </div>
+                
+                <!-- Middle row with member info and join button -->
+                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                    <div class="flex items-center gap-4 text-sm text-gray-500">
+                         <span>{group.members.length} member{group.members.length === 1 ? '' : 's'}</span>
+                         {#if isMember}
+                            <span class="inline-flex items-center rounded-md bg-green-400/10 px-2 py-0.5 text-xs font-medium text-green-400 ring-1 ring-inset ring-green-400/20">Member</span>
+                         {/if}
+                    </div>
+                    
+                    <div class="flex gap-3">
+                        {#if !isMember && $user}
+                            <button 
+                                onclick={handleJoin}
+                                disabled={joining}
+                                class="inline-flex items-center rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 transition-colors disabled:opacity-50"
+                            >
+                                {joining ? 'Joining...' : 'Join Group'}
+                            </button>
+                        {/if}
+                    </div>
+                </div>
+                
+                <!-- Bottom row with description -->
+                {#if group.description}
+                    <p class="text-gray-400">{group.description}</p>
+                {/if}
             </div>
         </header>
 
         <section>
-            <h2 class="text-xl font-semibold text-white mb-4">Prayer Requests</h2>
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-xl font-semibold text-white">Prayer Requests</h2>
+                {#if isMember}
+                    <button 
+                        onclick={() => isAddModalOpen = true}
+                        class="inline-flex items-center rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 transition-colors whitespace-nowrap"
+                    >
+                        + New Prayer
+                    </button>
+                {/if}
+            </div>
             {#if !isMember}
                 <div class="text-center py-24 rounded-xl border border-dashed border-white/10 bg-slate-900/20">
                     <svg class="mx-auto h-12 w-12 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">

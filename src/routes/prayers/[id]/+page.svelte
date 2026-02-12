@@ -172,61 +172,53 @@
 
 		<!-- Prayer Card -->
 		<div class="rounded-xl bg-slate-900/50 border border-white/10 p-6 backdrop-blur-sm">
-			<div class="flex justify-between items-start mb-4">
-				<div class="flex-1">
-                    <!-- Owner identification (only if not current user) -->
-                    {#if prayer && !isOwner}
-                        <div class="flex items-center space-x-2 mb-4 border-b border-white/5 pb-4">
-                            <img 
-                                src={ownerProfile?.photoURL || (ownerProfile?.displayName ? `https://ui-avatars.com/api/?name=${ownerProfile.displayName}` : `https://ui-avatars.com/api/?name=User`)} 
-                                alt="Owner Profile" 
-                                class="h-8 w-8 rounded-full border border-white/10" 
-                            />
-                            <div class="flex flex-col">
-                                <span class="text-sm font-medium text-white">
-                                    {ownerProfile?.displayName || 'Loading...'}
-                                </span>
-                                <span class="text-[10px] text-slate-500 uppercase tracking-wider font-semibold">Shared this prayer</span>
-                            </div>
+			<div class="mb-4">
+                <!-- Owner identification (only if not current user) -->
+                {#if prayer && !isOwner}
+                    <div class="flex items-center space-x-2 mb-4 border-b border-white/5 pb-4">
+                        <img 
+                            src={ownerProfile?.photoURL || (ownerProfile?.displayName ? `https://ui-avatars.com/api/?name=${ownerProfile.displayName}` : `https://ui-avatars.com/api/?name=User`)} 
+                            alt="Owner Profile" 
+                            class="h-8 w-8 rounded-full border border-white/10" 
+                        />
+                        <div class="flex flex-col">
+                            <span class="text-sm font-medium text-white">
+                                {ownerProfile?.displayName || 'Loading...'}
+                            </span>
+                            <span class="text-[10px] text-slate-500 uppercase tracking-wider font-semibold">Shared this prayer</span>
                         </div>
-                    {/if}
+                    </div>
+                {/if}
 
-					{#if prayer.summary}
-						<h2 class="text-2xl font-bold text-white mb-3">{prayer.summary}</h2>
-						{#if prayer.description}
-							<p class="text-slate-300 text-lg leading-relaxed whitespace-pre-wrap">{prayer.description}</p>
-						{/if}
-					{:else if (prayer as any).content}
-						<p class="text-xl text-slate-200 leading-relaxed whitespace-pre-wrap">{(prayer as any).content}</p>
-					{:else}
-						<p class="text-slate-500 italic">No content available</p>
+				{#if prayer.summary}
+					<h2 class="text-2xl font-bold text-white mb-3">{prayer.summary}</h2>
+					{#if prayer.description}
+						<p class="text-slate-300 text-lg leading-relaxed whitespace-pre-wrap">{prayer.description}</p>
 					{/if}
+				{:else if (prayer as any).content}
+					<p class="text-xl text-slate-200 leading-relaxed whitespace-pre-wrap">{(prayer as any).content}</p>
+				{:else}
+					<p class="text-slate-500 italic">No content available</p>
+				{/if}
 
-					<!-- Shared Groups Tags (Owner Only) -->
-					{#if isOwner && sharedGroupNames.length > 0}
-						<div class="mt-6 flex flex-wrap gap-2">
-							<span class="text-xs font-semibold text-slate-500 uppercase tracking-wider w-full mb-1">Shared with:</span>
-							{#each sharedGroupNames as groupName}
-								<span class="inline-flex items-center rounded-full bg-slate-800 px-2.5 py-0.5 text-xs font-medium text-slate-300 border border-white/5">
-									{groupName}
-								</span>
-							{/each}
-						</div>
-					{/if}
-				</div>
-				
-				<div class="flex items-center space-x-2 ml-4">
-					{#if isOwner}
-						<button 
-							onclick={() => showShareModal = true}
-							class="p-2 text-indigo-400 hover:text-indigo-300 hover:bg-indigo-400/10 rounded-full transition-colors"
-							title="Share with Groups"
-						>
-							<svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
-							</svg>
-						</button>
-
+				<!-- Shared Groups Tags (Owner Only) -->
+				{#if isOwner && sharedGroupNames.length > 0}
+					<div class="mt-6 flex flex-wrap gap-2">
+						<span class="text-xs font-semibold text-slate-500 uppercase tracking-wider w-full mb-1">Shared with:</span>
+						{#each sharedGroupNames as groupName}
+							<span class="inline-flex items-center rounded-full bg-slate-800 px-2.5 py-0.5 text-xs font-medium text-slate-300 border border-white/5">
+								{groupName}
+							</span>
+						{/each}
+					</div>
+				{/if}
+			</div>
+			
+			<!-- Bottom Row with Actions, Date, and Status -->
+			<div class="flex items-center justify-between pt-4 border-t border-white/10">
+				<!-- Action Buttons (left justified) -->
+				{#if isOwner}
+					<div class="flex items-center space-x-2">
 						<button 
 							onclick={handleToggleStatus}
 							class="p-2 {prayer.status === 'answered' ? 'text-indigo-400 hover:text-indigo-300 hover:bg-indigo-400/10' : 'text-rose-400 hover:text-rose-300 hover:bg-rose-400/10'} rounded-full transition-colors"
@@ -242,6 +234,16 @@
 									<path d="M17.5 19c3-2 4.5-4.5 4.5-7.5H2c0 3 1.5 5.5 4.5 7.5.667 0 1.333-.333 2-1a4 4 0 0 0 6 0c.667.667 1.333 1 2 1" />
 								</svg>
 							{/if}
+						</button>
+
+						<button 
+							onclick={() => showShareModal = true}
+							class="p-2 text-indigo-400 hover:text-indigo-300 hover:bg-indigo-400/10 rounded-full transition-colors"
+							title="Share with Groups"
+						>
+							<svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+							</svg>
 						</button>
 
 						<button 
@@ -263,17 +265,21 @@
 								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
 							</svg>
 						</button>
-					{/if}
+					</div>
+				{:else}
+					<!-- Spacer for non-owners to maintain alignment -->
+					<div></div>
+				{/if}
+				
+				<!-- Date and Status (right justified) -->
+				<div class="flex items-center space-x-3">
+					<span class="text-sm text-slate-500">
+						Created {prayer.createdAt?.toDate().toLocaleDateString() || 'Just now'}
+					</span>
+					<span class="inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset {prayer.status === 'answered' ? 'bg-green-400/10 text-green-400 ring-green-400/20' : 'bg-indigo-400/10 text-indigo-400 ring-indigo-400/30'}">
+						{prayer.status.charAt(0).toUpperCase() + prayer.status.slice(1)}
+					</span>
 				</div>
-			</div>
-			
-			<div class="flex items-center justify-between pt-4 border-t border-white/10">
-				<span class="inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset {prayer.status === 'answered' ? 'bg-green-400/10 text-green-400 ring-green-400/20' : 'bg-indigo-400/10 text-indigo-400 ring-indigo-400/30'}">
-					{prayer.status.charAt(0).toUpperCase() + prayer.status.slice(1)}
-				</span>
-				<span class="text-sm text-slate-500">
-					Created {prayer.createdAt?.toDate().toLocaleDateString() || 'Just now'}
-				</span>
 			</div>
 		</div>
 

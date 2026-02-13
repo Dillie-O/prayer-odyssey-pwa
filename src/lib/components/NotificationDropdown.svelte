@@ -5,7 +5,7 @@
     import { goto } from '$app/navigation';
 
     let { isOpen = $bindable(false) } = $props<{ isOpen: boolean }>();
-    let isClearing = false;
+    let isClearing = $state(false);
 
     function formatTime(timestamp: any) {
         if (!timestamp) return 'Just now';

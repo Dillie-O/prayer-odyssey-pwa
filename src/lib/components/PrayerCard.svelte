@@ -6,7 +6,7 @@
     import { profiles, fetchUserProfile } from '$lib/stores/users';
     import SharePrayerModal from './SharePrayerModal.svelte';
     
-    let { prayer, showGroupTags = true, showOwnerInfo = true } = $props<{ prayer: Prayer; showGroupTags?: boolean; showOwnerInfo?: boolean }>();
+    let { prayer, showGroupTags = true, showOwnerInfo = true, showFullDescription = false, expandHeight = false } = $props<{ prayer: Prayer; showGroupTags?: boolean; showOwnerInfo?: boolean; showFullDescription?: boolean; expandHeight?: boolean }>();
 	let unsubscribeUpdates: (() => void) | null = null;
 	
 	// Use $derived instead of $: for Svelte 5 runes mode
@@ -77,7 +77,7 @@
                 <!-- Summary is always shown -->
                 <h4 class="text-xl font-semibold text-white mb-2 hover:text-indigo-300 transition-colors">{prayer.summary}</h4>
                 {#if prayer.description}
-                    <p class="text-slate-300 leading-relaxed whitespace-pre-wrap line-clamp-1">{prayer.description}</p>
+                    <p class="text-slate-300 leading-relaxed whitespace-pre-wrap {showFullDescription ? '' : 'line-clamp-1'}">{prayer.description}</p>
                 {/if}
             {:else if (prayer as any).content}
                 <!-- Old format with just content - fallback for existing prayers -->

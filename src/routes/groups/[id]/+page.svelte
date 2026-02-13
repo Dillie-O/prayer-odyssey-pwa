@@ -15,8 +15,13 @@
     let loading = $state(true);
     let joining = $state(false);
     let isAddModalOpen = $state(false);
+    let filter = $state<'all' | 'active' | 'answered'>('active');
 
     let isMember = $derived(group && $user && group.members.includes($user.uid));
+    let filteredPrayers = $derived(groupPrayers.filter(p => {
+        if (filter === 'all') return true;
+        return p.status === filter;
+    }));
 
     async function handleJoin() {
         if (!groupId || !$user) return;
@@ -160,6 +165,31 @@
                     </button>
                 {/if}
             </div>
+            
+            {#if isMember}
+                <!-- Filter Tabs -->
+                <div class="flex items-center space-x-1 rounded-xl bg-slate-900/50 p-1 border border-white/5 backdrop-blur-sm w-fit mb-6">
+                    <button 
+                        onclick={() => filter = 'active'}
+                        class="px-4 py-2 text-sm font-medium rounded-lg transition-all {filter === 'active' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/20' : 'text-slate-400 hover:text-white hover:bg-white/5'}"
+                    >
+                        Active
+                    </button>
+                    <button 
+                        onclick={() => filter = 'answered'}
+                        class="px-4 py-2 text-sm font-medium rounded-lg transition-all {filter === 'answered' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/20' : 'text-slate-400 hover:text-white hover:bg-white/5'}"
+                    >
+                        Answered
+                    </button>
+                    <button 
+                        onclick={() => filter = 'all'}
+                        class="px-4 py-2 text-sm font-medium rounded-lg transition-all {filter === 'all' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/20' : 'text-slate-400 hover:text-white hover:bg-white/5'}"
+                    >
+                        All
+                    </button>
+                </div>
+            {/if}
+            
             {#if !isMember}
                 <div class="text-center py-24 rounded-xl border border-dashed border-white/10 bg-slate-900/20">
                     <svg class="mx-auto h-12 w-12 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -183,9 +213,13 @@
                 <div class="text-center py-12 rounded-lg border border-dashed border-white/10">
                     <p class="text-gray-500">No prayer requests in this group yet.</p>
                 </div>
+            {:else if filteredPrayers.length === 0}
+                <div class="text-center py-12 rounded-lg border border-dashed border-white/10">
+                    <p class="text-gray-500">No {filter === 'all' ? '' : filter} prayers found.</p>
+                </div>
             {:else}
                 <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                    {#each groupPrayers as prayer (prayer.id)}
+                    {#each filteredPrayers as prayer (prayer.id)}
                          <PrayerCard {prayer} showGroupTags={false} />
                     {/each}
                 </div>

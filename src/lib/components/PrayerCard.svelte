@@ -6,7 +6,7 @@
     import { profiles, fetchUserProfile } from '$lib/stores/users';
     import SharePrayerModal from './SharePrayerModal.svelte';
     
-    let { prayer, showGroupTags = true, showOwnerInfo = true, showFullDescription = false, expandHeight = false } = $props<{ prayer: Prayer; showGroupTags?: boolean; showOwnerInfo?: boolean; showFullDescription?: boolean; expandHeight?: boolean }>();
+    let { prayer, showGroupTags = true, showOwnerInfo = true, showFullDescription = false, expandHeight = false, showLatestUpdate = false } = $props<{ prayer: Prayer; showGroupTags?: boolean; showOwnerInfo?: boolean; showFullDescription?: boolean; expandHeight?: boolean; showLatestUpdate?: boolean }>();
 	let unsubscribeUpdates: (() => void) | null = null;
 	
 	// Use $derived instead of $: for Svelte 5 runes mode
@@ -15,6 +15,9 @@
     let sharedGroups = $derived($groups.filter(g => prayer.sharedWith?.includes(g.id)));
     let ownerProfile = $derived($profiles[prayer.ownerId]);
     let hasPrayed = $derived(prayer.prayedBy?.includes($user?.uid || ''));
+    
+    // Get the most recent update for display
+    let latestUpdate = $derived(updates.length > 0 ? updates[0] : null);
 
     let isShareModalOpen = $state(false);
     let isPraying = $state(false);
@@ -87,6 +90,23 @@
                 <p class="text-slate-500 italic">No content available</p>
             {/if}
         </a>
+        
+        <!-- Latest Update Display -->
+        {#if latestUpdate && showLatestUpdate}
+            <div class="mt-3 p-3 rounded-lg bg-slate-800/30 border border-slate-700/50">
+                <div class="flex items-start space-x-2">
+                    <div class="flex-1 min-w-0">
+                        <div class="flex items-center space-x-2 mb-1">
+                            <span class="text-xs font-medium text-slate-400">Latest Update</span>
+                            <span class="text-xs text-slate-500">
+                                {latestUpdate.createdAt?.toDate().toLocaleDateString() || 'Just now'}
+                            </span>
+                        </div>
+                        <p class="text-sm text-slate-300 line-clamp-2">{latestUpdate.content}</p>
+                    </div>
+                </div>
+            </div>
+        {/if}
     </div>
 
     <!-- Shared with groups (Owner Only) -->

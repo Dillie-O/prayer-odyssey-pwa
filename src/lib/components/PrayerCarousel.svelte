@@ -119,7 +119,7 @@
 		<p class="text-slate-400">No prayers to display</p>
 	</div>
 {:else}
-	<div class="space-y-6">
+	<div class="space-y-4">
 		<!-- Prayer Counter and Navigation -->
 		<div class="flex items-center justify-between">
 			<div class="text-sm text-slate-400 font-medium">
@@ -154,7 +154,7 @@
 		
 		<!-- Main Prayer Display -->
 		<div 
-			class="relative min-h-[350px]"
+			class="relative"
 			role="region"
 			aria-label="Prayer carousel"
 			ontouchstart={handleTouchStart}
@@ -166,13 +166,14 @@
 					showOwnerInfo={false}
 					showGroupTags={true}
 					showFullDescription={true}
+					showLatestUpdate={true}
 				/>
 			</div>
 		</div>
 		
 		<!-- Prayer Dots Indicator -->
 		{#if prayerList.length > 1}
-			<div class="flex justify-center space-x-2">
+			<div class="flex justify-center space-x-2 pt-2">
 				{#each prayerList as _, index}
 					<button
 						onclick={() => goToPrayer(index)}

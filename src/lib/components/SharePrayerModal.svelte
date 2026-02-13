@@ -63,6 +63,7 @@
                 <button 
                     onclick={closeModal}
                     class="rounded-full p-1 text-gray-400 hover:bg-white/10 hover:text-white transition-colors"
+                    aria-label="Close modal"
                 >
                     <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />

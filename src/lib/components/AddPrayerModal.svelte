@@ -98,11 +98,9 @@
 								type="text"
 								bind:value={summary}
 								maxlength="100"
-								class="block w-full rounded-md border-0 bg-slate-950/50 py-3 text-white shadow-sm ring-1 ring-inset ring-white/10 placeholder:text-gray-500 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6"
+								class="block w-full rounded-md border-0 bg-slate-950/50 py-3 px-4 text-white shadow-sm ring-1 ring-inset ring-white/10 placeholder:text-gray-500 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6"
 								placeholder="Brief title for this prayer request"
-								autofocus
 							/>
-							<p class="mt-1 text-xs text-gray-500">{summary.length}/100 characters</p>
 						</div>
 						
 						<div>
@@ -113,8 +111,8 @@
 								id="prayer-description"
 								bind:value={description}
 								rows="4"
-								class="block w-full rounded-md border-0 bg-slate-950/50 py-3 text-white shadow-sm ring-1 ring-inset ring-white/10 placeholder:text-gray-500 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6"
-								placeholder="What would you like to pray for?"
+								class="block w-full rounded-md border-0 bg-slate-950/50 py-3 px-4 text-white shadow-sm ring-1 ring-inset ring-white/10 placeholder:text-gray-500 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6"
+								placeholder="Detailed description of your prayer request"
 							></textarea>
 						</div>
 					</div>
@@ -128,11 +126,11 @@
                                 <label class="flex items-center space-x-3 rounded-lg border border-white/5 bg-white/5 p-3 hover:bg-white/10 transition-colors cursor-pointer">
                                     <input 
                                         type="checkbox" 
-                                        value={group.id} 
+                                        value={group.id}
                                         bind:group={selectedGroups}
-                                        class="h-4 w-4 rounded border-gray-600 bg-slate-800 text-indigo-600 focus:ring-indigo-600 focus:ring-offset-slate-900"
+                                        class="h-4 w-4 text-indigo-600 rounded border-white/10 focus:ring-2 focus:ring-indigo-500"
                                     />
-                                    <span class="text-sm font-medium text-white">{group.name}</span>
+                                    <span class="text-sm font-medium text-gray-700">{group.name}</span>
                                 </label>
                             {/each}
                         </div>

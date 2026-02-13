@@ -166,6 +166,7 @@
 					showOwnerInfo={false}
 					showGroupTags={true}
 					showFullDescription={true}
+					showLatestUpdate={true}
 				/>
 			</div>
 		</div>

@@ -7,6 +7,7 @@
     import { joinGroup, type Group } from '$lib/stores/groups';
     import type { Prayer } from '$lib/stores/prayers';
     import PrayerCard from '$lib/components/PrayerCard.svelte';
+    import PrayerCarousel from '$lib/components/PrayerCarousel.svelte';
     import AddPrayerModal from '$lib/components/AddPrayerModal.svelte';
     
     let groupId = $derived($page.params.id);
@@ -16,6 +17,7 @@
     let joining = $state(false);
     let isAddModalOpen = $state(false);
     let filter = $state<'all' | 'active' | 'answered'>('active');
+    let viewMode = $state<'list' | 'carousel'>('list');
 
     let isMember = $derived(group && $user && group.members.includes($user.uid));
     let filteredPrayers = $derived(groupPrayers.filter(p => {
@@ -167,26 +169,51 @@
             </div>
             
             {#if isMember}
-                <!-- Filter Tabs -->
-                <div class="flex items-center space-x-1 rounded-xl bg-slate-900/50 p-1 border border-white/5 backdrop-blur-sm w-fit mb-6">
-                    <button 
-                        onclick={() => filter = 'active'}
-                        class="px-4 py-2 text-sm font-medium rounded-lg transition-all {filter === 'active' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/20' : 'text-slate-400 hover:text-white hover:bg-white/5'}"
-                    >
-                        Active
-                    </button>
-                    <button 
-                        onclick={() => filter = 'answered'}
-                        class="px-4 py-2 text-sm font-medium rounded-lg transition-all {filter === 'answered' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/20' : 'text-slate-400 hover:text-white hover:bg-white/5'}"
-                    >
-                        Answered
-                    </button>
-                    <button 
-                        onclick={() => filter = 'all'}
-                        class="px-4 py-2 text-sm font-medium rounded-lg transition-all {filter === 'all' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/20' : 'text-slate-400 hover:text-white hover:bg-white/5'}"
-                    >
-                        All
-                    </button>
+                <!-- Filter Tabs with View Toggle -->
+                <div class="flex items-center justify-between mb-6">
+                    <!-- Filter Buttons -->
+                    <div class="flex items-center space-x-1 rounded-xl bg-slate-900/50 p-1 border border-white/5 backdrop-blur-sm">
+                        <button 
+                            onclick={() => filter = 'active'}
+                            class="px-4 py-2 text-sm font-medium rounded-lg transition-all {filter === 'active' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/20' : 'text-slate-400 hover:text-white hover:bg-white/5'}"
+                        >
+                            Active
+                        </button>
+                        <button 
+                            onclick={() => filter = 'answered'}
+                            class="px-4 py-2 text-sm font-medium rounded-lg transition-all {filter === 'answered' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/20' : 'text-slate-400 hover:text-white hover:bg-white/5'}"
+                        >
+                            Answered
+                        </button>
+                        <button 
+                            onclick={() => filter = 'all'}
+                            class="px-4 py-2 text-sm font-medium rounded-lg transition-all {filter === 'all' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/20' : 'text-slate-400 hover:text-white hover:bg-white/5'}"
+                        >
+                            All
+                        </button>
+                    </div>
+                    
+                    <!-- View Toggle Buttons -->
+                    <div class="flex items-center space-x-1 rounded-xl bg-slate-900/50 p-1 border border-white/5 backdrop-blur-sm">
+                        <button 
+                            onclick={() => viewMode = 'list'}
+                            class="px-3 py-2 text-sm font-medium rounded-lg transition-all {viewMode === 'list' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/20' : 'text-slate-400 hover:text-white hover:bg-white/5'}"
+                            title="List view"
+                        >
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                            </svg>
+                        </button>
+                        <button 
+                            onclick={() => viewMode = 'carousel'}
+                            class="px-3 py-2 text-sm font-medium rounded-lg transition-all {viewMode === 'carousel' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/20' : 'text-slate-400 hover:text-white hover:bg-white/5'}"
+                            title="Carousel view"
+                        >
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 4v16M17 4v16M3 8h4m10 0h4M3 16h4m10 0h4" />
+                            </svg>
+                        </button>
+                    </div>
                 </div>
             {/if}
             
@@ -218,11 +245,19 @@
                     <p class="text-gray-500">No {filter === 'all' ? '' : filter} prayers found.</p>
                 </div>
             {:else}
-                <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                    {#each filteredPrayers as prayer (prayer.id)}
-                         <PrayerCard {prayer} showGroupTags={false} />
-                    {/each}
-                </div>
+                <!-- Conditional rendering based on view mode -->
+                {#if viewMode === 'carousel'}
+                    <div class="max-w-2xl mx-auto">
+                        <PrayerCarousel prayers={filteredPrayers} />
+                    </div>
+                {:else}
+                    <!-- List View (existing grid layout) -->
+                    <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                        {#each filteredPrayers as prayer (prayer.id)}
+                            <PrayerCard {prayer} showGroupTags={false} />
+                        {/each}
+                    </div>
+                {/if}
             {/if}
         </section>
     </div>

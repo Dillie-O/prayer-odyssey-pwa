@@ -90,7 +90,15 @@
 
 					{#if isOpen}
 						<div class="absolute right-0 mt-2 w-48 origin-top-right rounded-md bg-slate-900 py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none border border-white/10">
-							<a href="/profile" class="block px-4 py-2 text-sm text-gray-300 hover:bg-slate-800">Your Profile</a>
+							<button 
+								onclick={() => {
+									window.location.href = '/profile';
+									isOpen = false;
+								}}
+								class="block w-full px-4 py-2 text-left text-sm text-gray-300 hover:bg-slate-800"
+							>
+								Your Profile
+							</button>
 							<button 
 								onclick={logout}
 								class="block w-full px-4 py-2 text-left text-sm text-gray-300 hover:bg-slate-800"

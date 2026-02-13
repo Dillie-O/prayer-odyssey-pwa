@@ -89,7 +89,7 @@ groupsStore.subscribe(gs => {
 export const addPrayer = async (summary: string, description?: string, sharedWith: string[] = []) => {
     if (!auth.currentUser) throw new Error("User not logged in");
 
-    await addDoc(collection(db, 'prayers'), {
+    const prayerDoc = await addDoc(collection(db, 'prayers'), {
         summary,
         ...(description ? { description } : {}),
         ownerId: auth.currentUser.uid,
@@ -97,6 +97,11 @@ export const addPrayer = async (summary: string, description?: string, sharedWit
         createdAt: serverTimestamp(),
         sharedWith
     });
+    
+    // Send notifications to group members if prayer is being shared with groups
+    if (sharedWith.length > 0) {
+        await notifyGroupMembersPrayerShared(prayerDoc.id, summary, sharedWith);
+    }
 };
 
 export const updatePrayerSharing = async (prayerId: string, groupIds: string[]) => {

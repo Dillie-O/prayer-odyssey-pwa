@@ -10,6 +10,7 @@
     import { profiles, fetchUserProfile } from '$lib/stores/users';
 	import EditPrayerModal from '$lib/components/EditPrayerModal.svelte';
 	import SharePrayerModal from '$lib/components/SharePrayerModal.svelte';
+	import AddUpdateModal from '$lib/components/AddUpdateModal.svelte';
 	
 	let prayerId = $derived($page.params.id);
 	let prayer = $state<Prayer | null>(null);
@@ -20,6 +21,7 @@
 	
 	let showEditModal = $state(false);
 	let showShareModal = $state(false);
+	let showAddUpdateModal = $state(false);
 	let newUpdateContent = $state('');
 	let editingUpdateId = $state<string | null>(null);
 	let editContent = $state('');
@@ -285,7 +287,17 @@
 
 		<!-- Updates Section -->
 		<div class="rounded-xl bg-slate-900/50 border border-white/10 p-6 backdrop-blur-sm">
-			<h3 class="text-xl font-semibold text-white mb-4">Updates</h3>
+			<div class="flex items-center justify-between mb-4">
+				<h3 class="text-xl font-semibold text-white">Updates</h3>
+				{#if isOwner}
+					<button 
+						onclick={() => showAddUpdateModal = true}
+						class="inline-flex items-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 transition-colors"
+					>						
+						+ Add Update
+					</button>
+				{/if}
+			</div>
 			
 			<!-- Updates List -->
 			<div class="space-y-3">
@@ -348,41 +360,19 @@
 				
 				{#if updates.length === 0}
 					<div class="text-center py-8 text-gray-500">
-						No updates yet. Add the first update above!
+						No updates yet. Be the first to add an update!
 					</div>
 				{/if}
 			</div>
 
 			
 		</div>
-
-		<!-- Add New Update (Owner Only) -->
-		{#if isOwner}
-			<div class="mb-6 rounded-lg bg-slate-800/50 border border-white/10 p-4">
-				<label for="new-update" class="block text-sm font-medium leading-6 text-gray-300 mb-2">
-					Add Update
-				</label>
-				<textarea
-					id="new-update"
-					bind:value={newUpdateContent}
-					rows="3"
-					class="block w-full rounded-md border-0 bg-slate-950/50 py-3 text-white shadow-sm ring-1 ring-inset ring-white/10 placeholder:text-gray-500 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6"
-					placeholder="Share an update on this prayer..."
-				></textarea>
-				<div class="mt-3 flex justify-end">
-					<button
-						type="button"
-						class="inline-flex justify-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
-						onclick={handleAddUpdate}
-						disabled={!newUpdateContent.trim() || isSubmitting}
-					>
-						{isSubmitting ? 'Adding...' : 'Add Update'}
-					</button>
-				</div>
-			</div>
-		{/if}
+		
 	</div>
 
 	<EditPrayerModal {prayer} bind:isOpen={showEditModal} />
 	<SharePrayerModal prayerId={prayerId} sharedWith={prayer.sharedWith} bind:isOpen={showShareModal} />
+	{#if isOwner}
+		<AddUpdateModal bind:isOpen={showAddUpdateModal} prayerId={prayerId} />
+	{/if}
 {/if}

@@ -91,9 +91,9 @@
 
     <!-- Shared with groups (Owner Only) -->
     {#if isOwner && showGroupTags && sharedGroups.length > 0}
-        <div class="mt-3 flex flex-wrap gap-2">
+        <div class="mt-3 mb-4 flex flex-wrap gap-2 -mx-1">
             {#each sharedGroups as group}
-                <span class="inline-flex items-center rounded-full bg-indigo-400/10 px-2 py-0.5 text-[10px] font-medium text-indigo-400 ring-1 ring-inset ring-indigo-400/20">
+                <span class="inline-flex items-center rounded-full bg-indigo-400/10 px-2 py-0.5 text-[10px] font-medium text-indigo-400 ring-1 ring-inset ring-indigo-400/20 mx-1">
                     {group.name}
                 </span>
             {/each}

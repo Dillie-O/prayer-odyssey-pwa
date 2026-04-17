@@ -24,7 +24,7 @@
 	{@html pwaInfo?.registerSW?.scriptTag}
 </svelte:head>
 
-<div class="min-h-screen bg-slate-950 text-slate-50 font-sans selection:bg-indigo-500 selection:text-white">
+<div class="min-h-screen bg-slate-100 text-slate-900 font-sans selection:bg-indigo-500 selection:text-white dark:bg-slate-950 dark:text-slate-50">
 	<Navbar />
 	
 	<main class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8 pb-20 sm:pb-6">

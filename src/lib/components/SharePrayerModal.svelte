@@ -51,18 +51,18 @@
         <!-- Backdrop -->
         <button 
             type="button"
-            class="absolute inset-0 bg-slate-950/80 backdrop-blur-sm"
+            class="absolute inset-0 bg-slate-950/20 backdrop-blur-sm dark:bg-slate-950/80"
             onclick={closeModal}
             aria-label="Close modal"
         ></button>
         
         <!-- Modal Content -->
-        <div class="relative w-full max-w-md overflow-hidden rounded-2xl bg-slate-900 border border-white/10 p-6 shadow-2xl">
+        <div class="relative w-full max-w-md overflow-hidden rounded-2xl bg-white border border-slate-900/10 p-6 shadow-2xl dark:bg-slate-900 dark:border-white/10">
             <div class="flex items-center justify-between mb-6">
-                <h2 class="text-xl font-bold text-white">Share Prayer</h2>
+                <h2 class="text-xl font-bold text-slate-900 dark:text-white">Share Prayer</h2>
                 <button 
                     onclick={closeModal}
-                    class="rounded-full p-1 text-gray-400 hover:bg-white/10 hover:text-white transition-colors"
+                    class="rounded-full p-1 text-gray-500 hover:bg-slate-100 hover:text-slate-900 transition-colors dark:text-gray-400 dark:hover:bg-white/10 dark:hover:text-white"
                     aria-label="Close modal"
                 >
                     <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -73,24 +73,24 @@
 
             {#if $groups.length === 0}
                 <div class="text-center py-8">
-                    <p class="text-gray-400 mb-4">You are not a member of any groups yet.</p>
-                    <a href="/groups" class="text-indigo-400 hover:text-indigo-300 font-medium">Create or join a group</a>
+                    <p class="text-gray-400 mb-4 dark:text-gray-400">You are not a member of any groups yet.</p>
+                    <a href="/groups" class="text-indigo-500 hover:text-indigo-600 font-medium dark:text-indigo-400 dark:hover:text-indigo-300">Create or join a group</a>
                 </div>
             {:else}
                 <div class="space-y-4">
-                    <p class="text-sm text-gray-400">Select the groups you want to share this prayer with:</p>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">Select the groups you want to share this prayer with:</p>
                     
                     <div class="max-h-60 overflow-y-auto space-y-2 pr-2 custom-scrollbar">
                         {#each $groups as group}
                             <label 
-                                class="flex items-center justify-between p-3 rounded-lg border transition-all cursor-pointer {selectedGroupIds.includes(group.id) ? 'bg-indigo-500/10 border-indigo-500/50 text-white' : 'bg-slate-800/50 border-white/5 text-gray-400 hover:bg-white/5'}"
+                                class="flex items-center justify-between p-3 rounded-lg border transition-all cursor-pointer {selectedGroupIds.includes(group.id) ? 'bg-indigo-500/10 border-indigo-500/50 text-slate-900 dark:text-white' : 'bg-slate-100 border-slate-900/10 text-gray-600 hover:bg-slate-200 dark:bg-slate-800/50 dark:border-white/5 dark:text-gray-400 dark:hover:bg-white/5'}"
                             >
                                 <span class="font-medium text-sm">{group.name}</span>
                                 <input 
                                     type="checkbox" 
                                     checked={selectedGroupIds.includes(group.id)}
                                     onchange={() => toggleGroup(group.id)}
-                                    class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-600 bg-slate-950"
+                                    class="h-4 w-4 rounded border-gray-400 text-indigo-600 focus:ring-indigo-600 bg-slate-100 dark:border-gray-300 dark:bg-slate-950"
                                 />
                             </label>
                         {/each}
@@ -104,7 +104,7 @@
                         <button 
                             type="button"
                             onclick={closeModal}
-                            class="px-4 py-2 text-sm font-medium text-gray-300 hover:text-white transition-colors"
+                            class="px-4 py-2 text-sm font-medium text-gray-500 hover:text-slate-900 transition-colors dark:text-gray-300 dark:hover:text-white"
                         >
                             Cancel
                         </button>

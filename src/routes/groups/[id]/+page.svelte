@@ -95,30 +95,30 @@
     </div>
 {:else if !group}
     <div class="text-center py-24">
-        <h2 class="text-2xl font-bold text-white">Group not found</h2>
-        <a href="/groups" class="mt-4 inline-block text-indigo-400 hover:text-indigo-300">Back to Groups</a>
+        <h2 class="text-2xl font-bold text-slate-900 dark:text-white">Group not found</h2>
+        <a href="/groups" class="mt-4 inline-block text-indigo-500 hover:text-indigo-600 dark:text-indigo-400 dark:hover:text-indigo-300">Back to Groups</a>
     </div>
 {:else}
     <div class="space-y-6">
-        <header class="rounded-xl bg-slate-900/50 border border-white/10 p-6 backdrop-blur-sm">
+        <header class="rounded-xl bg-white/80 border border-slate-900/10 p-6 backdrop-blur-sm dark:bg-slate-900/50 dark:border-white/10">
             <div class="flex flex-col gap-4">
                 <!-- Top row with group name and invite button -->
                 <div class="flex items-center justify-between">
                     <div class="flex items-center gap-3">
-                        <a href="/groups" class="text-gray-400 hover:text-white transition-colors" aria-label="Back to groups">
+                        <a href="/groups" class="text-gray-500 hover:text-slate-900 transition-colors dark:text-gray-400 dark:hover:text-white" aria-label="Back to groups">
                             <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                                 <path fill-rule="evenodd" d="M17 10a.75.75 0 01-.75.75H5.612l4.158 3.96a.75.75 0 11-1.04 1.08l-5.5-5.25a.75.75 0 010-1.08l5.5-5.25a.75.75 0 111.04 1.08L5.612 9.25H16.25A.75.75 0 0117 10z" clip-rule="evenodd" />
                             </svg>
                         </a>
-                        <h1 class="text-3xl font-bold text-white">{group.name}</h1>
+                        <h1 class="text-3xl font-bold text-slate-900 dark:text-white">{group.name}</h1>
                     </div>
                     
                     {#if $user}
                         <button 
                             onclick={copyInviteLink}
-                            class="inline-flex items-center rounded-lg bg-white/5 px-4 py-2 text-sm font-semibold text-white shadow-sm ring-1 ring-inset ring-white/10 hover:bg-white/10 transition-colors"
+                            class="inline-flex items-center rounded-lg bg-slate-100 px-4 py-2 text-sm font-semibold text-slate-900 shadow-sm ring-1 ring-inset ring-slate-900/10 hover:bg-slate-200 dark:bg-white/5 dark:text-white dark:ring-white/10 dark:hover:bg-white/10 transition-colors"
                         >
-                            <svg class="-ml-0.5 mr-1.5 h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
+                            <svg class="-ml-0.5 mr-1.5 h-5 w-5 text-gray-500 dark:text-gray-400" viewBox="0 0 20 20" fill="currentColor">
                                 <path fill-rule="evenodd" d="M15.621 4.379a3 3 0 00-4.242 0l-7 7a3 3 0 004.241 4.243h.001l.497-.5a.75.75 0 011.064 1.057l-.498.501-.002.002a4.5 4.5 0 01-6.364-6.364l7-7a4.5 4.5 0 016.368 6.36l-3.455 3.553A2.625 2.625 0 119.52 9.52l3.45-3.451a.75.75 0 111.061 1.06l-3.45 3.451a1.125 1.125 0 001.587 1.595l3.454-3.553a3 3 0 000-4.242z" clip-rule="evenodd" />
                             </svg>
                             Invite
@@ -150,14 +150,14 @@
                 
                 <!-- Bottom row with description -->
                 {#if group.description}
-                    <p class="text-gray-400">{group.description}</p>
+                    <p class="text-gray-500 dark:text-gray-400">{group.description}</p>
                 {/if}
             </div>
         </header>
 
         <section>
             <div class="flex items-center justify-between mb-4">
-                <h2 class="text-xl font-semibold text-white">Prayer Requests</h2>
+                <h2 class="text-xl font-semibold text-slate-900 dark:text-white">Prayer Requests</h2>
                 {#if isMember}
                     <button 
                         onclick={() => isAddModalOpen = true}
@@ -172,32 +172,32 @@
                 <!-- Filter Tabs with View Toggle -->
                 <div class="flex items-center justify-between mb-6">
                     <!-- Filter Buttons -->
-                    <div class="flex items-center space-x-1 rounded-xl bg-slate-900/50 p-1 border border-white/5 backdrop-blur-sm">
+                    <div class="flex items-center space-x-1 rounded-xl bg-slate-200/80 p-1 border border-slate-900/10 backdrop-blur-sm dark:bg-slate-900/50 dark:border-white/5">
                         <button 
                             onclick={() => filter = 'active'}
-                            class="px-4 py-2 text-sm font-medium rounded-lg transition-all {filter === 'active' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/20' : 'text-slate-400 hover:text-white hover:bg-white/5'}"
+                            class="px-4 py-2 text-sm font-medium rounded-lg transition-all {filter === 'active' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/20' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200 dark:text-slate-400 dark:hover:text-white dark:hover:bg-white/5'}"
                         >
                             Active
                         </button>
                         <button 
                             onclick={() => filter = 'answered'}
-                            class="px-4 py-2 text-sm font-medium rounded-lg transition-all {filter === 'answered' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/20' : 'text-slate-400 hover:text-white hover:bg-white/5'}"
+                            class="px-4 py-2 text-sm font-medium rounded-lg transition-all {filter === 'answered' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/20' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200 dark:text-slate-400 dark:hover:text-white dark:hover:bg-white/5'}"
                         >
                             Answered
                         </button>
                         <button 
                             onclick={() => filter = 'all'}
-                            class="px-4 py-2 text-sm font-medium rounded-lg transition-all {filter === 'all' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/20' : 'text-slate-400 hover:text-white hover:bg-white/5'}"
+                            class="px-4 py-2 text-sm font-medium rounded-lg transition-all {filter === 'all' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/20' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200 dark:text-slate-400 dark:hover:text-white dark:hover:bg-white/5'}"
                         >
                             All
                         </button>
                     </div>
                     
                     <!-- View Toggle Buttons -->
-                    <div class="flex items-center space-x-1 rounded-xl bg-slate-900/50 p-1 border border-white/5 backdrop-blur-sm">
+                    <div class="flex items-center space-x-1 rounded-xl bg-slate-200/80 p-1 border border-slate-900/10 backdrop-blur-sm dark:bg-slate-900/50 dark:border-white/5">
                         <button 
                             onclick={() => viewMode = 'list'}
-                            class="px-3 py-2 text-sm font-medium rounded-lg transition-all {viewMode === 'list' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/20' : 'text-slate-400 hover:text-white hover:bg-white/5'}"
+                            class="px-3 py-2 text-sm font-medium rounded-lg transition-all {viewMode === 'list' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/20' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200 dark:text-slate-400 dark:hover:text-white dark:hover:bg-white/5'}"
                             title="List view"
                         >
                             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -206,7 +206,7 @@
                         </button>
                         <button 
                             onclick={() => viewMode = 'carousel'}
-                            class="px-3 py-2 text-sm font-medium rounded-lg transition-all {viewMode === 'carousel' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/20' : 'text-slate-400 hover:text-white hover:bg-white/5'}"
+                            class="px-3 py-2 text-sm font-medium rounded-lg transition-all {viewMode === 'carousel' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/20' : 'text-slate-600 hover:text-slate-900 hover:bg-white/10 dark:text-slate-400 dark:hover:text-white dark:hover:bg-white/5'}"
                             title="Carousel view"
                         >
                             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -218,12 +218,12 @@
             {/if}
             
             {#if !isMember}
-                <div class="text-center py-24 rounded-xl border border-dashed border-white/10 bg-slate-900/20">
+                <div class="text-center py-24 rounded-xl border border-dashed border-slate-900/10 bg-slate-100/20 dark:border-white/10 dark:bg-slate-900/20">
                     <svg class="mx-auto h-12 w-12 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                     </svg>
                     <h3 class="mt-4 text-lg font-medium text-white">Member Access Only</h3>
-                    <p class="mt-2 text-gray-400">Join this group to see and share prayer requests.</p>
+                    <p class="mt-2 text-gray-500 dark:text-gray-400">Join this group to see and share prayer requests.</p>
                     {#if $user}
                         <button 
                             onclick={handleJoin}

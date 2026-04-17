@@ -54,14 +54,14 @@
 
 {#if isOpen}
     <div 
-        class="absolute right-0 mt-2 w-80 sm:w-96 origin-top-right rounded-xl bg-slate-900 shadow-2xl ring-1 ring-black/5 border border-white/10 overflow-hidden z-[60]"
+        class="absolute right-0 mt-2 w-80 sm:w-96 origin-top-right rounded-xl bg-white shadow-2xl ring-1 ring-black/5 border border-slate-900/10 dark:bg-slate-900 dark:border-white/10 overflow-hidden z-[60]"
         in:fly={{ y: -10, duration: 200 }}
         out:fade={{ duration: 150 }}
     >
-        <div class="px-4 py-3 border-b border-white/5 flex justify-between items-center bg-slate-800/50">
-            <h3 class="text-sm font-semibold text-white">Notifications</h3>
+        <div class="px-4 py-3 border-b border-slate-900/10 flex justify-between items-center bg-slate-100/80 dark:border-white/5 dark:bg-slate-800/50">
+            <h3 class="text-sm font-semibold text-slate-900 dark:text-white">Notifications</h3>
             {#if $notifications.length > 0}
-                <span class="text-[10px] uppercase tracking-wider text-slate-400 font-bold">{$notifications.length} Total</span>
+                <span class="text-[10px] uppercase tracking-wider text-slate-400 font-bold dark:text-slate-400">{$notifications.length} Total</span>
             {/if}
         </div>
 
@@ -79,7 +79,7 @@
                 <div class="divide-y divide-white/5">
                     {#each $notifications as notification (notification.id)}
                         <div 
-                            class="w-full text-left px-4 py-3 hover:bg-slate-800/50 transition-colors relative group cursor-pointer {notification.read ? 'opacity-60' : ''}"
+                            class="w-full text-left px-4 py-3 hover:bg-slate-100/80 transition-colors relative group dark:hover:bg-slate-800/50 cursor-pointer {notification.read ? 'opacity-60' : ''}"
                             onclick={() => handleNavigateToPrayer(notification)}
                             onkeydown={(e) => e.key === 'Enter' && handleNavigateToPrayer(notification)}
                             role="button"
@@ -100,8 +100,8 @@
                                     {/if}
                                 </div>
                                 <div class="flex-1 min-w-0">
-                                    <p class="text-sm text-slate-200 leading-snug">
-                                        <span class="font-semibold text-white">{notification.senderName}</span>
+                                    <p class="text-sm text-slate-700 leading-snug dark:text-slate-200">
+                                        <span class="font-semibold text-slate-900 dark:text-white">{notification.senderName}</span>
                                         {#if notification.type === 'prayer_reaction'}
                                             is praying for <span class="text-indigo-300 font-medium">"{notification.prayerSummary}"</span>
                                         {:else if notification.type === 'prayer_update'}
@@ -123,7 +123,7 @@
                                             sent you a notification
                                         {/if}
                                     </p>
-                                    <p class="text-[10px] text-slate-500 mt-1 font-medium">{formatTime(notification.createdAt)}</p>
+                                    <p class="text-[10px] text-slate-400 mt-1 font-medium dark:text-slate-500">{formatTime(notification.createdAt)}</p>
                                 </div>
                                 <div class="flex-shrink-0 flex flex-col items-end gap-2">
                                     {#if !notification.read}
@@ -147,7 +147,7 @@
             {/if}
         </div>
         
-        <div class="border-t border-white/5 bg-slate-800/20">
+        <div class="border-t border-slate-900/10 bg-slate-50/80 dark:border-white/5 dark:bg-slate-800/20">
             {#if $notifications.length > 0}
                 <button 
                     class="w-full py-2 text-[11px] font-bold text-rose-400 hover:text-rose-300 hover:bg-slate-800/40 transition-all uppercase tracking-widest disabled:opacity-50"
@@ -158,7 +158,7 @@
                 </button>
             {/if}
             <button 
-                class="w-full py-3 text-[11px] font-bold text-slate-500 hover:text-indigo-400 hover:bg-slate-800/40 transition-all uppercase tracking-widest"
+                class="w-full py-3 text-[11px] font-bold text-slate-400 hover:text-indigo-500 hover:bg-slate-100 dark:text-slate-500 dark:hover:text-indigo-400 dark:hover:bg-slate-800/40 transition-all uppercase tracking-widest"
                 onclick={() => isOpen = false}
             >
                 Close

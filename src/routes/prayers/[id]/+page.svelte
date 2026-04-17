@@ -157,37 +157,37 @@
 	</div>
 {:else if error || !prayer}
 	<div class="text-center py-24">
-		<h2 class="text-2xl font-bold text-white">{error || 'Prayer not found'}</h2>
-		<a href="/" class="mt-4 inline-block text-indigo-400 hover:text-indigo-300">Back to Prayers</a>
+		<h2 class="text-2xl font-bold text-slate-900 dark:text-white">{error || 'Prayer not found'}</h2>
+		<a href="/" class="mt-4 inline-block text-indigo-500 hover:text-indigo-600 dark:text-indigo-400 dark:hover:text-indigo-300">Back to Prayers</a>
 	</div>
 {:else}
 	<div class="max-w-4xl mx-auto space-y-6">
 		<!-- Header with back button -->
 		<div class="flex items-center gap-3">
-			<a href="/" class="text-gray-400 hover:text-white transition-colors" aria-label="Back to prayers">
+			<a href="/" class="p-2 -ml-2 text-gray-500 hover:text-slate-900 hover:bg-slate-100 dark:text-gray-400 dark:hover:text-white dark:hover:bg-white/5 rounded-lg transition-colors" aria-label="Back to prayers">
 				<svg class="h-6 w-6" viewBox="0 0 20 20" fill="currentColor">
 					<path fill-rule="evenodd" d="M17 10a.75.75 0 01-.75.75H5.612l4.158 3.96a.75.75 0 11-1.04 1.08l-5.5-5.25a.75.75 0 010-1.08l5.5-5.25a.75.75 0 111.04 1.08L5.612 9.25H16.25A.75.75 0 0117 10z" clip-rule="evenodd" />
 				</svg>
 			</a>
-			<h1 class="text-2xl font-bold text-white">Prayer Details</h1>
+			<h1 class="text-2xl font-bold text-slate-900 dark:text-white">Prayer Details</h1>
 		</div>
 
 		<!-- Prayer Card -->
-		<div class="rounded-xl bg-slate-900/50 border border-white/10 p-6 backdrop-blur-sm">
+		<div class="rounded-xl bg-white/80 border border-slate-900/10 p-6 backdrop-blur-sm dark:bg-slate-900/50 dark:border-white/10">
 			<div class="mb-4">
                 <!-- Owner identification (only if not current user) -->
                 {#if prayer && !isOwner}
-                    <div class="flex items-center space-x-2 mb-4 border-b border-white/5 pb-4">
+                    <div class="flex items-center space-x-2 mb-4 border-b border-slate-900/5 dark:border-white/5 pb-4">
                         <img 
                             src={ownerProfile?.photoURL || (ownerProfile?.displayName ? `https://ui-avatars.com/api/?name=${ownerProfile.displayName}` : `https://ui-avatars.com/api/?name=User`)} 
                             alt="Owner Profile" 
-                            class="h-8 w-8 rounded-full border border-white/10" 
+                            class="h-8 w-8 rounded-full border border-slate-900/10 dark:border-white/10" 
                         />
                         <div class="flex flex-col">
-                            <span class="text-sm font-medium text-white">
+                            <span class="text-sm font-medium text-slate-900 dark:text-white">
                                 {ownerProfile?.displayName || 'Loading...'}
                             </span>
-                            <span class="text-[10px] text-slate-500 uppercase tracking-wider font-semibold">Shared this prayer</span>
+                            <span class="text-xs text-slate-400 uppercase tracking-wider font-semibold dark:text-slate-500">Shared this prayer</span>
                         </div>
                     </div>
                 {/if}
@@ -195,10 +195,10 @@
 				{#if prayer.summary}
 					<h2 class="text-2xl font-bold text-white mb-3">{prayer.summary}</h2>
 					{#if prayer.description}
-						<p class="text-slate-300 text-lg leading-relaxed whitespace-pre-wrap">{prayer.description}</p>
+						<p class="text-slate-600 text-lg dark:text-slate-300 leading-relaxed whitespace-pre-wrap">{prayer.description}</p>
 					{/if}
 				{:else if (prayer as any).content}
-					<p class="text-xl text-slate-200 leading-relaxed whitespace-pre-wrap">{(prayer as any).content}</p>
+					<p class="text-xl text-slate-700 dark:text-slate-200 leading-relaxed whitespace-pre-wrap">{(prayer as any).content}</p>
 				{:else}
 					<p class="text-slate-500 italic">No content available</p>
 				{/if}
@@ -206,9 +206,9 @@
 				<!-- Shared Groups Tags (Owner Only) -->
 				{#if isOwner && sharedGroupNames.length > 0}
 					<div class="mt-6 flex flex-wrap gap-2">
-						<span class="text-xs font-semibold text-slate-500 uppercase tracking-wider w-full mb-1">Shared with:</span>
+						<span class="text-xs font-semibold text-slate-400 uppercase tracking-wider w-full mb-1 dark:text-slate-500">Shared with:</span>
 						{#each sharedGroupNames as groupName}
-							<span class="inline-flex items-center rounded-full bg-slate-800 px-2.5 py-0.5 text-xs font-medium text-slate-300 border border-white/5">
+							<span class="inline-flex items-center rounded-full bg-slate-200 px-2.5 py-0.5 text-xs font-medium text-slate-600 border border-slate-900/10 dark:bg-slate-800 dark:text-slate-300 dark:border-white/5">
 								{groupName}
 							</span>
 						{/each}
@@ -217,13 +217,13 @@
 			</div>
 			
 			<!-- Bottom Row with Actions, Date, and Status -->
-			<div class="flex items-center justify-between pt-4 border-t border-white/10">
+			<div class="flex flex-wrap items-center justify-between gap-3 pt-4 border-t border-slate-900/10 dark:border-white/10">
 				<!-- Action Buttons (left justified) -->
 				{#if isOwner}
 					<div class="flex items-center space-x-2">
 						<button 
 							onclick={handleToggleStatus}
-							class="p-2 {prayer.status === 'answered' ? 'text-indigo-400 hover:text-indigo-300 hover:bg-indigo-400/10' : 'text-rose-400 hover:text-rose-300 hover:bg-rose-400/10'} rounded-full transition-colors"
+						class="p-3 {prayer.status === 'answered' ? 'text-indigo-400 hover:text-indigo-300 hover:bg-indigo-400/10' : 'text-rose-400 hover:text-rose-300 hover:bg-rose-400/10'} rounded-full transition-colors"
 							title={prayer.status === 'answered' ? "Mark as Active" : "Mark as Answered"}
 						>
 							{#if prayer.status === 'answered'}
@@ -240,7 +240,7 @@
 
 						<button 
 							onclick={() => showShareModal = true}
-							class="p-2 text-indigo-400 hover:text-indigo-300 hover:bg-indigo-400/10 rounded-full transition-colors"
+						class="p-3 text-indigo-400 hover:text-indigo-300 hover:bg-indigo-400/10 rounded-full transition-colors"
 							title="Share with Groups"
 						>
 							<svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -250,7 +250,7 @@
 
 						<button 
 							onclick={() => showEditModal = true}
-							class="p-2 text-blue-400 hover:text-blue-300 hover:bg-blue-400/10 rounded-full transition-colors"
+						class="p-3 text-blue-400 hover:text-blue-300 hover:bg-blue-400/10 rounded-full transition-colors"
 							title="Edit Prayer"
 						>
 							<svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -260,7 +260,7 @@
 						
 						<button 
 							onclick={handleDelete}
-							class="p-2 text-rose-400 hover:text-rose-300 hover:bg-rose-400/10 rounded-full transition-colors"
+						class="p-3 text-rose-400 hover:text-rose-300 hover:bg-rose-400/10 rounded-full transition-colors"
 							title="Delete"
 						>
 							<svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -286,13 +286,13 @@
 		</div>
 
 		<!-- Updates Section -->
-		<div class="rounded-xl bg-slate-900/50 border border-white/10 p-6 backdrop-blur-sm">
+		<div class="rounded-xl bg-white/80 border border-slate-900/10 p-6 backdrop-blur-sm dark:bg-slate-900/50 dark:border-white/10">
 			<div class="flex items-center justify-between mb-4">
-				<h3 class="text-xl font-semibold text-white">Updates</h3>
+				<h3 class="text-xl font-semibold text-slate-900 dark:text-white">Updates</h3>
 				{#if isOwner}
 					<button 
 						onclick={() => showAddUpdateModal = true}
-						class="inline-flex items-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 transition-colors"
+						class="inline-flex items-center rounded-md bg-indigo-600 px-4 py-3 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 transition-colors"
 					>						
 						+ Add Update
 					</button>
@@ -302,18 +302,18 @@
 			<!-- Updates List -->
 			<div class="space-y-3">
 				{#each updates as update (update.id)}
-					<div class="rounded-lg bg-slate-800/30 border border-white/5 p-4">
+					<div class="rounded-lg bg-slate-100/80 border border-slate-900/10 dark:bg-slate-800/30 dark:border-white/5 p-4">
 						{#if editingUpdateId === update.id}
 							<!-- Edit Mode -->
 							<textarea
 								bind:value={editContent}
 								rows="3"
-								class="block w-full rounded-md border-0 bg-slate-950/50 py-3 text-white shadow-sm ring-1 ring-inset ring-white/10 placeholder:text-gray-500 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6"
+								class="block w-full rounded-md border-0 bg-slate-100 py-3 text-slate-900 shadow-sm ring-1 ring-inset ring-slate-900/10 dark:bg-slate-950/50 dark:text-white dark:ring-white/10 placeholder:text-gray-500 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6"
 							></textarea>
 							<div class="mt-3 flex justify-end gap-2">
 								<button
 									type="button"
-									class="rounded-md bg-white/5 px-3 py-2 text-sm font-semibold text-white shadow-sm ring-1 ring-inset ring-white/10 hover:bg-white/10"
+									class="rounded-md bg-slate-100 px-3 py-2 text-sm font-semibold text-slate-900 shadow-sm ring-1 ring-inset ring-slate-900/10 hover:bg-slate-200 dark:bg-white/5 dark:text-white dark:ring-white/10 dark:hover:bg-white/10"
 									onclick={cancelEdit}
 								>
 									Cancel
@@ -329,25 +329,25 @@
 							</div>
 						{:else}
 							<!-- View Mode -->
-							<p class="text-slate-200 whitespace-pre-wrap">{update.content}</p>
+							<p class="text-slate-700 whitespace-pre-wrap dark:text-slate-200">{update.content}</p>
 							<div class="mt-3 flex items-center justify-between">
-								<span class="text-xs text-slate-500">
+								<span class="text-xs text-slate-400 dark:text-slate-500">
 									{update.createdAt?.toDate().toLocaleString() || 'Just now'}
 									{#if update.updatedAt}
 										<span class="text-slate-600"> (edited)</span>
 									{/if}
 								</span>
 								{#if $user && update.authorId === $user.uid}
-									<div class="flex gap-2">
-										<button
-											onclick={() => startEdit(update)}
-											class="text-xs text-blue-400 hover:text-blue-300"
-										>
-											Edit
-										</button>
-										<button
-											onclick={() => handleDeleteUpdate(update.id)}
-											class="text-xs text-rose-400 hover:text-rose-300"
+										<div class="flex gap-1">
+											<button
+												onclick={() => startEdit(update)}
+												class="px-3 py-2 text-xs text-blue-400 hover:text-blue-300 hover:bg-blue-400/10 rounded-md transition-colors"
+											>
+												Edit
+											</button>
+											<button
+												onclick={() => handleDeleteUpdate(update.id)}
+												class="px-3 py-2 text-xs text-rose-400 hover:text-rose-300 hover:bg-rose-400/10 rounded-md transition-colors"
 										>
 											Delete
 										</button>

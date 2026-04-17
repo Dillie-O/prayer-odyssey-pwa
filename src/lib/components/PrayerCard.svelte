@@ -58,19 +58,19 @@
 	});
 </script>
 
-<div class="relative overflow-hidden rounded-xl bg-slate-900/50 border border-white/10 p-6 backdrop-blur-sm transition-all hover:bg-slate-900/80 hover:border-indigo-500/30 group">
+<div class="relative overflow-hidden rounded-xl bg-white border border-slate-200 p-6 shadow-sm transition-all hover:border-indigo-400/60 hover:shadow-md group dark:bg-slate-900/50 dark:border-white/10 dark:shadow-none dark:hover:bg-slate-900/80">
     <!-- Prayer content -->
 	<div class="mb-4">
         <!-- Owner identification -->
         {#if showOwnerInfo}
             <div class="flex items-center space-x-2 mb-3">
                 <img 
-                    src={ownerProfile?.photoURL || (ownerProfile?.displayName ? `https://ui-avatars.com/api/?name=${ownerProfile.displayName}` : `https://ui-avatars.com/api/?name=User`)} 
+                    src={ownerProfile?.photoURL ?? `https://ui-avatars.com/api/?name=${ownerProfile?.displayName ?? 'User'}`} 
                     alt="Owner Profile" 
-                    class="h-6 w-6 rounded-full border border-white/10" 
+                    class="h-6 w-6 rounded-full border border-slate-900/10 dark:border-white/10" 
                 />
-                <span class="text-xs font-medium text-slate-400">
-                    {ownerProfile?.displayName || 'Loading...'}
+                <span class="text-xs font-medium text-slate-500 dark:text-slate-400">
+                    {ownerProfile?.displayName ?? ''}
                 </span>
             </div>
         {/if}
@@ -78,31 +78,31 @@
         <a href="/prayers/{prayer.id}" class="cursor-pointer">
             {#if prayer.summary}
                 <!-- Summary is always shown -->
-                <h4 class="text-xl font-semibold text-white mb-2 hover:text-indigo-300 transition-colors">{prayer.summary}</h4>
+                <h4 class="text-xl font-semibold text-slate-900 mb-2 hover:text-indigo-600 transition-colors dark:text-white dark:hover:text-indigo-300">{prayer.summary}</h4>
                 {#if prayer.description}
-                    <p class="text-slate-300 leading-relaxed whitespace-pre-wrap {showFullDescription ? '' : 'line-clamp-1'}">{prayer.description}</p>
+                    <p class="text-slate-600 leading-relaxed whitespace-pre-wrap {showFullDescription ? '' : 'line-clamp-1'} dark:text-slate-300">{prayer.description}</p>
                 {/if}
             {:else if (prayer as any).content}
                 <!-- Old format with just content - fallback for existing prayers -->
-                <p class="text-lg text-slate-200 leading-relaxed whitespace-pre-wrap line-clamp-1">{(prayer as any).content}</p>
+                <p class="text-lg text-slate-700 leading-relaxed whitespace-pre-wrap line-clamp-1 dark:text-slate-200">{(prayer as any).content}</p>
             {:else}
                 <!-- No content at all -->
-                <p class="text-slate-500 italic">No content available</p>
+                <p class="text-slate-400 italic dark:text-slate-500">No content available</p>
             {/if}
         </a>
         
         <!-- Latest Update Display -->
         {#if latestUpdate && showLatestUpdate}
-            <div class="mt-3 p-3 rounded-lg bg-slate-800/30 border border-slate-700/50">
+            <div class="mt-3 p-3 rounded-lg bg-slate-100/80 border border-slate-900/10 dark:bg-slate-800/30 dark:border-slate-700/50">
                 <div class="flex items-start space-x-2">
                     <div class="flex-1 min-w-0">
                         <div class="flex items-center space-x-2 mb-1">
-                            <span class="text-xs font-medium text-slate-400">Latest Update</span>
-                            <span class="text-xs text-slate-500">
+                            <span class="text-xs font-medium text-slate-500 dark:text-slate-400">Latest Update</span>
+                            <span class="text-xs text-slate-400 dark:text-slate-500">
                                 {latestUpdate.createdAt?.toDate().toLocaleDateString() || 'Just now'}
                             </span>
                         </div>
-                        <p class="text-sm text-slate-300 line-clamp-2">{latestUpdate.content}</p>
+                        <p class="text-sm text-slate-600 line-clamp-2 dark:text-slate-300">{latestUpdate.content}</p>
                     </div>
                 </div>
             </div>
@@ -121,13 +121,13 @@
     {/if}
     
     <!-- Bottom Row with Actions, Date, Status, and Count -->
-    <div class="flex items-center justify-between pt-4 border-t border-white/10">
+    <div class="flex items-center justify-between pt-4 border-t border-slate-200 dark:border-white/10">
         <!-- Action Buttons (left justified) -->
         <div class="flex items-center space-x-2">
             {#if isOwner}
                 <button 
                     onclick={(e) => { e.preventDefault(); e.stopPropagation(); handleToggleStatus(); }}
-                    class="p-2 {prayer.status === 'answered' ? 'text-indigo-400 hover:text-indigo-300 hover:bg-indigo-400/10' : 'text-rose-400 hover:text-rose-300 hover:bg-rose-400/10'} rounded-full transition-colors"
+                    class="p-3 {prayer.status === 'answered' ? 'text-indigo-400 hover:text-indigo-300 hover:bg-indigo-400/10' : 'text-rose-400 hover:text-rose-300 hover:bg-rose-400/10'} rounded-full transition-colors"
                     title={prayer.status === 'answered' ? "Mark as Active" : "Mark as Answered"}
                 >
                     {#if prayer.status === 'answered'}
@@ -157,11 +157,11 @@
         
         <!-- Date, Status, Updates, and Prayer Count (right justified) -->
         <div class="flex items-center space-x-3">
-            <span class="text-xs text-slate-500">
+            <span class="text-xs text-slate-400 dark:text-slate-500">
                 {prayer.createdAt?.toDate().toLocaleDateString() || 'Just now'}
             </span>
             {#if updates.length > 0}
-                <span class="text-xs text-indigo-400">
+                <span class="text-xs text-indigo-500 dark:text-indigo-400">
                     {updates.length} {updates.length === 1 ? 'Update' : 'Updates'}
                 </span>
             {/if}
@@ -172,7 +172,7 @@
                 <!-- Prayer button for non-owners -->
                 <button 
                     onclick={(e) => { e.preventDefault(); e.stopPropagation(); handlePrayedFor(); }}
-                    class="inline-flex items-center space-x-1.5 px-2 py-1 rounded-md text-xs font-medium transition-all {isPraying ? 'scale-95 bg-indigo-600 text-white' : hasPrayed ? 'bg-indigo-500/20 text-indigo-300 hover:bg-indigo-500/30 ring-1 ring-inset ring-indigo-500/40' : 'bg-indigo-400/10 text-indigo-400 hover:bg-indigo-400/20 ring-1 ring-inset ring-indigo-400/30'}"
+                    class="inline-flex items-center space-x-1.5 px-3 py-3 rounded-md text-xs font-medium transition-all {isPraying ? 'scale-95 bg-indigo-600 text-white' : hasPrayed ? 'bg-indigo-500/20 text-indigo-300 hover:bg-indigo-500/30 ring-1 ring-inset ring-indigo-500/40' : 'bg-indigo-400/10 text-indigo-400 hover:bg-indigo-400/20 ring-1 ring-inset ring-indigo-400/30'}"
                     disabled={isPraying}
                     title="I'm praying for this"
                 >

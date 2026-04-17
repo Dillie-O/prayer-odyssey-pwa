@@ -22,10 +22,10 @@
 {#if $user}
 	<div class="space-y-6">
 		<header class="flex items-center justify-between">
-			<h1 class="text-3xl font-bold text-white">My Prayers</h1>
+			<h1 class="text-3xl font-bold text-slate-900 dark:text-white">My Prayers</h1>
 			<button 
                 onclick={() => isModalOpen = true}
-                class="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 transition-colors whitespace-nowrap"
+                class="rounded-lg bg-indigo-600 px-4 py-3 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 transition-colors whitespace-nowrap"
             >
 				+ New Prayer
 			</button>
@@ -34,32 +34,32 @@
 		<!-- Filter Tabs with View Toggle -->
 		<div class="flex items-center justify-between">
 			<!-- Filter Buttons -->
-			<div class="flex items-center space-x-1 rounded-xl bg-slate-900/50 p-1 border border-white/5 backdrop-blur-sm">
+			<div class="flex items-center space-x-1 rounded-xl bg-slate-200/80 p-1 border border-slate-900/10 backdrop-blur-sm dark:bg-slate-900/50 dark:border-white/5">
 				<button 
 					onclick={() => filter = 'active'}
-					class="px-4 py-2 text-sm font-medium rounded-lg transition-all {filter === 'active' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/20' : 'text-slate-400 hover:text-white hover:bg-white/5'}"
+					class="px-4 py-3 text-sm font-medium rounded-lg transition-all {filter === 'active' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/20' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200 dark:text-slate-400 dark:hover:text-white dark:hover:bg-white/5'}"
 				>
 					Active
 				</button>
 				<button 
 					onclick={() => filter = 'answered'}
-					class="px-4 py-2 text-sm font-medium rounded-lg transition-all {filter === 'answered' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/20' : 'text-slate-400 hover:text-white hover:bg-white/5'}"
+					class="px-4 py-3 text-sm font-medium rounded-lg transition-all {filter === 'answered' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/20' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200 dark:text-slate-400 dark:hover:text-white dark:hover:bg-white/5'}"
 				>
 					Answered
 				</button>
 				<button 
 					onclick={() => filter = 'all'}
-					class="px-4 py-2 text-sm font-medium rounded-lg transition-all {filter === 'all' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/20' : 'text-slate-400 hover:text-white hover:bg-white/5'}"
+					class="px-4 py-3 text-sm font-medium rounded-lg transition-all {filter === 'all' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/20' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200 dark:text-slate-400 dark:hover:text-white dark:hover:bg-white/5'}"
 				>
 					All
 				</button>
 			</div>
 			
 			<!-- View Toggle Buttons -->
-			<div class="flex items-center space-x-1 rounded-xl bg-slate-900/50 p-1 border border-white/5 backdrop-blur-sm">
+			<div class="flex items-center space-x-1 rounded-xl bg-slate-200/80 p-1 border border-slate-900/10 backdrop-blur-sm dark:bg-slate-900/50 dark:border-white/5">
 				<button 
 					onclick={() => viewMode = 'list'}
-					class="px-3 py-2 text-sm font-medium rounded-lg transition-all {viewMode === 'list' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/20' : 'text-slate-400 hover:text-white hover:bg-white/5'}"
+					class="px-3 py-3 text-sm font-medium rounded-lg transition-all {viewMode === 'list' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/20' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200 dark:text-slate-400 dark:hover:text-white dark:hover:bg-white/5'}"
 					title="List view"
 				>
 					<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -68,7 +68,7 @@
 				</button>
 				<button 
 					onclick={() => viewMode = 'carousel'}
-					class="px-3 py-2 text-sm font-medium rounded-lg transition-all {viewMode === 'carousel' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/20' : 'text-slate-400 hover:text-white hover:bg-white/5'}"
+					class="px-3 py-3 text-sm font-medium rounded-lg transition-all {viewMode === 'carousel' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/20' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200 dark:text-slate-400 dark:hover:text-white dark:hover:bg-white/5'}"
 					title="Carousel view"
 				>
 					<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -81,23 +81,23 @@
         {#if $loadingPrayers}
             <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 {#each Array(3) as _}
-                    <div class="h-32 animate-pulse rounded-xl bg-slate-800/50 border border-white/5"></div>
+                    <div class="h-32 animate-pulse rounded-xl bg-slate-200/80 border border-slate-900/5 dark:bg-slate-800/50 dark:border-white/5"></div>
                 {/each}
             </div>
         {:else if $prayers.length === 0}
-            <div class="rounded-lg border border-white/10 bg-white/5 p-6 backdrop-blur-sm">
+            <div class="rounded-lg border border-slate-900/10 bg-slate-100/80 p-6 backdrop-blur-sm dark:border-white/10 dark:bg-white/5">
                 <div class="text-center py-12">
                     <button 
                         onclick={() => isModalOpen = true}
                         class="mx-auto block"
                         aria-label="Create new prayer"
                     >
-                        <svg class="mx-auto h-12 w-12 text-gray-400 hover:text-indigo-400 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                        <svg class="mx-auto h-12 w-12 text-gray-400 hover:text-indigo-500 dark:hover:text-indigo-400 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                         </svg>
                     </button>
-                    <h3 class="mt-2 text-sm font-semibold text-white">No prayers yet</h3>
-                    <p class="mt-1 text-sm text-gray-400">Start your prayer journey by creating your first prayer request.</p>
+                    <h3 class="mt-2 text-sm font-semibold text-slate-900 dark:text-white">No prayers yet</h3>
+                    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Start your prayer journey by creating your first prayer request.</p>
                     <div class="mt-6">
                         <button 
                             onclick={() => isModalOpen = true}
@@ -112,7 +112,7 @@
                 </div>
             </div>
 		{:else if filteredPrayers.length === 0}
-			<div class="rounded-lg border border-white/10 bg-white/5 p-12 text-center backdrop-blur-sm">
+			<div class="rounded-lg border border-slate-900/10 bg-slate-100/80 p-12 text-center backdrop-blur-sm dark:border-white/10 dark:bg-white/5">
 				<p class="text-slate-400">No {filter === 'all' ? '' : filter} prayers found.</p>
 			</div>
         {:else}
@@ -133,7 +133,7 @@
 	</div>
 {:else}
     <div class="py-24 text-center">
-        <h2 class="text-2xl font-bold text-white">Please sign in to view your prayers</h2>
-        <a href="/login" class="mt-4 inline-block text-indigo-400 hover:text-indigo-300 transition-colors">Sign in →</a>
+        <h2 class="text-2xl font-bold text-slate-900 dark:text-white">Please sign in to view your prayers</h2>
+        <a href="/login" class="mt-4 inline-block text-indigo-500 hover:text-indigo-600 transition-colors dark:text-indigo-400 dark:hover:text-indigo-300">Sign in →</a>
     </div>
 {/if}

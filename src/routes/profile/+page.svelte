@@ -41,12 +41,12 @@
 
 <div class="space-y-6 max-w-2xl mx-auto">
     <header>
-        <h1 class="text-3xl font-bold text-white">Profile</h1>
-        <p class="mt-2 text-gray-400">Manage your account and settings</p>
+        <h1 class="text-3xl font-bold text-slate-900 dark:text-white">Profile</h1>
+        <p class="mt-2 text-gray-500 dark:text-gray-400">Manage your account and settings</p>
     </header>
 
     {#if $user}
-        <div class="rounded-xl bg-slate-900/50 border border-white/10 p-6 backdrop-blur-sm">
+        <div class="rounded-xl bg-white/80 border border-slate-900/10 p-6 backdrop-blur-sm dark:bg-slate-900/50 dark:border-white/10">
             <div class="flex items-center space-x-4">
                 <img 
                     src={$user.photoURL || `https://ui-avatars.com/api/?name=${$user.displayName}`} 
@@ -54,17 +54,17 @@
                     class="h-16 w-16 rounded-full border-2 border-indigo-500/50" 
                 />
                 <div>
-                    <h2 class="text-xl font-semibold text-white">{$user.displayName}</h2>
-                    <p class="text-gray-400">{$user.email}</p>
+                    <h2 class="text-xl font-semibold text-slate-900 dark:text-white">{$user.displayName}</h2>
+                    <p class="text-gray-500 dark:text-gray-400">{$user.email}</p>
                 </div>
             </div>
             
-            <div class="mt-8 border-t border-white/10 pt-6">
-                <h3 class="text-lg font-medium text-white mb-4">Notifications</h3>
+            <div class="mt-8 border-t border-slate-900/10 dark:border-white/10 pt-6">
+                <h3 class="text-lg font-medium text-slate-900 mb-4 dark:text-white">Notifications</h3>
                 <div class="flex items-center justify-between">
                     <div>
-                        <p class="text-white font-medium">Push Notifications</p>
-                        <p class="text-sm text-gray-400">Receive updates when someone prays for you</p>
+                        <p class="text-slate-900 font-medium dark:text-white">Push Notifications</p>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">Receive updates when someone prays for you</p>
                     </div>
                     {#if isFCMEnabled}
                         <button 
@@ -93,7 +93,7 @@
                 <div class="mt-6 border-t border-white/5 pt-6">
                     <button 
                         onclick={() => showAdvancedSettings = !showAdvancedSettings}
-                        class="flex items-center gap-2 text-sm text-gray-400 hover:text-white transition-colors"
+                        class="flex items-center gap-2 text-sm text-gray-500 hover:text-slate-900 dark:text-gray-400 dark:hover:text-white transition-colors"
                     >
                         <svg 
                             class="w-4 h-4 transition-transform" 
@@ -108,11 +108,11 @@
                     </button>
                     
                     {#if showAdvancedSettings}
-                        <div class="mt-4 p-4 rounded-lg bg-slate-800/30 border border-white/5">
+                        <div class="mt-4 p-4 rounded-lg bg-slate-100/80 border border-slate-900/10 dark:bg-slate-800/30 dark:border-white/5">
                             <div class="flex items-center justify-between">
                                 <div>
-                                    <p class="text-white font-medium text-sm">Clear All Devices</p>
-                                    <p class="text-xs text-gray-400">Remove push notifications from all browsers and devices</p>
+                                    <p class="text-slate-900 font-medium text-sm dark:text-white">Clear All Devices</p>
+                                    <p class="text-xs text-gray-500 dark:text-gray-400">Remove push notifications from all browsers and devices</p>
                                 </div>
                                 {#if $notificationPermission === 'granted' || $fcmToken !== null}
                                     <button 
@@ -123,7 +123,7 @@
                                         {isClearingAll ? 'Clearing...' : 'Clear All'}
                                     </button>
                                 {:else}
-                                    <span class="text-xs text-gray-500">No active devices</span>
+                                    <span class="text-xs text-gray-400 dark:text-gray-500">No active devices</span>
                                 {/if}
                             </div>
                         </div>
@@ -131,10 +131,10 @@
                 </div>
             </div>
 
-            <div class="mt-8 border-t border-white/10 pt-6">
+            <div class="mt-8 border-t border-slate-900/10 dark:border-white/10 pt-6">
                 <button 
                     onclick={logout}
-                    class="w-full rounded-md bg-white/5 px-3 py-2 text-sm font-semibold text-red-400 shadow-sm ring-1 ring-inset ring-white/10 hover:bg-white/10 hover:text-red-300 transition-colors"
+                    class="w-full rounded-md bg-slate-100 px-3 py-2 text-sm font-semibold text-red-500 shadow-sm ring-1 ring-inset ring-slate-900/10 hover:bg-slate-200 hover:text-red-600 dark:bg-white/5 dark:text-red-400 dark:ring-white/10 dark:hover:bg-white/10 dark:hover:text-red-300 transition-colors"
                 >
                     Sign Out
                 </button>

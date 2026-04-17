@@ -18,17 +18,17 @@
 </script>
 
 {#if $user}
-    <nav class="fixed bottom-0 left-0 z-50 w-full border-t border-white/10 bg-slate-950/80 backdrop-blur-md sm:hidden">
+    <nav class="fixed bottom-0 left-0 z-50 w-full border-t border-slate-900/10 bg-white/80 backdrop-blur-md dark:border-white/10 dark:bg-slate-950/80 sm:hidden">
         <div class="flex h-16 items-center justify-around px-2">
             {#each navItems as item}
                 <a 
                     href={item.href} 
-                    class="flex flex-col items-center justify-center space-y-1 transition-colors {isActive(item.href) ? 'text-indigo-400' : 'text-gray-400 hover:text-white'}"
+                    class="flex flex-col items-center justify-center min-h-[44px] px-3 space-y-1 transition-colors {isActive(item.href) ? 'text-indigo-500 dark:text-indigo-400' : 'text-gray-500 hover:text-slate-900 dark:text-gray-400 dark:hover:text-white'}"
                 >
                     <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d={item.icon} />
                     </svg>
-                    <span class="text-[10px] font-medium">{item.name}</span>
+                    <span class="text-xs font-medium">{item.name}</span>
                 </a>
             {/each}
         </div>

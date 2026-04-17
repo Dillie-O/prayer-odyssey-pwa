@@ -68,5 +68,8 @@ export default defineConfig({
 				globPatterns: ['**/*.{js,css,html,png,svg,ico}']
 			}
 		})
-	]
+	],
+	build: {
+		chunkSizeWarningLimit: 1000
+	}
 });

@@ -73,13 +73,13 @@
 		></div>
 
 		<!-- Modal Panel -->
-		<div class="relative w-full max-w-2xl max-h-[80vh] transform overflow-hidden rounded-xl bg-slate-900 border border-white/10 text-left shadow-2xl transition-all sm:my-8 bg-gradient-to-b from-slate-800/50 to-slate-900 flex flex-col">
-			<div class="p-6 border-b border-white/10">
+           <div class="relative w-full max-w-2xl max-h-[80vh] transform overflow-hidden rounded-xl bg-white border border-slate-200 text-left shadow-2xl transition-all sm:my-8 dark:bg-gradient-to-b dark:from-slate-800/50 dark:to-slate-900 dark:border-white/10 flex flex-col">
+			<div class="p-6 border-b border-slate-200 dark:border-white/10">
 				<div class="flex items-center justify-between">
-					<h3 class="text-xl font-semibold leading-6 text-white">Prayer Updates</h3>
+					<h3 class="text-xl font-semibold leading-6 text-slate-900 dark:text-white">Prayer Updates</h3>
 					<button 
 						onclick={() => isOpen = false}
-						class="text-gray-400 hover:text-white focus:outline-none"
+						class="text-gray-500 hover:text-slate-900 dark:text-gray-400 dark:hover:text-white focus:outline-none"
 					>
 						<span class="sr-only">Close</span>
 						<svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
@@ -91,15 +91,15 @@
 
 			<div class="flex-1 overflow-y-auto p-6 space-y-4">
 				<!-- Add New Update -->
-				<div class="rounded-lg bg-slate-800/50 border border-white/10 p-4">
-					<label for="new-update" class="block text-sm font-medium leading-6 text-gray-300 mb-2">
+				<div class="rounded-lg bg-slate-100 border border-slate-200 p-4 dark:bg-slate-800/50 dark:border-white/10">
+					<label for="new-update" class="block text-sm font-medium leading-6 text-gray-600 dark:text-gray-300 mb-2">
 						Add Update
 					</label>
 					<textarea
 						id="new-update"
 						bind:value={newUpdateContent}
 						rows="3"
-						class="block w-full rounded-md border-0 bg-slate-950/50 py-3 text-white shadow-sm ring-1 ring-inset ring-white/10 placeholder:text-gray-500 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6"
+						class="block w-full rounded-md border-0 bg-white py-3 text-slate-900 dark:bg-slate-950/50 dark:text-white shadow-sm ring-1 ring-inset ring-slate-900/10 dark:ring-white/10 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6"
 						placeholder="Share an update on this prayer..."
 					></textarea>
 					<div class="mt-3 flex justify-end">
@@ -117,18 +117,18 @@
 				<!-- Updates List -->
 				<div class="space-y-3">
 					{#each updates as update (update.id)}
-						<div class="rounded-lg bg-slate-800/30 border border-white/5 p-4">
+						<div class="rounded-lg bg-slate-50 border border-slate-200 p-4 dark:bg-slate-800/30 dark:border-white/5">
 							{#if editingUpdateId === update.id}
 								<!-- Edit Mode -->
 								<textarea
 									bind:value={editContent}
 									rows="3"
-									class="block w-full rounded-md border-0 bg-slate-950/50 py-3 text-white shadow-sm ring-1 ring-inset ring-white/10 placeholder:text-gray-500 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6"
+									class="block w-full rounded-md border-0 bg-white py-3 text-slate-900 dark:bg-slate-950/50 dark:text-white shadow-sm ring-1 ring-inset ring-slate-900/10 dark:ring-white/10 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6"
 								></textarea>
 								<div class="mt-3 flex justify-end gap-2">
 									<button
 										type="button"
-										class="rounded-md bg-white/5 px-3 py-2 text-sm font-semibold text-white shadow-sm ring-1 ring-inset ring-white/10 hover:bg-white/10"
+										class="rounded-md bg-slate-100 px-3 py-2 text-sm font-semibold text-slate-900 shadow-sm ring-1 ring-inset ring-slate-900/10 hover:bg-slate-200 dark:bg-white/5 dark:text-white dark:ring-white/10 dark:hover:bg-white/10"
 										onclick={cancelEdit}
 									>
 										Cancel
@@ -144,7 +144,7 @@
 								</div>
 							{:else}
 								<!-- View Mode -->
-								<p class="text-slate-200 whitespace-pre-wrap">{update.content}</p>
+								<p class="text-slate-700 dark:text-slate-200 whitespace-pre-wrap">{update.content}</p>
 								<div class="mt-3 flex items-center justify-between">
 									<span class="text-xs text-slate-500">
 										{update.createdAt?.toDate().toLocaleString() || 'Just now'}

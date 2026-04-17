@@ -116,13 +116,13 @@
 
 {#if prayerList.length === 0}
 	<div class="text-center py-12">
-		<p class="text-slate-400">No prayers to display</p>
+		<p class="text-slate-500 dark:text-slate-400">No prayers to display</p>
 	</div>
 {:else}
 	<div class="space-y-4">
 		<!-- Prayer Counter and Navigation -->
 		<div class="flex items-center justify-between">
-			<div class="text-sm text-slate-400 font-medium">
+			<div class="text-sm text-slate-500 font-medium dark:text-slate-400">
 				{prayerCounter}
 			</div>
 			
@@ -131,7 +131,7 @@
 				<button
 					onclick={goToPrevious}
 					disabled={!hasPrevious || isTransitioning}
-					class="p-2 rounded-full bg-slate-800/50 border border-white/10 text-slate-400 hover:text-white hover:bg-slate-700/50 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+					class="p-3 rounded-full bg-slate-200/80 border border-slate-900/10 text-slate-500 hover:text-slate-900 hover:bg-slate-200 disabled:opacity-50 disabled:cursor-not-allowed transition-all dark:bg-slate-800/50 dark:border-white/10 dark:text-slate-400 dark:hover:text-white dark:hover:bg-slate-700/50"
 					aria-label="Previous prayer"
 				>
 					<svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -142,7 +142,7 @@
 				<button
 					onclick={goToNext}
 					disabled={!hasNext || isTransitioning}
-					class="p-2 rounded-full bg-slate-800/50 border border-white/10 text-slate-400 hover:text-white hover:bg-slate-700/50 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+					class="p-3 rounded-full bg-slate-200/80 border border-slate-900/10 text-slate-500 hover:text-slate-900 hover:bg-slate-200 disabled:opacity-50 disabled:cursor-not-allowed transition-all dark:bg-slate-800/50 dark:border-white/10 dark:text-slate-400 dark:hover:text-white dark:hover:bg-slate-700/50"
 					aria-label="Next prayer"
 				>
 					<svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -173,19 +173,28 @@
 		
 		<!-- Prayer Dots Indicator -->
 		{#if prayerList.length > 1}
-			<div class="flex justify-center space-x-2 pt-2">
-				{#each prayerList as _, index}
-					<button
-						onclick={() => goToPrayer(index)}
-						class="w-2 h-2 rounded-full transition-all {index === currentIndex ? 'bg-indigo-500 w-8' : 'bg-slate-600 hover:bg-slate-500'}"
-						aria-label={`Go to prayer ${index + 1}`}
-					></button>
-				{/each}
-			</div>
+			<!-- On touch with many prayers, just show a compact position indicator -->
+			{#if isTouchDevice && prayerList.length > 5}
+				<div class="flex justify-center pt-2">
+					<span class="text-xs text-slate-400 bg-slate-200/80 px-3 py-1 rounded-full dark:text-slate-500 dark:bg-slate-800/50">{currentIndex + 1} / {prayerList.length}</span>
+				</div>
+			{:else}
+				<div class="flex justify-center flex-wrap gap-0 pt-2">
+					{#each prayerList as _, index}
+						<button
+							onclick={() => goToPrayer(index)}
+							class="flex items-center justify-center min-w-[44px] min-h-[44px] rounded-md transition-all"
+							aria-label={`Go to prayer ${index + 1}`}
+						>
+							<span class="block rounded-full transition-all {index === currentIndex ? 'bg-indigo-500 w-8 h-2' : 'bg-slate-300 hover:bg-slate-400 w-2 h-2 dark:bg-slate-600 dark:hover:bg-slate-500'}"></span>
+						</button>
+					{/each}
+				</div>
+			{/if}
 		{/if}
 		
 		<!-- Keyboard Navigation Hint -->
-		<div class="text-center text-xs text-slate-500">
+		<div class="text-center text-xs text-slate-400 dark:text-slate-500">
 			{isTouchDevice ? 'Swipe to navigate' : 'Use arrow keys to navigate'}
 		</div>
 	</div>

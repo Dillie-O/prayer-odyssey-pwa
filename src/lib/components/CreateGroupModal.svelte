@@ -27,7 +27,7 @@
 	<div class="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6" role="dialog" aria-modal="true">
 		<!-- Backdrop -->
 		<div 
-			class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm transition-opacity" 
+			class="fixed inset-0 bg-slate-950/20 backdrop-blur-sm dark:bg-slate-950/80 transition-opacity" 
 			onclick={() => isOpen = false}
             role="button"
             tabindex="0"
@@ -35,11 +35,11 @@
 		></div>
 
 		<!-- Modal Panel -->
-		<div class="relative w-full max-w-lg transform overflow-hidden rounded-xl bg-slate-900 border border-white/10 p-6 text-left shadow-2xl transition-all sm:my-8 bg-gradient-to-b from-slate-800/50 to-slate-900">
+		<div class="relative w-full max-w-lg transform overflow-hidden rounded-xl bg-white border border-slate-200 dark:bg-gradient-to-b dark:from-slate-800/50 dark:to-slate-900 dark:border-white/10 p-6 text-left shadow-2xl transition-all sm:my-8">
 			<div class="absolute right-4 top-4">
 				<button 
 					onclick={() => isOpen = false}
-					class="text-gray-400 hover:text-white focus:outline-none"
+					class="text-gray-500 hover:text-slate-900 focus:outline-none dark:text-gray-400 dark:hover:text-white"
 				>
 					<span class="sr-only">Close</span>
 					<svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
@@ -49,26 +49,25 @@
 			</div>
 
 			<div class="mt-2">
-				<h3 class="text-xl font-semibold leading-6 text-white">Create New Group</h3>
+				<h3 class="text-xl font-semibold leading-6 text-slate-900 dark:text-white">Create New Group</h3>
 				<div class="mt-4 space-y-4">
                     <div>
-                        <label for="group-name" class="block text-sm font-medium leading-6 text-gray-300">Group Name</label>
+                        <label for="group-name" class="block text-sm font-medium leading-6 text-gray-600 dark:text-gray-300">Group Name</label>
                         <input
                             type="text"
                             bind:value={name}
                             id="group-name"
-                            class="block w-full rounded-md border-0 bg-slate-950/50 py-2.5 text-white shadow-sm ring-1 ring-inset ring-white/10 placeholder:text-gray-500 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6"
+                            class="block w-full rounded-md border-0 bg-slate-100 py-2.5 text-slate-900 dark:bg-slate-950/50 dark:text-white shadow-sm ring-1 ring-inset ring-slate-900/10 placeholder:text-gray-400 dark:ring-white/10 dark:placeholder:text-gray-500 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6"
                             placeholder="e.g. Morning Prayer Warriors"
-                            autofocus
                         />
                     </div>
                     <div>
-                        <label for="group-desc" class="block text-sm font-medium leading-6 text-gray-300">Description (Optional)</label>
+                        <label for="group-desc" class="block text-sm font-medium leading-6 text-gray-600 dark:text-gray-300">Description (Optional)</label>
                         <textarea
                             bind:value={description}
                             id="group-desc"
                             rows="3"
-                            class="block w-full rounded-md border-0 bg-slate-950/50 py-2.5 text-white shadow-sm ring-1 ring-inset ring-white/10 placeholder:text-gray-500 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6"
+                            class="block w-full rounded-md border-0 bg-slate-100 py-2.5 text-slate-900 dark:bg-slate-950/50 dark:text-white shadow-sm ring-1 ring-inset ring-slate-900/10 placeholder:text-gray-400 dark:ring-white/10 dark:placeholder:text-gray-500 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6"
                             placeholder="What is this group about?"
                         ></textarea>
                     </div>
@@ -78,7 +77,7 @@
 			<div class="mt-6 flex justify-end gap-3">
 				<button
 					type="button"
-					class="rounded-md bg-white/5 px-3 py-2 text-sm font-semibold text-white shadow-sm ring-1 ring-inset ring-white/10 hover:bg-white/10"
+					class="rounded-md bg-slate-100 px-3 py-2 text-sm font-semibold text-slate-900 shadow-sm ring-1 ring-inset ring-slate-900/10 hover:bg-slate-200 dark:bg-white/5 dark:text-white dark:ring-white/10 dark:hover:bg-white/10"
 					onclick={() => isOpen = false}
 				>
 					Cancel

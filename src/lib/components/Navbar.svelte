@@ -51,6 +51,7 @@
                 <a href="/" class="px-3 py-3 text-sm font-medium transition-colors {isActive('/') ? 'text-indigo-500 dark:text-indigo-400' : 'text-gray-600 hover:text-slate-900 dark:text-gray-300 dark:hover:text-white'}">Home</a>
                 <a href="/prayers" class="px-3 py-3 text-sm font-medium transition-colors {isActive('/prayers') ? 'text-indigo-500 dark:text-indigo-400' : 'text-gray-600 hover:text-slate-900 dark:text-gray-300 dark:hover:text-white'}">Prayers</a>
                 <a href="/groups" class="px-3 py-3 text-sm font-medium transition-colors {isActive('/groups') ? 'text-indigo-500 dark:text-indigo-400' : 'text-gray-600 hover:text-slate-900 dark:text-gray-300 dark:hover:text-white'}">Groups</a>
+                <a href="/about" class="px-3 py-3 text-sm font-medium transition-colors {isActive('/about') ? 'text-indigo-500 dark:text-indigo-400' : 'text-gray-600 hover:text-slate-900 dark:text-gray-300 dark:hover:text-white'}">About</a>
             </div>
 		</div>
 

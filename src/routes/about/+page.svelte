@@ -1,6 +1,4 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
-	
 	let appVersion = '4.1.1'; // Hardcoded version from package.json
 </script>
 

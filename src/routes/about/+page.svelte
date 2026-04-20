@@ -90,8 +90,7 @@
 					</div>
 					<h3 class="text-lg font-medium text-slate-900 mb-2 dark:text-white">Remember View Mode</h3>
 					<ul class="text-slate-500 space-y-1 text-sm dark:text-slate-400">
-						<li>• Prayer list view mode (list / carousel) now saved across sessions</li>
-						<li>• Shared view preference between personal and group prayer pages</li>
+						<li>• The app now remembers your list or carousel view when you return to your prayers or a group</li>
 					</ul>
 				</div>
 

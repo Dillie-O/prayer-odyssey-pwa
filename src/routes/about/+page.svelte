@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	
-	let appVersion = '4.1.0'; // Hardcoded version from package.json
+	let appVersion = '4.1.1'; // Hardcoded version from package.json
 </script>
 
 <div class="min-h-screen bg-slate-100 dark:bg-slate-950">
@@ -85,8 +85,19 @@
 			<div class="space-y-4">
 				<div class="border-l-2 border-indigo-500/30 pl-4">
 					<div class="flex items-center space-x-2 mb-2">
-						<span class="text-sm font-medium text-indigo-400">Ver 4.1.0 - April 17, 2026</span>
+						<span class="text-sm font-medium text-indigo-400">Ver 4.1.1 - April 20, 2026</span>
 						<span class="inline-flex items-center rounded-full bg-green-400/10 px-2 py-0.5 text-xs font-medium text-green-400">Latest</span>
+					</div>
+					<h3 class="text-lg font-medium text-slate-900 mb-2 dark:text-white">Remember View Mode</h3>
+					<ul class="text-slate-500 space-y-1 text-sm dark:text-slate-400">
+						<li>• Prayer list view mode (list / carousel) now saved across sessions</li>
+						<li>• Shared view preference between personal and group prayer pages</li>
+					</ul>
+				</div>
+
+				<div class="border-l-2 border-slate-300/50 pl-4 dark:border-slate-600/30">
+					<div class="flex items-center space-x-2 mb-2">
+						<span class="text-sm font-medium text-slate-400">Ver 4.1.0 - April 17, 2026</span>
 					</div>
 					<h3 class="text-lg font-medium text-slate-900 mb-2 dark:text-white">Light / Dark Mode & Visual Polish</h3>
 					<ul class="text-slate-500 space-y-1 text-sm dark:text-slate-400">

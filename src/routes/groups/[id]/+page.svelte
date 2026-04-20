@@ -1,7 +1,7 @@
 <script lang="ts">
     import { page } from '$app/stores';
-    import { db, auth } from '$lib/firebase';
-    import { doc, getDoc, onSnapshot, collection, query, where, orderBy, type Timestamp } from 'firebase/firestore';
+    import { db } from '$lib/firebase';
+    import { doc, onSnapshot, collection, query, where, orderBy } from 'firebase/firestore';
     import { onMount } from 'svelte';
     import { user } from '$lib/stores/auth';
     import { joinGroup, type Group } from '$lib/stores/groups';

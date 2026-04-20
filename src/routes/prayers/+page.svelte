@@ -1,13 +1,13 @@
 <script lang="ts">
 	import { user } from '$lib/stores/auth';
 	import { prayers, loadingPrayers } from '$lib/stores/prayers';
+	import { viewMode } from '$lib/stores/viewMode';
 	import AddPrayerModal from '$lib/components/AddPrayerModal.svelte';
 	import PrayerCard from '$lib/components/PrayerCard.svelte';
 	import PrayerCarousel from '$lib/components/PrayerCarousel.svelte';
 	
 	let isModalOpen = $state(false);
 	let filter = $state<'all' | 'active' | 'answered'>('active');
-	let viewMode = $state<'list' | 'carousel'>('list');
 	
 	let filteredPrayers = $derived($prayers.filter(p => {
         // Only show personal prayers in this view
@@ -58,8 +58,8 @@
 			<!-- View Toggle Buttons -->
 			<div class="flex items-center space-x-1 rounded-xl bg-slate-200/80 p-1 border border-slate-900/10 backdrop-blur-sm dark:bg-slate-900/50 dark:border-white/5">
 				<button 
-					onclick={() => viewMode = 'list'}
-					class="px-3 py-3 text-sm font-medium rounded-lg transition-all {viewMode === 'list' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/20' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200 dark:text-slate-400 dark:hover:text-white dark:hover:bg-white/5'}"
+					onclick={() => viewMode.set('list')}
+					class="px-3 py-3 text-sm font-medium rounded-lg transition-all {$viewMode === 'list' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/20' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200 dark:text-slate-400 dark:hover:text-white dark:hover:bg-white/5'}"
 					title="List view"
 				>
 					<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -67,8 +67,8 @@
 					</svg>
 				</button>
 				<button 
-					onclick={() => viewMode = 'carousel'}
-					class="px-3 py-3 text-sm font-medium rounded-lg transition-all {viewMode === 'carousel' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/20' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200 dark:text-slate-400 dark:hover:text-white dark:hover:bg-white/5'}"
+					onclick={() => viewMode.set('carousel')}
+					class="px-3 py-3 text-sm font-medium rounded-lg transition-all {$viewMode === 'carousel' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/20' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200 dark:text-slate-400 dark:hover:text-white dark:hover:bg-white/5'}"
 					title="Carousel view"
 				>
 					<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -117,7 +117,7 @@
 			</div>
         {:else}
             <!-- Conditional rendering based on view mode -->
-            {#if viewMode === 'carousel'}
+            {#if $viewMode === 'carousel'}
                 <div class="max-w-2xl mx-auto">
                     <PrayerCarousel prayers={filteredPrayers} />
                 </div>

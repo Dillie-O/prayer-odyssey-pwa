@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [4.1.1] - 2026-04-20
+
+### Added
+- Persistent prayer list view mode (list / carousel) saved to `localStorage`
+- `viewMode` store (`src/lib/stores/viewMode.ts`) shared across personal and group prayer views
+
+### Changed
+- Personal prayers page and group prayers page now both read/write the shared `viewMode` store instead of local component state
+- About page version badge and changelog entry updated to reflect 4.1.1
+
+### Fixed
+- About page link missing from desktop navigation bar
+
+---
+
 ## [4.1.0] - 2026-04-17
 
 ### Added

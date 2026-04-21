@@ -1,11 +1,12 @@
 <script lang="ts">
     import { page } from '$app/stores';
-    import { db, auth } from '$lib/firebase';
-    import { doc, getDoc, onSnapshot, collection, query, where, orderBy, type Timestamp } from 'firebase/firestore';
+    import { db } from '$lib/firebase';
+    import { doc, onSnapshot, collection, query, where, orderBy } from 'firebase/firestore';
     import { onMount } from 'svelte';
     import { user } from '$lib/stores/auth';
     import { joinGroup, type Group } from '$lib/stores/groups';
     import type { Prayer } from '$lib/stores/prayers';
+    import { viewMode } from '$lib/stores/viewMode';
     import PrayerCard from '$lib/components/PrayerCard.svelte';
     import PrayerCarousel from '$lib/components/PrayerCarousel.svelte';
     import AddPrayerModal from '$lib/components/AddPrayerModal.svelte';
@@ -17,7 +18,6 @@
     let joining = $state(false);
     let isAddModalOpen = $state(false);
     let filter = $state<'all' | 'active' | 'answered'>('active');
-    let viewMode = $state<'list' | 'carousel'>('list');
 
     let isMember = $derived(group && $user && group.members.includes($user.uid));
     let filteredPrayers = $derived(groupPrayers.filter(p => {
@@ -196,8 +196,8 @@
                     <!-- View Toggle Buttons -->
                     <div class="flex items-center space-x-1 rounded-xl bg-slate-200/80 p-1 border border-slate-900/10 backdrop-blur-sm dark:bg-slate-900/50 dark:border-white/5">
                         <button 
-                            onclick={() => viewMode = 'list'}
-                            class="px-3 py-2 text-sm font-medium rounded-lg transition-all {viewMode === 'list' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/20' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200 dark:text-slate-400 dark:hover:text-white dark:hover:bg-white/5'}"
+                            onclick={() => viewMode.set('list')}
+                            class="px-3 py-2 text-sm font-medium rounded-lg transition-all {$viewMode === 'list' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/20' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200 dark:text-slate-400 dark:hover:text-white dark:hover:bg-white/5'}"
                             title="List view"
                         >
                             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -205,8 +205,8 @@
                             </svg>
                         </button>
                         <button 
-                            onclick={() => viewMode = 'carousel'}
-                            class="px-3 py-2 text-sm font-medium rounded-lg transition-all {viewMode === 'carousel' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/20' : 'text-slate-600 hover:text-slate-900 hover:bg-white/10 dark:text-slate-400 dark:hover:text-white dark:hover:bg-white/5'}"
+                            onclick={() => viewMode.set('carousel')}
+                            class="px-3 py-2 text-sm font-medium rounded-lg transition-all {$viewMode === 'carousel' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/20' : 'text-slate-600 hover:text-slate-900 hover:bg-white/10 dark:text-slate-400 dark:hover:text-white dark:hover:bg-white/5'}"
                             title="Carousel view"
                         >
                             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -246,7 +246,7 @@
                 </div>
             {:else}
                 <!-- Conditional rendering based on view mode -->
-                {#if viewMode === 'carousel'}
+                {#if $viewMode === 'carousel'}
                     <div class="max-w-2xl mx-auto">
                         <PrayerCarousel prayers={filteredPrayers} />
                     </div>

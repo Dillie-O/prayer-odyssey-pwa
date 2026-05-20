@@ -22,6 +22,7 @@
     let qrCodeDataUrl = $state('');
     let qrCodeLoading = $state(false);
     let qrCodeError = $state('');
+    let qrModalRef = $state<HTMLDivElement | null>(null);
     let filter = $state<'all' | 'active' | 'answered'>('active');
     const QR_CODE_SIZE = 256;
     const QR_CODE_MARGIN = 1;
@@ -73,6 +74,63 @@
             qrCodeLoading = false;
         }
     }
+
+    function closeQrModal() {
+        isQrModalOpen = false;
+    }
+
+    $effect(() => {
+        if (!isQrModalOpen || !qrModalRef) return;
+
+        const previouslyFocused = document.activeElement as HTMLElement | null;
+        const focusableSelectors = [
+            'button:not([disabled])',
+            '[href]',
+            'input:not([disabled])',
+            'select:not([disabled])',
+            'textarea:not([disabled])',
+            '[tabindex]:not([tabindex="-1"])'
+        ].join(',');
+        const getFocusableElements = () =>
+            Array.from(qrModalRef?.querySelectorAll<HTMLElement>(focusableSelectors) ?? []);
+
+        const focusableElements = getFocusableElements();
+        focusableElements[0]?.focus();
+
+        const handleKeyDown = (event: KeyboardEvent) => {
+            if (event.key === 'Escape') {
+                event.preventDefault();
+                closeQrModal();
+                return;
+            }
+
+            if (event.key !== 'Tab') return;
+
+            const currentFocusableElements = getFocusableElements();
+            if (currentFocusableElements.length === 0) {
+                event.preventDefault();
+                return;
+            }
+
+            const first = currentFocusableElements[0];
+            const last = currentFocusableElements[currentFocusableElements.length - 1];
+
+            if (event.shiftKey && document.activeElement === first) {
+                event.preventDefault();
+                last.focus();
+            } else if (!event.shiftKey && document.activeElement === last) {
+                event.preventDefault();
+                first.focus();
+            }
+        };
+
+        document.addEventListener('keydown', handleKeyDown);
+
+        return () => {
+            document.removeEventListener('keydown', handleKeyDown);
+            previouslyFocused?.focus();
+        };
+    });
 
     onMount(() => {
         if (!groupId) return;
@@ -309,12 +367,13 @@
 {/if}
 
 {#if isQrModalOpen}
-    <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" role="dialog" aria-modal="true" aria-labelledby="invite-qr-modal-title">
-        <div class="w-full max-w-sm rounded-xl bg-white p-6 shadow-xl dark:bg-slate-900">
+    <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" role="dialog" aria-modal="true" aria-labelledby="invite-qr-modal-title" tabindex="-1">
+        <button type="button" class="absolute inset-0" aria-label="Close QR code modal" onclick={closeQrModal}></button>
+        <div class="relative w-full max-w-sm rounded-xl bg-white p-6 shadow-xl dark:bg-slate-900" bind:this={qrModalRef}>
             <div class="flex items-center justify-between">
                 <h2 id="invite-qr-modal-title" class="text-lg font-semibold text-slate-900 dark:text-white">Invite QR Code</h2>
                 <button
-                    onclick={() => (isQrModalOpen = false)}
+                    onclick={closeQrModal}
                     class="rounded-md p-1 text-slate-500 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-white/10 dark:hover:text-white"
                     aria-label="Close QR code modal"
                 >

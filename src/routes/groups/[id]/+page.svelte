@@ -23,6 +23,8 @@
     let qrCodeLoading = $state(false);
     let qrCodeError = $state('');
     let filter = $state<'all' | 'active' | 'answered'>('active');
+    const QR_CODE_SIZE = 256;
+    const QR_CODE_MARGIN = 1;
 
     let isMember = $derived(group && $user && group.members.includes($user.uid));
     let filteredPrayers = $derived(groupPrayers.filter(p => {
@@ -61,8 +63,8 @@
 
         try {
             qrCodeDataUrl = await QRCode.toDataURL(getInviteLink(), {
-                width: 256,
-                margin: 1
+                width: QR_CODE_SIZE,
+                margin: QR_CODE_MARGIN
             });
         } catch (err) {
             console.error('Failed to generate invite QR code', err);
@@ -327,7 +329,7 @@
                         <div class="h-8 w-8 animate-spin rounded-full border-4 border-indigo-500 border-t-transparent"></div>
                     </div>
                 {:else if qrCodeError}
-                    <p class="text-sm text-red-500 dark:text-red-400">{qrCodeError}</p>
+                    <p class="text-sm text-red-500 dark:text-red-400" role="alert" aria-live="polite">{qrCodeError}</p>
                 {:else}
                     <img src={qrCodeDataUrl} alt="QR code for group invite link" class="h-64 w-64" />
                 {/if}

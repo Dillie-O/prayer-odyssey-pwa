@@ -69,7 +69,7 @@
                 margin: QR_CODE_MARGIN
             });
         } catch (err) {
-            console.error('Failed to generate invite QR code', { inviteLink: getInviteLink(), error: err });
+            console.error('Failed to generate invite QR code', err);
             qrCodeError = 'Failed to generate QR code. Please try again.';
         } finally {
             qrCodeLoading = false;
@@ -394,7 +394,7 @@
                     <img src={qrCodeDataUrl} alt="QR code for group invite link" class="h-64 w-64" />
                 {/if}
             </div>
-            <p class="mt-4 text-center text-xs text-slate-500 dark:text-slate-400 break-all">{getInviteLink()}</p>
+            <p class="mt-4 text-center text-xs text-slate-500 dark:text-slate-400 break-words">{getInviteLink()}</p>
         </div>
     </div>
 {/if}

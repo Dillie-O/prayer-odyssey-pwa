@@ -17,6 +17,7 @@
     let loading = $state(true);
     let joining = $state(false);
     let isAddModalOpen = $state(false);
+    let isQrModalOpen = $state(false);
     let filter = $state<'all' | 'active' | 'answered'>('active');
 
     let isMember = $derived(group && $user && group.members.includes($user.uid));
@@ -38,8 +39,12 @@
         }
     }
 
+    function getInviteLink() {
+        return window.location.href;
+    }
+
     async function copyInviteLink() {
-        const link = window.location.href;
+        const link = getInviteLink();
         await navigator.clipboard.writeText(link);
         alert('Group link copied to clipboard!');
     }
@@ -114,15 +119,30 @@
                     </div>
                     
                     {#if $user}
-                        <button 
-                            onclick={copyInviteLink}
-                            class="inline-flex items-center rounded-lg bg-slate-100 px-4 py-2 text-sm font-semibold text-slate-900 shadow-sm ring-1 ring-inset ring-slate-900/10 hover:bg-slate-200 dark:bg-white/5 dark:text-white dark:ring-white/10 dark:hover:bg-white/10 transition-colors"
-                        >
-                            <svg class="-ml-0.5 mr-1.5 h-5 w-5 text-gray-500 dark:text-gray-400" viewBox="0 0 20 20" fill="currentColor">
-                                <path fill-rule="evenodd" d="M15.621 4.379a3 3 0 00-4.242 0l-7 7a3 3 0 004.241 4.243h.001l.497-.5a.75.75 0 011.064 1.057l-.498.501-.002.002a4.5 4.5 0 01-6.364-6.364l7-7a4.5 4.5 0 016.368 6.36l-3.455 3.553A2.625 2.625 0 119.52 9.52l3.45-3.451a.75.75 0 111.061 1.06l-3.45 3.451a1.125 1.125 0 001.587 1.595l3.454-3.553a3 3 0 000-4.242z" clip-rule="evenodd" />
-                            </svg>
-                            Invite
-                        </button>
+                        <div class="flex items-center gap-2">
+                            <button 
+                                onclick={copyInviteLink}
+                                class="inline-flex items-center rounded-lg bg-slate-100 px-4 py-2 text-sm font-semibold text-slate-900 shadow-sm ring-1 ring-inset ring-slate-900/10 hover:bg-slate-200 dark:bg-white/5 dark:text-white dark:ring-white/10 dark:hover:bg-white/10 transition-colors"
+                            >
+                                <svg class="-ml-0.5 mr-1.5 h-5 w-5 text-gray-500 dark:text-gray-400" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M15.621 4.379a3 3 0 00-4.242 0l-7 7a3 3 0 004.241 4.243h.001l.497-.5a.75.75 0 011.064 1.057l-.498.501-.002.002a4.5 4.5 0 01-6.364-6.364l7-7a4.5 4.5 0 016.368 6.36l-3.455 3.553A2.625 2.625 0 119.52 9.52l3.45-3.451a.75.75 0 111.061 1.06l-3.45 3.451a1.125 1.125 0 001.587 1.595l3.454-3.553a3 3 0 000-4.242z" clip-rule="evenodd" />
+                                </svg>
+                                Invite
+                            </button>
+                            <button
+                                onclick={() => (isQrModalOpen = true)}
+                                class="inline-flex items-center rounded-lg bg-slate-100 p-2 text-slate-900 shadow-sm ring-1 ring-inset ring-slate-900/10 hover:bg-slate-200 dark:bg-white/5 dark:text-white dark:ring-white/10 dark:hover:bg-white/10 transition-colors"
+                                aria-label="Show invite QR code"
+                                title="Show invite QR code"
+                            >
+                                <svg class="h-5 w-5 text-gray-500 dark:text-gray-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <rect x="3" y="3" width="6" height="6" />
+                                    <rect x="15" y="3" width="6" height="6" />
+                                    <rect x="3" y="15" width="6" height="6" />
+                                    <path d="M15 15h3v3h-3zM21 15v6h-3M15 21h3" />
+                                </svg>
+                            </button>
+                        </div>
                     {/if}
                 </div>
                 
@@ -260,6 +280,33 @@
                 {/if}
             {/if}
         </section>
+    </div>
+{/if}
+
+{#if isQrModalOpen}
+    <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" role="dialog" aria-modal="true" aria-label="Invite QR code">
+        <div class="w-full max-w-sm rounded-xl bg-white p-6 shadow-xl dark:bg-slate-900">
+            <div class="flex items-center justify-between">
+                <h2 class="text-lg font-semibold text-slate-900 dark:text-white">Invite QR Code</h2>
+                <button
+                    onclick={() => (isQrModalOpen = false)}
+                    class="rounded-md p-1 text-slate-500 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-white/10 dark:hover:text-white"
+                    aria-label="Close QR code modal"
+                >
+                    <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+                    </svg>
+                </button>
+            </div>
+            <div class="mt-4 flex justify-center rounded-lg bg-slate-100 p-4 dark:bg-slate-800">
+                <img
+                    src={`https://api.qrserver.com/v1/create-qr-code/?size=256x256&data=${encodeURIComponent(getInviteLink())}`}
+                    alt="QR code for group invite link"
+                    class="h-64 w-64"
+                />
+            </div>
+            <p class="mt-4 text-center text-xs text-slate-500 dark:text-slate-400 break-all">{getInviteLink()}</p>
+        </div>
     </div>
 {/if}
 

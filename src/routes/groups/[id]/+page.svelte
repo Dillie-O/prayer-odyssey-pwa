@@ -368,7 +368,9 @@
 
 {#if isQrModalOpen}
     <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" role="dialog" aria-modal="true" aria-labelledby="invite-qr-modal-title">
-        <button type="button" class="absolute inset-0" aria-label="Close QR code modal" onclick={closeQrModal}></button>
+        <button type="button" class="absolute inset-0" aria-label="Close QR code modal" onclick={closeQrModal}>
+            <span class="sr-only">Close QR code modal</span>
+        </button>
         <div class="relative w-full max-w-sm rounded-xl bg-white p-6 shadow-xl dark:bg-slate-900" bind:this={qrModalRef}>
             <div class="flex items-center justify-between">
                 <h2 id="invite-qr-modal-title" class="text-lg font-semibold text-slate-900 dark:text-white">Invite QR Code</h2>
@@ -393,7 +395,7 @@
                     <img src={qrCodeDataUrl} alt="QR code for group invite link" class="h-64 w-64" />
                 {/if}
             </div>
-            <p class="mt-4 text-center text-xs text-slate-500 dark:text-slate-400 break-all" aria-label={`Group invite URL: ${getInviteLink()}`}>{getInviteLink()}</p>
+            <p class="mt-4 text-center text-xs text-slate-500 dark:text-slate-400 break-all">{getInviteLink()}</p>
         </div>
     </div>
 {/if}

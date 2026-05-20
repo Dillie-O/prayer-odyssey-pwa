@@ -3,6 +3,7 @@
     import { db } from '$lib/firebase';
     import { doc, onSnapshot, collection, query, where, orderBy } from 'firebase/firestore';
     import { onMount } from 'svelte';
+    import QRCode from 'qrcode';
     import { user } from '$lib/stores/auth';
     import { joinGroup, type Group } from '$lib/stores/groups';
     import type { Prayer } from '$lib/stores/prayers';
@@ -18,6 +19,9 @@
     let joining = $state(false);
     let isAddModalOpen = $state(false);
     let isQrModalOpen = $state(false);
+    let qrCodeDataUrl = $state('');
+    let qrCodeLoading = $state(false);
+    let qrCodeError = $state('');
     let filter = $state<'all' | 'active' | 'answered'>('active');
 
     let isMember = $derived(group && $user && group.members.includes($user.uid));
@@ -47,6 +51,25 @@
         const link = getInviteLink();
         await navigator.clipboard.writeText(link);
         alert('Group link copied to clipboard!');
+    }
+
+    async function openQrModal() {
+        isQrModalOpen = true;
+        qrCodeLoading = true;
+        qrCodeError = '';
+        qrCodeDataUrl = '';
+
+        try {
+            qrCodeDataUrl = await QRCode.toDataURL(getInviteLink(), {
+                width: 256,
+                margin: 1
+            });
+        } catch (err) {
+            console.error('Failed to generate invite QR code', err);
+            qrCodeError = 'Failed to generate QR code. Please try again.';
+        } finally {
+            qrCodeLoading = false;
+        }
     }
 
     onMount(() => {
@@ -130,7 +153,7 @@
                                 Invite
                             </button>
                             <button
-                                onclick={() => (isQrModalOpen = true)}
+                                onclick={openQrModal}
                                 class="inline-flex items-center rounded-lg bg-slate-100 p-2 text-slate-900 shadow-sm ring-1 ring-inset ring-slate-900/10 hover:bg-slate-200 dark:bg-white/5 dark:text-white dark:ring-white/10 dark:hover:bg-white/10 transition-colors"
                                 aria-label="Show invite QR code"
                                 title="Show invite QR code"
@@ -299,11 +322,15 @@
                 </button>
             </div>
             <div class="mt-4 flex justify-center rounded-lg bg-slate-100 p-4 dark:bg-slate-800">
-                <img
-                    src={`https://api.qrserver.com/v1/create-qr-code/?size=256x256&data=${encodeURIComponent(getInviteLink())}`}
-                    alt="QR code for group invite link"
-                    class="h-64 w-64"
-                />
+                {#if qrCodeLoading}
+                    <div class="flex h-64 w-64 items-center justify-center">
+                        <div class="h-8 w-8 animate-spin rounded-full border-4 border-indigo-500 border-t-transparent"></div>
+                    </div>
+                {:else if qrCodeError}
+                    <p class="text-sm text-red-500 dark:text-red-400">{qrCodeError}</p>
+                {:else}
+                    <img src={qrCodeDataUrl} alt="QR code for group invite link" class="h-64 w-64" />
+                {/if}
             </div>
             <p class="mt-4 text-center text-xs text-slate-500 dark:text-slate-400 break-all">{getInviteLink()}</p>
         </div>

@@ -63,12 +63,13 @@
         qrCodeDataUrl = '';
 
         try {
-            qrCodeDataUrl = await QRCode.toDataURL(getInviteLink(), {
+            const inviteLink = getInviteLink();
+            qrCodeDataUrl = await QRCode.toDataURL(inviteLink, {
                 width: QR_CODE_SIZE,
                 margin: QR_CODE_MARGIN
             });
         } catch (err) {
-            console.error('Failed to generate invite QR code', err);
+            console.error('Failed to generate invite QR code', { inviteLink: getInviteLink(), error: err });
             qrCodeError = 'Failed to generate QR code. Please try again.';
         } finally {
             qrCodeLoading = false;
@@ -368,9 +369,7 @@
 
 {#if isQrModalOpen}
     <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" role="dialog" aria-modal="true" aria-labelledby="invite-qr-modal-title">
-        <button type="button" class="absolute inset-0" aria-label="Close QR code modal" onclick={closeQrModal}>
-            <span class="sr-only">Close QR code modal</span>
-        </button>
+        <button type="button" class="absolute inset-0" aria-label="Close QR code modal" onclick={closeQrModal}></button>
         <div class="relative w-full max-w-sm rounded-xl bg-white p-6 shadow-xl dark:bg-slate-900" bind:this={qrModalRef}>
             <div class="flex items-center justify-between">
                 <h2 id="invite-qr-modal-title" class="text-lg font-semibold text-slate-900 dark:text-white">Invite QR Code</h2>

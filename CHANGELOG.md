@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [4.2.0] - 2026-05-20
+
+### Added
+- QR-code invite sharing on group detail pages, next to the existing Invite link action
+- Invite QR modal with local QR generation, keyboard accessibility support, and close actions
+- Updated PR screenshots under `artifacts/screenshots/` for this release
+
+### Changed
+- App version bumped to 4.2.0 across package metadata and About page
+- Added repository Copilot agent rule requiring PR screenshot refresh plus version/changelog updates
+
+---
+
 ## [4.1.1] - 2026-04-20
 
 ### Added

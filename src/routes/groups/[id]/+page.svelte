@@ -329,12 +329,12 @@
                         <div class="h-8 w-8 animate-spin rounded-full border-4 border-indigo-500 border-t-transparent"></div>
                     </div>
                 {:else if qrCodeError}
-                    <p class="text-sm text-red-500 dark:text-red-400" role="alert" aria-live="polite">{qrCodeError}</p>
+                    <p class="text-sm text-red-500 dark:text-red-400" role="alert" aria-live="assertive">{qrCodeError}</p>
                 {:else}
                     <img src={qrCodeDataUrl} alt="QR code for group invite link" class="h-64 w-64" />
                 {/if}
             </div>
-            <p class="mt-4 text-center text-xs text-slate-500 dark:text-slate-400 break-all">{getInviteLink()}</p>
+            <p class="mt-4 text-center text-xs text-slate-500 dark:text-slate-400 break-all" aria-label="Group invite link">{getInviteLink()}</p>
         </div>
     </div>
 {/if}

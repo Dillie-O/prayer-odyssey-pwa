@@ -236,8 +236,8 @@
     <div class="space-y-6">
         <header class="rounded-xl bg-white/80 border border-slate-900/10 p-6 backdrop-blur-sm dark:bg-slate-900/50 dark:border-white/10">
             <div class="flex flex-col gap-4">
-                <!-- Top row with group name and invite button -->
-                <div class="flex items-center justify-between">
+                <!-- Top row with group name -->
+                <div class="flex items-center">
                     <div class="flex min-w-0 items-center gap-3">
                         <a href="/groups" class="text-gray-500 hover:text-slate-900 transition-colors dark:text-gray-400 dark:hover:text-white" aria-label="Back to groups">
                             <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
@@ -246,46 +246,9 @@
                         </a>
                         <h1 class="text-3xl font-bold text-slate-900 dark:text-white">{group.name}</h1>
                     </div>
-                    
-                    {#if $user}
-                        <div class="relative" bind:this={inviteMenuRef}>
-                            <button
-                                onclick={toggleInviteMenu}
-                                class="inline-flex items-center rounded-lg bg-slate-100 px-4 py-2 text-sm font-semibold text-slate-900 shadow-sm ring-1 ring-inset ring-slate-900/10 transition-colors hover:bg-slate-200 dark:bg-white/5 dark:text-white dark:ring-white/10 dark:hover:bg-white/10"
-                                aria-haspopup="menu"
-                                aria-expanded={isInviteMenuOpen}
-                            >
-                                <svg class="-ml-0.5 mr-1.5 h-5 w-5 text-gray-500 dark:text-gray-400" viewBox="0 0 20 20" fill="currentColor">
-                                    <path fill-rule="evenodd" d="M15.621 4.379a3 3 0 00-4.242 0l-7 7a3 3 0 004.241 4.243h.001l.497-.5a.75.75 0 011.064 1.057l-.498.501-.002.002a4.5 4.5 0 01-6.364-6.364l7-7a4.5 4.5 0 016.368 6.36l-3.455 3.553A2.625 2.625 0 119.52 9.52l3.45-3.451a.75.75 0 111.061 1.06l-3.45 3.451a1.125 1.125 0 001.587 1.595l3.454-3.553a3 3 0 000-4.242z" clip-rule="evenodd" />
-                                </svg>
-                                Invite
-                                <svg class="ml-2 h-4 w-4 text-gray-500 dark:text-gray-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                                    <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.939a.75.75 0 111.08 1.04l-4.25 4.511a.75.75 0 01-1.08 0L5.21 8.27a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
-                                </svg>
-                            </button>
-                            {#if isInviteMenuOpen}
-                                <div class="absolute right-0 z-10 mt-2 w-40 rounded-lg border border-slate-900/10 bg-white p-1 shadow-lg dark:border-white/10 dark:bg-slate-900" role="menu" aria-label="Invite options">
-                                    <button
-                                        onclick={handleCopyInviteLink}
-                                        class="block w-full rounded-md px-3 py-2 text-left text-sm text-slate-700 transition-colors hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-white/10"
-                                        role="menuitem"
-                                    >
-                                        Copy link
-                                    </button>
-                                    <button
-                                        onclick={handleOpenQrModalFromMenu}
-                                        class="block w-full rounded-md px-3 py-2 text-left text-sm text-slate-700 transition-colors hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-white/10"
-                                        role="menuitem"
-                                    >
-                                        QR code
-                                    </button>
-                                </div>
-                            {/if}
-                        </div>
-                    {/if}
                 </div>
                 
-                <!-- Middle row with member info and join button -->
+                <!-- Middle row with member info and actions -->
                 <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                     <div class="flex items-center gap-4 text-sm text-gray-500">
                          <span>{group.members.length} member{group.members.length === 1 ? '' : 's'}</span>
@@ -295,6 +258,42 @@
                     </div>
                     
                     <div class="flex gap-3">
+                        {#if $user}
+                            <div class="relative" bind:this={inviteMenuRef}>
+                                <button
+                                    onclick={toggleInviteMenu}
+                                    class="inline-flex items-center rounded-lg bg-slate-100 px-4 py-2 text-sm font-semibold text-slate-900 shadow-sm ring-1 ring-inset ring-slate-900/10 transition-colors hover:bg-slate-200 dark:bg-white/5 dark:text-white dark:ring-white/10 dark:hover:bg-white/10"
+                                    aria-haspopup="menu"
+                                    aria-expanded={isInviteMenuOpen}
+                                >
+                                    <svg class="-ml-0.5 mr-1.5 h-5 w-5 text-gray-500 dark:text-gray-400" viewBox="0 0 20 20" fill="currentColor">
+                                        <path fill-rule="evenodd" d="M15.621 4.379a3 3 0 00-4.242 0l-7 7a3 3 0 004.241 4.243h.001l.497-.5a.75.75 0 011.064 1.057l-.498.501-.002.002a4.5 4.5 0 01-6.364-6.364l7-7a4.5 4.5 0 016.368 6.36l-3.455 3.553A2.625 2.625 0 119.52 9.52l3.45-3.451a.75.75 0 111.061 1.06l-3.45 3.451a1.125 1.125 0 001.587 1.595l3.454-3.553a3 3 0 000-4.242z" clip-rule="evenodd" />
+                                    </svg>
+                                    Invite
+                                    <svg class="ml-2 h-4 w-4 text-gray-500 dark:text-gray-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                        <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.939a.75.75 0 111.08 1.04l-4.25 4.511a.75.75 0 01-1.08 0L5.21 8.27a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
+                                    </svg>
+                                </button>
+                                {#if isInviteMenuOpen}
+                                    <div class="absolute right-0 z-10 mt-2 w-40 rounded-lg border border-slate-900/10 bg-white p-1 shadow-lg dark:border-white/10 dark:bg-slate-900" role="menu" aria-label="Invite options">
+                                        <button
+                                            onclick={handleCopyInviteLink}
+                                            class="block w-full rounded-md px-3 py-2 text-left text-sm text-slate-700 transition-colors hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-white/10"
+                                            role="menuitem"
+                                        >
+                                            Copy link
+                                        </button>
+                                        <button
+                                            onclick={handleOpenQrModalFromMenu}
+                                            class="block w-full rounded-md px-3 py-2 text-left text-sm text-slate-700 transition-colors hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-white/10"
+                                            role="menuitem"
+                                        >
+                                            QR code
+                                        </button>
+                                    </div>
+                                {/if}
+                            </div>
+                        {/if}
                         {#if !isMember && $user}
                             <button 
                                 onclick={handleJoin}

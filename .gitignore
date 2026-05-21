@@ -27,3 +27,4 @@ vite.config.ts.timestamp-*
 # PR screenshots
 artifacts/screenshots/*.png
 playwright-report/
+test-results/

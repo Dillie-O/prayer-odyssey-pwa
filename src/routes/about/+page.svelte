@@ -83,7 +83,7 @@
 			<div class="space-y-4">
 				<div class="border-l-2 border-indigo-500/30 pl-4">
 					<div class="flex items-center space-x-2 mb-2">
-						<span class="text-sm font-medium text-indigo-400">Ver 4.2.0 - May 20, 2026</span>
+						<span class="text-sm font-medium text-indigo-400">Ver 4.2.1 - May 21, 2026</span>
 						<span class="inline-flex items-center rounded-full bg-green-400/10 px-2 py-0.5 text-xs font-medium text-green-400">Latest</span>
 					</div>
 					<h3 class="text-lg font-medium text-slate-900 mb-2 dark:text-white">QR Invite Sharing</h3>

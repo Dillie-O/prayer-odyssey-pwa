@@ -7,12 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [4.2.1] - 2026-05-21
+
+### Added
+- Single Invite dropdown action on group detail pages with options for copying the invite link or opening the QR code modal
+
+### Changed
+- Group header invite controls now use one compact button to reduce title wrapping pressure on smaller layouts
+- Copilot PR screenshot instructions now require embedding screenshots in the PR description instead of storing them in repository artifact folders
+- App version bumped to 4.2.1 across package metadata and About page
+
+---
+
 ## [4.2.0] - 2026-05-20
 
 ### Added
 - QR-code invite sharing on group detail pages, next to the existing Invite link action
 - Invite QR modal with local QR generation, keyboard accessibility support, and close actions
-- Updated PR screenshots under `artifacts/screenshots/` for this release
 
 ### Changed
 - App version bumped to 4.2.0 across package metadata and About page

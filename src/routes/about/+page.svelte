@@ -1,5 +1,5 @@
 <script lang="ts">
-	let appVersion = '4.2.0'; // Hardcoded version from package.json
+	import { version as appVersion } from '$app/environment';
 </script>
 
 <div class="min-h-screen bg-slate-100 dark:bg-slate-950">

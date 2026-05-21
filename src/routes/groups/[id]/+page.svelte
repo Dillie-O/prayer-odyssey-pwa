@@ -262,7 +262,7 @@
                             <div class="relative" bind:this={inviteMenuRef}>
                                 <button
                                     onclick={toggleInviteMenu}
-                                    class="inline-flex items-center rounded-lg bg-slate-100 px-4 py-2 text-sm font-semibold text-slate-900 shadow-sm ring-1 ring-inset ring-slate-900/10 transition-colors hover:bg-slate-200 dark:bg-white/5 dark:text-white dark:ring-white/10 dark:hover:bg-white/10"
+                                    class="inline-flex items-center rounded-lg bg-slate-100 px-3 py-1.5 text-xs font-semibold text-slate-900 shadow-sm ring-1 ring-inset ring-slate-900/10 transition-colors hover:bg-slate-200 dark:bg-white/5 dark:text-white dark:ring-white/10 dark:hover:bg-white/10 whitespace-nowrap sm:px-4 sm:py-2 sm:text-sm"
                                     aria-haspopup="menu"
                                     aria-expanded={isInviteMenuOpen}
                                 >

@@ -368,9 +368,9 @@
 {/if}
 
 {#if isQrModalOpen}
-    <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" role="dialog" aria-modal="true" aria-labelledby="invite-qr-modal-title">
+    <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
         <button type="button" class="absolute inset-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2" aria-label="Close QR code modal" onclick={closeQrModal}></button>
-        <div class="relative w-full max-w-sm rounded-xl bg-white p-6 shadow-xl dark:bg-slate-900" bind:this={qrModalRef}>
+        <div class="relative w-full max-w-sm rounded-xl bg-white p-6 shadow-xl dark:bg-slate-900" role="dialog" aria-modal="true" aria-labelledby="invite-qr-modal-title" bind:this={qrModalRef}>
             <div class="flex items-center justify-between">
                 <h2 id="invite-qr-modal-title" class="text-lg font-semibold text-slate-900 dark:text-white">Invite QR Code</h2>
                 <button

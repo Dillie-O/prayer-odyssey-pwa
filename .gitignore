@@ -24,3 +24,7 @@ vite.config.ts.timestamp-*
 
 # Firebase
 .firebase/
+# PR screenshots
+artifacts/screenshots/*.png
+playwright-report/
+test-results/

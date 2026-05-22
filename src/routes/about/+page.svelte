@@ -1,5 +1,5 @@
 <script lang="ts">
-	let appVersion = '4.1.1'; // Hardcoded version from package.json
+	import { version as appVersion } from '$app/environment';
 </script>
 
 <div class="min-h-screen bg-slate-100 dark:bg-slate-950">
@@ -83,24 +83,23 @@
 			<div class="space-y-4">
 				<div class="border-l-2 border-indigo-500/30 pl-4">
 					<div class="flex items-center space-x-2 mb-2">
-						<span class="text-sm font-medium text-indigo-400">Ver 4.1.1 - April 20, 2026</span>
+						<span class="text-sm font-medium text-indigo-400">Ver {appVersion} - May 21, 2026</span>
 						<span class="inline-flex items-center rounded-full bg-green-400/10 px-2 py-0.5 text-xs font-medium text-green-400">Latest</span>
 					</div>
-					<h3 class="text-lg font-medium text-slate-900 mb-2 dark:text-white">Remember View Mode</h3>
+					<h3 class="text-lg font-medium text-slate-900 mb-2 dark:text-white">QR Invite Sharing</h3>
 					<ul class="text-slate-500 space-y-1 text-sm dark:text-slate-400">
-						<li>• The app now remembers your list or carousel view when you return to your prayers or a group</li>
+						<li>• Added a QR code action next to Invite on group pages for faster sharing</li>
+						<li>• QR modal now supports keyboard users with focus trapping and Escape close</li>
 					</ul>
 				</div>
 
 				<div class="border-l-2 border-slate-300/50 pl-4 dark:border-slate-600/30">
 					<div class="flex items-center space-x-2 mb-2">
-						<span class="text-sm font-medium text-slate-400">Ver 4.1.0 - April 17, 2026</span>
+						<span class="text-sm font-medium text-slate-400">Ver 4.1.1 - April 20, 2026</span>
 					</div>
-					<h3 class="text-lg font-medium text-slate-900 mb-2 dark:text-white">Light / Dark Mode & Visual Polish</h3>
+					<h3 class="text-lg font-medium text-slate-900 mb-2 dark:text-white">Remember View Mode</h3>
 					<ul class="text-slate-500 space-y-1 text-sm dark:text-slate-400">
-						<li>• Added light/dark mode toggle</li>
-						<li>• General layout improvements for mobile users</li>
-						<li>• Accessibility improvements (ARIA roles, labels)</li>
+						<li>• The app now remembers your list or carousel view when you return to your prayers or a group</li>
 					</ul>
 				</div>
 

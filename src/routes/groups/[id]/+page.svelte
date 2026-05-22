@@ -3,6 +3,7 @@
     import { db } from '$lib/firebase';
     import { doc, onSnapshot, collection, query, where, orderBy } from 'firebase/firestore';
     import { onMount } from 'svelte';
+    import QRCode from 'qrcode';
     import { user } from '$lib/stores/auth';
     import { joinGroup, type Group } from '$lib/stores/groups';
     import type { Prayer } from '$lib/stores/prayers';
@@ -17,7 +18,16 @@
     let loading = $state(true);
     let joining = $state(false);
     let isAddModalOpen = $state(false);
+    let isQrModalOpen = $state(false);
+    let isInviteMenuOpen = $state(false);
+    let qrCodeDataUrl = $state('');
+    let qrCodeLoading = $state(false);
+    let qrCodeError = $state('');
+    let qrModalRef = $state<HTMLDivElement | null>(null);
+    let inviteMenuRef = $state<HTMLDivElement | null>(null);
     let filter = $state<'all' | 'active' | 'answered'>('active');
+    const QR_CODE_SIZE = 256;
+    const QR_CODE_MARGIN = 1;
 
     let isMember = $derived(group && $user && group.members.includes($user.uid));
     let filteredPrayers = $derived(groupPrayers.filter(p => {
@@ -38,11 +48,135 @@
         }
     }
 
+    function getInviteLink() {
+        return window.location.href;
+    }
+
     async function copyInviteLink() {
-        const link = window.location.href;
+        const link = getInviteLink();
         await navigator.clipboard.writeText(link);
         alert('Group link copied to clipboard!');
     }
+
+    function toggleInviteMenu() {
+        isInviteMenuOpen = !isInviteMenuOpen;
+    }
+
+    function closeInviteMenu() {
+        isInviteMenuOpen = false;
+    }
+
+    async function handleCopyInviteLink() {
+        await copyInviteLink();
+        closeInviteMenu();
+    }
+
+    async function handleOpenQrModalFromMenu() {
+        closeInviteMenu();
+        await openQrModal();
+    }
+
+    async function openQrModal() {
+        isQrModalOpen = true;
+        qrCodeLoading = true;
+        qrCodeError = '';
+        qrCodeDataUrl = '';
+
+        try {
+            const inviteLink = getInviteLink();
+            qrCodeDataUrl = await QRCode.toDataURL(inviteLink, {
+                width: QR_CODE_SIZE,
+                margin: QR_CODE_MARGIN
+            });
+        } catch (err) {
+            console.error('Failed to generate invite QR code', err);
+            qrCodeError = 'Failed to generate QR code. Please try again.';
+        } finally {
+            qrCodeLoading = false;
+        }
+    }
+
+    function closeQrModal() {
+        isQrModalOpen = false;
+    }
+
+    $effect(() => {
+        if (!isQrModalOpen || !qrModalRef) return;
+
+        const previouslyFocused = document.activeElement as HTMLElement | null;
+        const focusableSelectors = [
+            'button:not([disabled])',
+            '[href]',
+            'input:not([disabled])',
+            'select:not([disabled])',
+            'textarea:not([disabled])',
+            '[tabindex]:not([tabindex="-1"])'
+        ].join(',');
+        const getFocusableElements = () =>
+            Array.from(qrModalRef?.querySelectorAll<HTMLElement>(focusableSelectors) ?? []);
+
+        const focusableElements = getFocusableElements();
+        focusableElements[0]?.focus();
+
+        const handleKeyDown = (event: KeyboardEvent) => {
+            if (event.key === 'Escape') {
+                event.preventDefault();
+                closeQrModal();
+                return;
+            }
+
+            if (event.key !== 'Tab') return;
+
+            const currentFocusableElements = getFocusableElements();
+            if (currentFocusableElements.length === 0) {
+                event.preventDefault();
+                return;
+            }
+
+            const first = currentFocusableElements[0];
+            const last = currentFocusableElements[currentFocusableElements.length - 1];
+
+            if (event.shiftKey && document.activeElement === first) {
+                event.preventDefault();
+                last.focus();
+            } else if (!event.shiftKey && document.activeElement === last) {
+                event.preventDefault();
+                first.focus();
+            }
+        };
+
+        document.addEventListener('keydown', handleKeyDown);
+
+        return () => {
+            document.removeEventListener('keydown', handleKeyDown);
+            previouslyFocused?.focus();
+        };
+    });
+
+    $effect(() => {
+        if (!isInviteMenuOpen) return;
+
+        const handlePointerDown = (event: PointerEvent) => {
+            if (!inviteMenuRef) return;
+            if (!inviteMenuRef.contains(event.target as Node)) {
+                closeInviteMenu();
+            }
+        };
+
+        const handleKeyDown = (event: KeyboardEvent) => {
+            if (event.key === 'Escape') {
+                closeInviteMenu();
+            }
+        };
+
+        document.addEventListener('pointerdown', handlePointerDown);
+        document.addEventListener('keydown', handleKeyDown);
+
+        return () => {
+            document.removeEventListener('pointerdown', handlePointerDown);
+            document.removeEventListener('keydown', handleKeyDown);
+        };
+    });
 
     onMount(() => {
         if (!groupId) return;
@@ -102,9 +236,9 @@
     <div class="space-y-6">
         <header class="rounded-xl bg-white/80 border border-slate-900/10 p-6 backdrop-blur-sm dark:bg-slate-900/50 dark:border-white/10">
             <div class="flex flex-col gap-4">
-                <!-- Top row with group name and invite button -->
-                <div class="flex items-center justify-between">
-                    <div class="flex items-center gap-3">
+                <!-- Top row with group name -->
+                <div class="flex items-center">
+                    <div class="flex min-w-0 items-center gap-3">
                         <a href="/groups" class="text-gray-500 hover:text-slate-900 transition-colors dark:text-gray-400 dark:hover:text-white" aria-label="Back to groups">
                             <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                                 <path fill-rule="evenodd" d="M17 10a.75.75 0 01-.75.75H5.612l4.158 3.96a.75.75 0 11-1.04 1.08l-5.5-5.25a.75.75 0 010-1.08l5.5-5.25a.75.75 0 111.04 1.08L5.612 9.25H16.25A.75.75 0 0117 10z" clip-rule="evenodd" />
@@ -112,21 +246,9 @@
                         </a>
                         <h1 class="text-3xl font-bold text-slate-900 dark:text-white">{group.name}</h1>
                     </div>
-                    
-                    {#if $user}
-                        <button 
-                            onclick={copyInviteLink}
-                            class="inline-flex items-center rounded-lg bg-slate-100 px-4 py-2 text-sm font-semibold text-slate-900 shadow-sm ring-1 ring-inset ring-slate-900/10 hover:bg-slate-200 dark:bg-white/5 dark:text-white dark:ring-white/10 dark:hover:bg-white/10 transition-colors"
-                        >
-                            <svg class="-ml-0.5 mr-1.5 h-5 w-5 text-gray-500 dark:text-gray-400" viewBox="0 0 20 20" fill="currentColor">
-                                <path fill-rule="evenodd" d="M15.621 4.379a3 3 0 00-4.242 0l-7 7a3 3 0 004.241 4.243h.001l.497-.5a.75.75 0 011.064 1.057l-.498.501-.002.002a4.5 4.5 0 01-6.364-6.364l7-7a4.5 4.5 0 016.368 6.36l-3.455 3.553A2.625 2.625 0 119.52 9.52l3.45-3.451a.75.75 0 111.061 1.06l-3.45 3.451a1.125 1.125 0 001.587 1.595l3.454-3.553a3 3 0 000-4.242z" clip-rule="evenodd" />
-                            </svg>
-                            Invite
-                        </button>
-                    {/if}
                 </div>
                 
-                <!-- Middle row with member info and join button -->
+                <!-- Middle row with member info and actions -->
                 <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                     <div class="flex items-center gap-4 text-sm text-gray-500">
                          <span>{group.members.length} member{group.members.length === 1 ? '' : 's'}</span>
@@ -136,6 +258,42 @@
                     </div>
                     
                     <div class="flex gap-3">
+                        {#if $user}
+                            <div class="relative" bind:this={inviteMenuRef}>
+                                <button
+                                    onclick={toggleInviteMenu}
+                                    class="inline-flex items-center rounded-lg bg-slate-100 px-3 py-1.5 text-xs font-semibold text-slate-900 shadow-sm ring-1 ring-inset ring-slate-900/10 transition-colors hover:bg-slate-200 dark:bg-white/5 dark:text-white dark:ring-white/10 dark:hover:bg-white/10 whitespace-nowrap sm:px-4 sm:py-2 sm:text-sm"
+                                    aria-haspopup="menu"
+                                    aria-expanded={isInviteMenuOpen}
+                                >
+                                    <svg class="-ml-0.5 mr-1.5 h-5 w-5 text-gray-500 dark:text-gray-400" viewBox="0 0 20 20" fill="currentColor">
+                                        <path fill-rule="evenodd" d="M15.621 4.379a3 3 0 00-4.242 0l-7 7a3 3 0 004.241 4.243h.001l.497-.5a.75.75 0 011.064 1.057l-.498.501-.002.002a4.5 4.5 0 01-6.364-6.364l7-7a4.5 4.5 0 016.368 6.36l-3.455 3.553A2.625 2.625 0 119.52 9.52l3.45-3.451a.75.75 0 111.061 1.06l-3.45 3.451a1.125 1.125 0 001.587 1.595l3.454-3.553a3 3 0 000-4.242z" clip-rule="evenodd" />
+                                    </svg>
+                                    Invite
+                                    <svg class="ml-2 h-4 w-4 text-gray-500 dark:text-gray-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                        <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.939a.75.75 0 111.08 1.04l-4.25 4.511a.75.75 0 01-1.08 0L5.21 8.27a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
+                                    </svg>
+                                </button>
+                                {#if isInviteMenuOpen}
+                                    <div class="absolute right-0 z-10 mt-2 w-40 rounded-lg border border-slate-900/10 bg-white p-1 shadow-lg dark:border-white/10 dark:bg-slate-900" role="menu" aria-label="Invite options">
+                                        <button
+                                            onclick={handleCopyInviteLink}
+                                            class="block w-full rounded-md px-3 py-2 text-left text-sm text-slate-700 transition-colors hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-white/10"
+                                            role="menuitem"
+                                        >
+                                            Copy link
+                                        </button>
+                                        <button
+                                            onclick={handleOpenQrModalFromMenu}
+                                            class="block w-full rounded-md px-3 py-2 text-left text-sm text-slate-700 transition-colors hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-white/10"
+                                            role="menuitem"
+                                        >
+                                            QR code
+                                        </button>
+                                    </div>
+                                {/if}
+                            </div>
+                        {/if}
                         {#if !isMember && $user}
                             <button 
                                 onclick={handleJoin}
@@ -263,4 +421,36 @@
     </div>
 {/if}
 
-<AddPrayerModal bind:isOpen={isAddModalOpen} initialGroupIds={[groupId]} />
+{#if isQrModalOpen}
+    <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
+        <button type="button" class="absolute inset-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2" aria-label="Close QR code modal" onclick={closeQrModal}></button>
+        <div class="relative w-full max-w-sm rounded-xl bg-white p-6 shadow-xl dark:bg-slate-900" role="dialog" aria-modal="true" aria-labelledby="invite-qr-modal-title" bind:this={qrModalRef}>
+            <div class="flex items-center justify-between">
+                <h2 id="invite-qr-modal-title" class="text-lg font-semibold text-slate-900 dark:text-white">Invite QR Code</h2>
+                <button
+                    onclick={closeQrModal}
+                    class="rounded-md p-1 text-slate-500 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-white/10 dark:hover:text-white"
+                    aria-label="Close QR code modal"
+                >
+                    <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+                    </svg>
+                </button>
+            </div>
+            <div class="mt-4 flex justify-center rounded-lg bg-slate-100 p-4 dark:bg-slate-800">
+                {#if qrCodeLoading}
+                    <div class="flex h-64 w-64 items-center justify-center" role="status" aria-label="Generating QR code">
+                        <div class="h-8 w-8 animate-spin rounded-full border-4 border-indigo-500 border-t-transparent"></div>
+                    </div>
+                {:else if qrCodeError}
+                    <p class="text-sm text-red-500 dark:text-red-400" role="alert" aria-live="assertive">{qrCodeError}</p>
+                {:else}
+                    <img src={qrCodeDataUrl} alt="QR code for group invite link" class="h-64 w-64" />
+                {/if}
+            </div>
+            <p class="mt-4 text-center text-xs text-slate-500 dark:text-slate-400 break-words"><span class="sr-only">Invite link URL:</span> {getInviteLink()}</p>
+        </div>
+    </div>
+{/if}
+
+<AddPrayerModal bind:isOpen={isAddModalOpen} initialGroupIds={groupId ? [groupId] : []} />

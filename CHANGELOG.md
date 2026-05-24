@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [4.2.2] - 2026-05-22
+
+### Changed
+- Group detail header action row now keeps member metadata and the Invite dropdown aligned on one row in mobile layouts
+- App version bumped to 4.2.2 across package metadata and About page
+
+---
+
 ## [4.2.1] - 2026-05-21
 
 ### Added

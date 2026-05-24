@@ -249,15 +249,15 @@
                 </div>
                 
                 <!-- Middle row with member info and actions -->
-                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                    <div class="flex items-center gap-4 text-sm text-gray-500">
+                <div class="flex items-center justify-between gap-3">
+                    <div class="flex min-w-0 flex-wrap items-center gap-4 text-sm text-gray-500">
                          <span>{group.members.length} member{group.members.length === 1 ? '' : 's'}</span>
                          {#if isMember}
                             <span class="inline-flex items-center rounded-md bg-green-400/10 px-2 py-0.5 text-xs font-medium text-green-400 ring-1 ring-inset ring-green-400/20">Member</span>
                          {/if}
                     </div>
                     
-                    <div class="flex gap-3">
+                    <div class="flex shrink-0 gap-3">
                         {#if $user}
                             <div class="relative" bind:this={inviteMenuRef}>
                                 <button

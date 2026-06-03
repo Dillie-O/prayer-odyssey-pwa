@@ -1,8 +1,17 @@
 <script lang="ts">
-	import { addPrayerUpdate, editPrayerUpdate, deletePrayerUpdate, type PrayerUpdate } from '$lib/stores/prayers';
+	import {
+		addPrayerUpdate,
+		editPrayerUpdate,
+		deletePrayerUpdate,
+		type PrayerUpdate
+	} from '$lib/stores/prayers';
 	import { user } from '$lib/stores/auth';
-	
-	let { prayerId, updates, isOpen = $bindable(false) } = $props<{ prayerId: string; updates: PrayerUpdate[]; isOpen: boolean }>();
+
+	let {
+		prayerId,
+		updates,
+		isOpen = $bindable(false)
+	} = $props<{ prayerId: string; updates: PrayerUpdate[]; isOpen: boolean }>();
 	let newUpdateContent = $state('');
 	let editingUpdateId = $state<string | null>(null);
 	let editContent = $state('');
@@ -10,7 +19,7 @@
 
 	async function handleAddUpdate() {
 		if (!newUpdateContent.trim()) return;
-		
+
 		isSubmitting = true;
 		try {
 			await addPrayerUpdate(prayerId, newUpdateContent);
@@ -22,20 +31,20 @@
 			isSubmitting = false;
 		}
 	}
-	
+
 	function startEdit(update: PrayerUpdate) {
 		editingUpdateId = update.id;
 		editContent = update.content;
 	}
-	
+
 	function cancelEdit() {
 		editingUpdateId = null;
 		editContent = '';
 	}
-	
+
 	async function handleEditUpdate(updateId: string) {
 		if (!editContent.trim()) return;
-		
+
 		isSubmitting = true;
 		try {
 			await editPrayerUpdate(prayerId, updateId, editContent);
@@ -48,10 +57,10 @@
 			isSubmitting = false;
 		}
 	}
-	
+
 	async function handleDeleteUpdate(updateId: string) {
 		if (!confirm('Are you sure you want to delete this update?')) return;
-		
+
 		try {
 			await deletePrayerUpdate(prayerId, updateId);
 		} catch (e: any) {
@@ -62,50 +71,69 @@
 </script>
 
 {#if isOpen}
-	<div class="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6" role="dialog" aria-modal="true">
+	<div
+		class="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6"
+		role="dialog"
+		aria-modal="true"
+	>
 		<!-- Backdrop -->
-		<div 
-			class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm transition-opacity" 
-			onclick={() => isOpen = false}
-            role="button"
-            tabindex="0"
-            onkeydown={(e) => e.key === 'Escape' && (isOpen = false)}
+		<div
+			class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm transition-opacity"
+			onclick={() => (isOpen = false)}
+			role="button"
+			tabindex="0"
+			onkeydown={(e) => e.key === 'Escape' && (isOpen = false)}
 		></div>
 
 		<!-- Modal Panel -->
-           <div class="relative w-full max-w-2xl max-h-[80vh] transform overflow-hidden rounded-xl bg-white border border-slate-200 text-left shadow-2xl transition-all sm:my-8 dark:bg-gradient-to-b dark:from-slate-800/50 dark:to-slate-900 dark:border-white/10 flex flex-col">
-			<div class="p-6 border-b border-slate-200 dark:border-white/10">
+		<div
+			class="relative flex max-h-[80vh] w-full max-w-2xl transform flex-col overflow-hidden rounded-xl border border-slate-200 bg-white text-left shadow-2xl transition-all dark:border-white/10 dark:bg-gradient-to-b dark:from-slate-800/50 dark:to-slate-900 sm:my-8"
+		>
+			<div class="border-b border-slate-200 p-6 dark:border-white/10">
 				<div class="flex items-center justify-between">
-					<h3 class="text-xl font-semibold leading-6 text-slate-900 dark:text-white">Prayer Updates</h3>
-					<button 
-						onclick={() => isOpen = false}
-						class="text-gray-500 hover:text-slate-900 dark:text-gray-400 dark:hover:text-white focus:outline-none"
+					<h3 class="text-xl font-semibold leading-6 text-slate-900 dark:text-white">
+						Prayer Updates
+					</h3>
+					<button
+						onclick={() => (isOpen = false)}
+						class="text-gray-500 hover:text-slate-900 focus:outline-none dark:text-gray-400 dark:hover:text-white"
 					>
 						<span class="sr-only">Close</span>
-						<svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+						<svg
+							class="h-6 w-6"
+							fill="none"
+							viewBox="0 0 24 24"
+							stroke-width="1.5"
+							stroke="currentColor"
+						>
 							<path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
 						</svg>
 					</button>
 				</div>
 			</div>
 
-			<div class="flex-1 overflow-y-auto p-6 space-y-4">
+			<div class="flex-1 space-y-4 overflow-y-auto p-6">
 				<!-- Add New Update -->
-				<div class="rounded-lg bg-slate-100 border border-slate-200 p-4 dark:bg-slate-800/50 dark:border-white/10">
-					<label for="new-update" class="block text-sm font-medium leading-6 text-gray-600 dark:text-gray-300 mb-2">
+				<div
+					class="rounded-lg border border-slate-200 bg-slate-100 p-4 dark:border-white/10 dark:bg-slate-800/50"
+				>
+					<label
+						for="new-update"
+						class="mb-2 block text-sm font-medium leading-6 text-gray-600 dark:text-gray-300"
+					>
 						Add Update
 					</label>
 					<textarea
 						id="new-update"
 						bind:value={newUpdateContent}
 						rows="3"
-						class="block w-full rounded-md border-0 bg-white py-3 text-slate-900 dark:bg-slate-950/50 dark:text-white shadow-sm ring-1 ring-inset ring-slate-900/10 dark:ring-white/10 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6"
+						class="block w-full rounded-md border-0 bg-white py-3 text-slate-900 shadow-sm ring-1 ring-inset ring-slate-900/10 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-500 dark:bg-slate-950/50 dark:text-white dark:ring-white/10 dark:placeholder:text-gray-500 sm:text-sm sm:leading-6"
 						placeholder="Share an update on this prayer..."
 					></textarea>
 					<div class="mt-3 flex justify-end">
 						<button
 							type="button"
-							class="inline-flex justify-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
+							class="inline-flex justify-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-50"
 							onclick={handleAddUpdate}
 							disabled={!newUpdateContent.trim() || isSubmitting}
 						>
@@ -117,13 +145,15 @@
 				<!-- Updates List -->
 				<div class="space-y-3">
 					{#each updates as update (update.id)}
-						<div class="rounded-lg bg-slate-50 border border-slate-200 p-4 dark:bg-slate-800/30 dark:border-white/5">
+						<div
+							class="rounded-lg border border-slate-200 bg-slate-50 p-4 dark:border-white/5 dark:bg-slate-800/30"
+						>
 							{#if editingUpdateId === update.id}
 								<!-- Edit Mode -->
 								<textarea
 									bind:value={editContent}
 									rows="3"
-									class="block w-full rounded-md border-0 bg-white py-3 text-slate-900 dark:bg-slate-950/50 dark:text-white shadow-sm ring-1 ring-inset ring-slate-900/10 dark:ring-white/10 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6"
+									class="block w-full rounded-md border-0 bg-white py-3 text-slate-900 shadow-sm ring-1 ring-inset ring-slate-900/10 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-500 dark:bg-slate-950/50 dark:text-white dark:ring-white/10 dark:placeholder:text-gray-500 sm:text-sm sm:leading-6"
 								></textarea>
 								<div class="mt-3 flex justify-end gap-2">
 									<button
@@ -135,7 +165,7 @@
 									</button>
 									<button
 										type="button"
-										class="inline-flex justify-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
+										class="inline-flex justify-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-50"
 										onclick={() => handleEditUpdate(update.id)}
 										disabled={!editContent.trim() || isSubmitting}
 									>
@@ -144,7 +174,9 @@
 								</div>
 							{:else}
 								<!-- View Mode -->
-								<p class="text-slate-700 dark:text-slate-200 whitespace-pre-wrap">{update.content}</p>
+								<p class="whitespace-pre-wrap text-slate-700 dark:text-slate-200">
+									{update.content}
+								</p>
 								<div class="mt-3 flex items-center justify-between">
 									<span class="text-xs text-slate-500">
 										{update.createdAt?.toDate().toLocaleString() || 'Just now'}
@@ -172,9 +204,9 @@
 							{/if}
 						</div>
 					{/each}
-					
+
 					{#if updates.length === 0}
-						<div class="text-center py-8 text-gray-500">
+						<div class="py-8 text-center text-gray-500">
 							No updates yet. Add the first update above!
 						</div>
 					{/if}

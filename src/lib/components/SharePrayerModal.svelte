@@ -1,140 +1,163 @@
 <script lang="ts">
-    import { groups } from '$lib/stores/groups';
-    import { updatePrayerSharing } from '$lib/stores/prayers';
-    
-    let { isOpen = $bindable(), prayerId, sharedWith = [] } = $props<{ 
-        isOpen: boolean, 
-        prayerId: string,
-        sharedWith?: string[]
-    }>();
-    
-    let selectedGroupIds = $state<string[]>([]);
-    let loading = $state(false);
-    let error = $state('');
+	import { groups } from '$lib/stores/groups';
+	import { updatePrayerSharing } from '$lib/stores/prayers';
 
-    // Initialize selected groups when modal opens or sharedWith changes
-    $effect(() => {
-        if (isOpen) {
-            selectedGroupIds = [...sharedWith];
-        }
-    });
+	let {
+		isOpen = $bindable(),
+		prayerId,
+		sharedWith = []
+	} = $props<{
+		isOpen: boolean;
+		prayerId: string;
+		sharedWith?: string[];
+	}>();
 
-    async function handleShare() {
-        loading = true;
-        error = '';
-        try {
-            await updatePrayerSharing(prayerId, selectedGroupIds);
-            isOpen = false;
-        } catch (err: any) {
-            error = err.message || 'Failed to update sharing';
-        } finally {
-            loading = false;
-        }
-    }
+	let selectedGroupIds = $state<string[]>([]);
+	let loading = $state(false);
+	let error = $state('');
 
-    function toggleGroup(groupId: string) {
-        if (selectedGroupIds.includes(groupId)) {
-            selectedGroupIds = selectedGroupIds.filter(id => id !== groupId);
-        } else {
-            selectedGroupIds = [...selectedGroupIds, groupId];
-        }
-    }
+	// Initialize selected groups when modal opens or sharedWith changes
+	$effect(() => {
+		if (isOpen) {
+			selectedGroupIds = [...sharedWith];
+		}
+	});
 
-    function closeModal() {
-        isOpen = false;
-        error = '';
-    }
+	async function handleShare() {
+		loading = true;
+		error = '';
+		try {
+			await updatePrayerSharing(prayerId, selectedGroupIds);
+			isOpen = false;
+		} catch (err: any) {
+			error = err.message || 'Failed to update sharing';
+		} finally {
+			loading = false;
+		}
+	}
+
+	function toggleGroup(groupId: string) {
+		if (selectedGroupIds.includes(groupId)) {
+			selectedGroupIds = selectedGroupIds.filter((id) => id !== groupId);
+		} else {
+			selectedGroupIds = [...selectedGroupIds, groupId];
+		}
+	}
+
+	function closeModal() {
+		isOpen = false;
+		error = '';
+	}
 </script>
 
 {#if isOpen}
-    <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
-        <!-- Backdrop -->
-        <button 
-            type="button"
-            class="absolute inset-0 bg-slate-950/20 backdrop-blur-sm dark:bg-slate-950/80"
-            onclick={closeModal}
-            aria-label="Close modal"
-        ></button>
-        
-        <!-- Modal Content -->
-        <div class="relative w-full max-w-md overflow-hidden rounded-2xl bg-white border border-slate-900/10 p-6 shadow-2xl dark:bg-slate-900 dark:border-white/10">
-            <div class="flex items-center justify-between mb-6">
-                <h2 class="text-xl font-bold text-slate-900 dark:text-white">Share Prayer</h2>
-                <button 
-                    onclick={closeModal}
-                    class="rounded-full p-1 text-gray-500 hover:bg-slate-100 hover:text-slate-900 transition-colors dark:text-gray-400 dark:hover:bg-white/10 dark:hover:text-white"
-                    aria-label="Close modal"
-                >
-                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                </button>
-            </div>
+	<div class="fixed inset-0 z-50 flex items-center justify-center p-4">
+		<!-- Backdrop -->
+		<button
+			type="button"
+			class="absolute inset-0 bg-slate-950/20 backdrop-blur-sm dark:bg-slate-950/80"
+			onclick={closeModal}
+			aria-label="Close modal"
+		></button>
 
-            {#if $groups.length === 0}
-                <div class="text-center py-8">
-                    <p class="text-gray-400 mb-4 dark:text-gray-400">You are not a member of any groups yet.</p>
-                    <a href="/groups" class="text-indigo-500 hover:text-indigo-600 font-medium dark:text-indigo-400 dark:hover:text-indigo-300">Create or join a group</a>
-                </div>
-            {:else}
-                <div class="space-y-4">
-                    <p class="text-sm text-gray-500 dark:text-gray-400">Select the groups you want to share this prayer with:</p>
-                    
-                    <div class="max-h-60 overflow-y-auto space-y-2 pr-2 custom-scrollbar">
-                        {#each $groups as group}
-                            <label 
-                                class="flex items-center justify-between p-3 rounded-lg border transition-all cursor-pointer {selectedGroupIds.includes(group.id) ? 'bg-indigo-500/10 border-indigo-500/50 text-slate-900 dark:text-white' : 'bg-slate-100 border-slate-900/10 text-gray-600 hover:bg-slate-200 dark:bg-slate-800/50 dark:border-white/5 dark:text-gray-400 dark:hover:bg-white/5'}"
-                            >
-                                <span class="font-medium text-sm">{group.name}</span>
-                                <input 
-                                    type="checkbox" 
-                                    checked={selectedGroupIds.includes(group.id)}
-                                    onchange={() => toggleGroup(group.id)}
-                                    class="h-4 w-4 rounded border-gray-400 text-indigo-600 focus:ring-indigo-600 bg-slate-100 dark:border-gray-300 dark:bg-slate-950"
-                                />
-                            </label>
-                        {/each}
-                    </div>
+		<!-- Modal Content -->
+		<div
+			class="relative w-full max-w-md overflow-hidden rounded-2xl border border-slate-900/10 bg-white p-6 shadow-2xl dark:border-white/10 dark:bg-slate-900"
+		>
+			<div class="mb-6 flex items-center justify-between">
+				<h2 class="text-xl font-bold text-slate-900 dark:text-white">Share Prayer</h2>
+				<button
+					onclick={closeModal}
+					class="rounded-full p-1 text-gray-500 transition-colors hover:bg-slate-100 hover:text-slate-900 dark:text-gray-400 dark:hover:bg-white/10 dark:hover:text-white"
+					aria-label="Close modal"
+				>
+					<svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M6 18L18 6M6 6l12 12"
+						/>
+					</svg>
+				</button>
+			</div>
 
-                    {#if error}
-                        <p class="text-sm text-rose-400">{error}</p>
-                    {/if}
+			{#if $groups.length === 0}
+				<div class="py-8 text-center">
+					<p class="mb-4 text-gray-400 dark:text-gray-400">
+						You are not a member of any groups yet.
+					</p>
+					<a
+						href="/groups"
+						class="font-medium text-indigo-500 hover:text-indigo-600 dark:text-indigo-400 dark:hover:text-indigo-300"
+						>Create or join a group</a
+					>
+				</div>
+			{:else}
+				<div class="space-y-4">
+					<p class="text-sm text-gray-500 dark:text-gray-400">
+						Select the groups you want to share this prayer with:
+					</p>
 
-                    <div class="flex justify-end gap-3 mt-8">
-                        <button 
-                            type="button"
-                            onclick={closeModal}
-                            class="px-4 py-2 text-sm font-medium text-gray-500 hover:text-slate-900 transition-colors dark:text-gray-300 dark:hover:text-white"
-                        >
-                            Cancel
-                        </button>
-                        <button 
-                            type="button"
-                            onclick={handleShare}
-                            disabled={loading}
-                            class="rounded-lg bg-indigo-600 px-6 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
-                        >
-                            {loading ? 'Saving...' : 'Save Changes'}
-                        </button>
-                    </div>
-                </div>
-            {/if}
-        </div>
-    </div>
+					<div class="custom-scrollbar max-h-60 space-y-2 overflow-y-auto pr-2">
+						{#each $groups as group}
+							<label
+								class="flex cursor-pointer items-center justify-between rounded-lg border p-3 transition-all {selectedGroupIds.includes(
+									group.id
+								)
+									? 'border-indigo-500/50 bg-indigo-500/10 text-slate-900 dark:text-white'
+									: 'border-slate-900/10 bg-slate-100 text-gray-600 hover:bg-slate-200 dark:border-white/5 dark:bg-slate-800/50 dark:text-gray-400 dark:hover:bg-white/5'}"
+							>
+								<span class="text-sm font-medium">{group.name}</span>
+								<input
+									type="checkbox"
+									checked={selectedGroupIds.includes(group.id)}
+									onchange={() => toggleGroup(group.id)}
+									class="h-4 w-4 rounded border-gray-400 bg-slate-100 text-indigo-600 focus:ring-indigo-600 dark:border-gray-300 dark:bg-slate-950"
+								/>
+							</label>
+						{/each}
+					</div>
+
+					{#if error}
+						<p class="text-sm text-rose-400">{error}</p>
+					{/if}
+
+					<div class="mt-8 flex justify-end gap-3">
+						<button
+							type="button"
+							onclick={closeModal}
+							class="px-4 py-2 text-sm font-medium text-gray-500 transition-colors hover:text-slate-900 dark:text-gray-300 dark:hover:text-white"
+						>
+							Cancel
+						</button>
+						<button
+							type="button"
+							onclick={handleShare}
+							disabled={loading}
+							class="rounded-lg bg-indigo-600 px-6 py-2 text-sm font-semibold text-white shadow-sm transition-all hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:cursor-not-allowed disabled:opacity-50"
+						>
+							{loading ? 'Saving...' : 'Save Changes'}
+						</button>
+					</div>
+				</div>
+			{/if}
+		</div>
+	</div>
 {/if}
 
 <style>
-    .custom-scrollbar::-webkit-scrollbar {
-        width: 4px;
-    }
-    .custom-scrollbar::-webkit-scrollbar-track {
-        background: transparent;
-    }
-    .custom-scrollbar::-webkit-scrollbar-thumb {
-        background: rgba(255, 255, 255, 0.1);
-        border-radius: 10px;
-    }
-    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-        background: rgba(255, 255, 255, 0.2);
-    }
+	.custom-scrollbar::-webkit-scrollbar {
+		width: 4px;
+	}
+	.custom-scrollbar::-webkit-scrollbar-track {
+		background: transparent;
+	}
+	.custom-scrollbar::-webkit-scrollbar-thumb {
+		background: rgba(255, 255, 255, 0.1);
+		border-radius: 10px;
+	}
+	.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+		background: rgba(255, 255, 255, 0.2);
+	}
 </style>

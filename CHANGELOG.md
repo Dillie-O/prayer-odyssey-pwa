@@ -10,11 +10,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [4.2.3] - 2026-06-03
 
 ### Added
-
-- Profile advanced settings now include prayer journal exports in JSON, CSV ZIP, Markdown, Word, and print-ready PDF-friendly formats
+- Profile advanced settings now include prayer journal exports in JSON, CSV ZIP, Markdown, Word, and print-ready formats
 
 ### Changed
-
 - Print/PDF exports now open a lightweight browser journal view that supports either physical printing or Save as PDF
 - App version bumped to 4.2.3 across package metadata and About page
 

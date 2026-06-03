@@ -48,6 +48,7 @@ export interface PrayerExportData {
 }
 
 const EXPORT_TITLE = 'Prayer Odyssey Journal Export';
+const BLOB_URL_CLEANUP_DELAY_MS = 60_000;
 
 const escapeHtml = (value: string) =>
 	value
@@ -61,7 +62,7 @@ const formatDisplayDate = (value: string | null) => {
 	if (!value) return '—';
 
 	const date = new Date(value);
-	return Number.isNaN(date.getTime()) ? value : date.toLocaleString();
+	return Number.isNaN(date.getTime()) ? '—' : date.toLocaleString();
 };
 
 const formatDateOnly = (value: Date) => value.toISOString().slice(0, 10);
@@ -345,10 +346,10 @@ const buildPrintHtml = (data: PrayerExportData) => {
 };
 
 export const openPrayerExportLoadingWindow = () => {
-	const previewWindow = window.open('', '_blank');
-	if (!previewWindow) return null;
+	const loadingWindow = window.open('', '_blank');
+	if (!loadingWindow) return null;
 
-	previewWindow.document.write(`<!doctype html>
+	loadingWindow.document.write(`<!doctype html>
 <html lang="en">
 	<head>
 		<meta charset="utf-8" />
@@ -377,9 +378,9 @@ export const openPrayerExportLoadingWindow = () => {
 		<p>Preparing your print-ready journal…</p>
 	</body>
 </html>`);
-	previewWindow.document.close();
+	loadingWindow.document.close();
 
-	return previewWindow;
+	return loadingWindow;
 };
 
 export const fetchOwnedPrayerExportData = async (appVersion: string): Promise<PrayerExportData> => {
@@ -669,5 +670,5 @@ export const exportPrayerData = async (
 
 	setTimeout(() => {
 		URL.revokeObjectURL(blobUrl);
-	}, 60_000);
+	}, BLOB_URL_CLEANUP_DELAY_MS);
 };

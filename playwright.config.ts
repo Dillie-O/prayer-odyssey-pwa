@@ -7,7 +7,9 @@ const chromiumExecutableCandidates = [
 	'/usr/bin/google-chrome',
 	'/usr/bin/google-chrome-stable'
 ];
-const chromiumExecutablePath = chromiumExecutableCandidates.find((candidate) => fs.existsSync(candidate));
+const chromiumExecutablePath = chromiumExecutableCandidates.find((candidate) =>
+	fs.existsSync(candidate)
+);
 
 export default defineConfig({
 	testDir: './tests',
@@ -36,7 +38,9 @@ export default defineConfig({
 			name: 'chromium',
 			use: {
 				...devices['Desktop Chrome'],
-				...(chromiumExecutablePath ? { executablePath: chromiumExecutablePath } : {})
+				...(chromiumExecutablePath
+					? { launchOptions: { executablePath: chromiumExecutablePath } }
+					: {})
 			}
 		}
 	],

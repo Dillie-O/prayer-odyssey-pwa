@@ -1,4 +1,13 @@
 import { defineConfig, devices } from '@playwright/test';
+import fs from 'fs';
+
+const chromiumExecutableCandidates = [
+	'/usr/bin/chromium-browser',
+	'/usr/bin/chromium',
+	'/usr/bin/google-chrome',
+	'/usr/bin/google-chrome-stable'
+];
+const chromiumExecutablePath = chromiumExecutableCandidates.find((candidate) => fs.existsSync(candidate));
 
 export default defineConfig({
 	testDir: './tests',
@@ -25,7 +34,10 @@ export default defineConfig({
 	projects: [
 		{
 			name: 'chromium',
-			use: { ...devices['Desktop Chrome'] }
+			use: {
+				...devices['Desktop Chrome'],
+				...(chromiumExecutablePath ? { executablePath: chromiumExecutablePath } : {})
+			}
 		}
 	],
 

@@ -37,7 +37,11 @@ Run Playwright tests with:
 npm run test:e2e
 ```
 
-This command now installs the required Chromium Playwright browser binary before running tests.
+If your environment does not have a system Chromium/Chrome binary available, run:
+
+```sh
+npm run test:e2e:install
+```
 
 ## Building
 

@@ -2,17 +2,28 @@
 	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
 	import { db } from '$lib/firebase';
-	import { doc, getDoc, onSnapshot } from 'firebase/firestore';
+	import { doc, onSnapshot } from 'firebase/firestore';
 	import { onMount, onDestroy } from 'svelte';
 	import { user } from '$lib/stores/auth';
-	import { subscribeToPrayerUpdates, prayerUpdates, addPrayerUpdate, editPrayerUpdate, deletePrayerUpdate, updatePrayer, deletePrayer, markAnswered, markActive, type Prayer, type PrayerUpdate } from '$lib/stores/prayers';
+	import {
+		subscribeToPrayerUpdates,
+		prayerUpdates,
+		addPrayerUpdate,
+		editPrayerUpdate,
+		deletePrayerUpdate,
+		deletePrayer,
+		markAnswered,
+		markActive,
+		type Prayer,
+		type PrayerUpdate
+	} from '$lib/stores/prayers';
 	import { groups } from '$lib/stores/groups';
     import { profiles, fetchUserProfile } from '$lib/stores/users';
 	import EditPrayerModal from '$lib/components/EditPrayerModal.svelte';
 	import SharePrayerModal from '$lib/components/SharePrayerModal.svelte';
 	import AddUpdateModal from '$lib/components/AddUpdateModal.svelte';
 	
-	let prayerId = $derived($page.params.id);
+	let prayerId = $derived($page.params.id ?? '');
 	let prayer = $state<Prayer | null>(null);
 	let loading = $state(true);
 	let error = $state<string | null>(null);

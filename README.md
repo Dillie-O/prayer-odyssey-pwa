@@ -29,6 +29,16 @@ npm run dev
 npm run dev -- --open
 ```
 
+## End-to-end tests
+
+Run Playwright tests with:
+
+```sh
+npm run test:e2e
+```
+
+This command now installs the required Chromium Playwright browser binary before running tests.
+
 ## Building
 
 To create a production version of your app:

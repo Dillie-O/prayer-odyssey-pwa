@@ -7,13 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [4.2.5] - 2026-06-03
+## [4.3.0] - 2026-06-03
 
 ### Changed
 
 - `npm run test:e2e` now runs Playwright tests directly so environments with a preinstalled Chromium/Chrome binary no longer block on browser download/install.
 - Firebase Hosting PR/merge workflows now run `npm run test:e2e` after build to add e2e coverage in CI.
-- App version bumped to 4.2.5 across package metadata and About page
+- App version bumped to 4.3.0 across package metadata and About page
 
 ---
 

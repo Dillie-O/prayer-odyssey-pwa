@@ -64,6 +64,7 @@ export interface PrayerExportDateRange {
 
 const EXPORT_TITLE = 'Prayer Odyssey Journal Export';
 const BLOB_URL_CLEANUP_DELAY_MS = 60_000;
+const DOWNLOAD_BLOB_URL_CLEANUP_DELAY_MS = 1_000;
 
 const escapeHtml = (value: string) =>
 	value
@@ -125,7 +126,7 @@ const downloadBlob = (blob: Blob, fileName: string) => {
 
 	setTimeout(() => {
 		URL.revokeObjectURL(url);
-	}, 1000);
+	}, DOWNLOAD_BLOB_URL_CLEANUP_DELAY_MS);
 };
 
 const buildBaseFileName = (exportedAt: string) =>

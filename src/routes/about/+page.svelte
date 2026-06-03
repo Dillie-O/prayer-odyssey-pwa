@@ -86,6 +86,17 @@
 						<span class="text-sm font-medium text-indigo-400">Ver {appVersion} - June 3, 2026</span>
 						<span class="inline-flex items-center rounded-full bg-green-400/10 px-2 py-0.5 text-xs font-medium text-green-400">Latest</span>
 					</div>
+					<h3 class="text-lg font-medium text-slate-900 mb-2 dark:text-white">Export Date Ranges</h3>
+					<ul class="text-slate-500 space-y-1 text-sm dark:text-slate-400">
+						<li>• Added optional start and end date filters before exporting your prayer journal data</li>
+						<li>• Export summaries now include the date range that was selected for the export</li>
+					</ul>
+				</div>
+
+				<div class="border-l-2 border-slate-300/50 pl-4 dark:border-slate-600/30">
+					<div class="flex items-center space-x-2 mb-2">
+						<span class="text-sm font-medium text-slate-400">Ver 4.2.3 - June 3, 2026</span>
+					</div>
 					<h3 class="text-lg font-medium text-slate-900 mb-2 dark:text-white">Prayer Journal Exports</h3>
 					<ul class="text-slate-500 space-y-1 text-sm dark:text-slate-400">
 						<li>• Added data exports for your prayer journal in JSON, CSV ZIP, Markdown, and Word formats</li>

@@ -1,7 +1,7 @@
 {
 	"name": "prayer-odyssey-pwa",
 	"private": true,
-	"version": "4.2.2",
+	"version": "4.2.3",
 	"type": "module",
 	"scripts": {
 		"dev": "vite dev",
@@ -15,7 +15,9 @@
 		"test:e2e": "playwright test"
 	},
 	"dependencies": {
+		"docx": "^9.7.1",
 		"firebase": "^11.2.0",
+		"jszip": "^3.10.1",
 		"qrcode": "^1.5.4"
 	},
 	"devDependencies": {

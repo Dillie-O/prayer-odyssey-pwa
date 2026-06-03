@@ -7,9 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [4.2.3] - 2026-06-03
+
+### Added
+
+- Profile advanced settings now include prayer journal exports in JSON, CSV ZIP, Markdown, Word, and print-ready PDF-friendly formats
+
+### Changed
+
+- Print/PDF exports now open a lightweight browser journal view that supports either physical printing or Save as PDF
+- App version bumped to 4.2.3 across package metadata and About page
+
+---
+
 ## [4.2.2] - 2026-05-22
 
 ### Changed
+
 - Group detail header action row now keeps member metadata and the Invite dropdown aligned on one row in mobile layouts
 - App version bumped to 4.2.2 across package metadata and About page
 
@@ -18,9 +32,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [4.2.1] - 2026-05-21
 
 ### Added
+
 - Single Invite dropdown action on group detail pages with options for copying the invite link or opening the QR code modal
 
 ### Changed
+
 - Group header invite controls now use one compact button to reduce title wrapping pressure on smaller layouts
 - Copilot PR screenshot instructions now require embedding screenshots in the PR description instead of storing them in repository artifact folders
 - App version bumped to 4.2.1 across package metadata and About page
@@ -30,10 +46,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [4.2.0] - 2026-05-20
 
 ### Added
+
 - QR-code invite sharing on group detail pages, next to the existing Invite link action
 - Invite QR modal with local QR generation, keyboard accessibility support, and close actions
 
 ### Changed
+
 - App version bumped to 4.2.0 across package metadata and About page
 - Added repository Copilot agent rule requiring PR screenshot refresh plus version/changelog updates
 
@@ -42,14 +60,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [4.1.1] - 2026-04-20
 
 ### Added
+
 - Persistent prayer list view mode (list / carousel) saved to `localStorage`
 - `viewMode` store (`src/lib/stores/viewMode.ts`) shared across personal and group prayer views
 
 ### Changed
+
 - Personal prayers page and group prayers page now both read/write the shared `viewMode` store instead of local component state
 - About page version badge and changelog entry updated to reflect 4.1.1
 
 ### Fixed
+
 - About page link missing from desktop navigation bar
 
 ---
@@ -57,6 +78,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [4.1.0] - 2026-04-17
 
 ### Added
+
 - Light/dark mode toggle with sun/moon icon in the navbar
 - System preference detection (`prefers-color-scheme`) on first load
 - Persistent theme selection saved to `localStorage`
@@ -67,6 +89,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Profile avatar `onerror` fallback to ui-avatars when Google photo URL fails
 
 ### Changed
+
 - App background updated to `slate-100` in light mode for better card contrast
 - Prayer cards now use solid `bg-white` with `border-slate-200 shadow-sm` in light mode
 - Group list cards hover state updated — no longer turns dark in light mode
@@ -77,6 +100,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - About page version badge and changelog entry updated to reflect 4.1.0
 
 ### Fixed
+
 - `AddUpdateModal` panel was hardcoded to `bg-slate-900` with no light-mode default
 - `EditPrayerModal` and `CreateGroupModal` dark gradient was applied unconditionally
 - `PrayerUpdates` modal had entirely hardcoded dark text and background colors
@@ -93,9 +117,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [4.0.20] - 2026-02-13
 
 ### Added
+
 - Latest prayer update preview displayed in carousel/card view
 
 ### Changed
+
 - Improved carousel layout to better fit viewport
 - Enhanced carousel navigation spacing
 
@@ -104,10 +130,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [4.0.10] - 2026-02-12
 
 ### Added
+
 - Group prayer sharing functionality
 - Group member management UI
 
 ### Changed
+
 - Enhanced group navigation and filtering
 
 ---
@@ -115,6 +143,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [4.0.0] - 2026-02-10
 
 ### Added
+
 - Initial launch of Prayer Odyssey PWA
 - Prayer tracking and creation system
 - Prayer status management (Active / Answered)

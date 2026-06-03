@@ -1,11 +1,25 @@
 <script lang="ts">
+    import { version as appVersion } from '$app/environment';
+    import { exportPrayerData, fetchOwnedPrayerExportData, openPrayerExportLoadingWindow, type PrayerExportFormat } from '$lib/utils/prayerExport';
     import { user, logout } from '$lib/stores/auth';
     import { requestNotificationPermission, disableFCMNotifications, clearAllFCMTokens, notificationPermission, fcmToken } from '$lib/stores/notifications';
     
     let isRequesting = $state(false);
     let isDisabling = $state(false);
     let isClearingAll = $state(false);
+    let isExporting = $state(false);
     let showAdvancedSettings = $state(false);
+    let exportFormat = $state<PrayerExportFormat>('json');
+    let exportStatusMessage = $state('');
+    let exportError = $state('');
+
+    const exportFormatDescriptions: Record<PrayerExportFormat, string> = {
+        json: 'Full-fidelity backup that is best for future imports or scripting.',
+        csv: 'Spreadsheet-friendly ZIP with separate prayer, update, and summary files.',
+        markdown: 'Plain text journal you can read or edit in most note-taking apps.',
+        docx: 'Word document for continuing journaling in Microsoft Word, Pages, or Google Docs.',
+        print: 'Print-ready journal in a new tab for physical printing or saving as a PDF.'
+    };
 
     async function handleEnableNotifications() {
         isRequesting = true;
@@ -32,6 +46,40 @@
                 console.error('Failed to clear all notifications:', error);
             }
             isClearingAll = false;
+        }
+    }
+
+    async function handleExportData() {
+        if (!$user || isExporting) return;
+
+        let printWindow: Window | null = null;
+        exportError = '';
+        exportStatusMessage = exportFormat === 'print' ? 'Preparing your print-ready journal...' : 'Preparing your export...';
+
+        if (exportFormat === 'print') {
+            printWindow = openPrayerExportLoadingWindow();
+            if (!printWindow) {
+                exportStatusMessage = '';
+                exportError = 'Please allow pop-ups to open the print-ready journal.';
+                return;
+            }
+        }
+
+        isExporting = true;
+
+        try {
+            const exportData = await fetchOwnedPrayerExportData(appVersion);
+            await exportPrayerData(exportFormat, exportData, printWindow);
+            exportStatusMessage = exportFormat === 'print'
+                ? 'Opened your print-ready journal in a new tab.'
+                : 'Your export is ready to download.';
+        } catch (error) {
+            console.error('Failed to export prayer data:', error);
+            exportStatusMessage = '';
+            exportError = 'Unable to export your prayer data right now. Please try again.';
+            printWindow?.close();
+        } finally {
+            isExporting = false;
         }
     }
 
@@ -108,7 +156,51 @@
                     </button>
                     
                     {#if showAdvancedSettings}
-                        <div class="mt-4 p-4 rounded-lg bg-slate-100/80 border border-slate-900/10 dark:bg-slate-800/30 dark:border-white/5">
+                        <div class="mt-4 space-y-4">
+                            <div class="p-4 rounded-lg bg-slate-100/80 border border-slate-900/10 dark:bg-slate-800/30 dark:border-white/5">
+                                <div class="space-y-4">
+                                    <div>
+                                        <p class="text-slate-900 font-medium text-sm dark:text-white">Export My Data</p>
+                                        <p class="text-xs text-gray-500 dark:text-gray-400">Download your prayers, updates, and prayer counts in the format that works best for you.</p>
+                                    </div>
+
+                                    <label class="block space-y-2">
+                                        <span class="text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400">Format</span>
+                                        <select
+                                            bind:value={exportFormat}
+                                            class="block w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:border-white/10 dark:bg-slate-900 dark:text-white"
+                                        >
+                                            <option value="json">JSON</option>
+                                            <option value="csv">CSV (ZIP)</option>
+                                            <option value="markdown">Markdown</option>
+                                            <option value="docx">Word (.docx)</option>
+                                            <option value="print">Print or Save as PDF</option>
+                                        </select>
+                                    </label>
+
+                                    <p class="text-xs text-gray-500 dark:text-gray-400">{exportFormatDescriptions[exportFormat]}</p>
+
+                                    <div class="flex items-center justify-between gap-4">
+                                        <div class="min-h-[2.5rem] text-xs">
+                                            {#if exportError}
+                                                <p class="text-red-500 dark:text-red-400">{exportError}</p>
+                                            {:else if exportStatusMessage}
+                                                <p class="text-gray-500 dark:text-gray-400">{exportStatusMessage}</p>
+                                            {/if}
+                                        </div>
+
+                                        <button
+                                            onclick={handleExportData}
+                                            disabled={isExporting}
+                                            class="shrink-0 rounded-md bg-indigo-600 px-3 py-2 text-xs font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:opacity-50 transition-colors"
+                                        >
+                                            {isExporting ? 'Preparing…' : exportFormat === 'print' ? 'Open Print View' : 'Export My Data'}
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="p-4 rounded-lg bg-slate-100/80 border border-slate-900/10 dark:bg-slate-800/30 dark:border-white/5">
                             <div class="flex items-center justify-between">
                                 <div>
                                     <p class="text-slate-900 font-medium text-sm dark:text-white">Clear All Devices</p>
@@ -125,6 +217,7 @@
                                 {:else}
                                     <span class="text-xs text-gray-400 dark:text-gray-500">No active devices</span>
                                 {/if}
+                            </div>
                             </div>
                         </div>
                     {/if}

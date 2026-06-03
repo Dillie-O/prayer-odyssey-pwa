@@ -83,13 +83,13 @@
 			<div class="space-y-4">
 				<div class="border-l-2 border-indigo-500/30 pl-4">
 					<div class="flex items-center space-x-2 mb-2">
-						<span class="text-sm font-medium text-indigo-400">Ver {appVersion} - May 21, 2026</span>
+						<span class="text-sm font-medium text-indigo-400">Ver {appVersion} - June 3, 2026</span>
 						<span class="inline-flex items-center rounded-full bg-green-400/10 px-2 py-0.5 text-xs font-medium text-green-400">Latest</span>
 					</div>
-					<h3 class="text-lg font-medium text-slate-900 mb-2 dark:text-white">QR Invite Sharing</h3>
+					<h3 class="text-lg font-medium text-slate-900 mb-2 dark:text-white">Prayer Journal Exports</h3>
 					<ul class="text-slate-500 space-y-1 text-sm dark:text-slate-400">
-						<li>• Added a QR code action next to Invite on group pages for faster sharing</li>
-						<li>• QR modal now supports keyboard users with focus trapping and Escape close</li>
+						<li>• Added data exports for your prayer journal in JSON, CSV ZIP, Markdown, and Word formats</li>
+						<li>• Added a print-ready view so you can print your journal or save it as a PDF from the browser</li>
 					</ul>
 				</div>
 

@@ -1,6 +1,6 @@
 <script lang="ts">
     import { version as appVersion } from '$app/environment';
-    import { exportPrayerData, fetchOwnedPrayerExportData, openPrayerExportLoadingWindow, type PrayerExportFormat } from '$lib/utils/prayerExport';
+    import { exportPrayerData, fetchOwnedPrayerExportData, openPrayerExportLoadingWindow, type PrayerExportDateRange, type PrayerExportFormat } from '$lib/utils/prayerExport';
     import { user, logout } from '$lib/stores/auth';
     import { requestNotificationPermission, disableFCMNotifications, clearAllFCMTokens, notificationPermission, fcmToken } from '$lib/stores/notifications';
     
@@ -10,6 +10,8 @@
     let isExporting = $state(false);
     let showAdvancedSettings = $state(false);
     let exportFormat = $state<PrayerExportFormat>('json');
+    let exportStartDate = $state('');
+    let exportEndDate = $state('');
     let exportStatusMessage = $state('');
     let exportError = $state('');
 
@@ -56,6 +58,12 @@
         exportError = '';
         exportStatusMessage = exportFormat === 'print' ? 'Preparing your print-ready journal...' : 'Preparing your export...';
 
+        if (exportStartDate && exportEndDate && exportStartDate > exportEndDate) {
+            exportStatusMessage = '';
+            exportError = 'Start date must be on or before the end date.';
+            return;
+        }
+
         if (exportFormat === 'print') {
             printWindow = openPrayerExportLoadingWindow();
             if (!printWindow) {
@@ -68,7 +76,11 @@
         isExporting = true;
 
         try {
-            const exportData = await fetchOwnedPrayerExportData(appVersion);
+            const dateRange: PrayerExportDateRange = {
+                startDate: exportStartDate || null,
+                endDate: exportEndDate || null
+            };
+            const exportData = await fetchOwnedPrayerExportData(appVersion, dateRange);
             await exportPrayerData(exportFormat, exportData, printWindow);
             exportStatusMessage = exportFormat === 'print'
                 ? 'Opened your print-ready journal in a new tab.'
@@ -179,6 +191,26 @@
                                     </label>
 
                                     <p class="text-xs text-gray-500 dark:text-gray-400">{exportFormatDescriptions[exportFormat]}</p>
+
+                                    <div class="grid gap-3 sm:grid-cols-2">
+                                        <label class="block space-y-2">
+                                            <span class="text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400">Start Date (optional)</span>
+                                            <input
+                                                type="date"
+                                                bind:value={exportStartDate}
+                                                class="block w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:border-white/10 dark:bg-slate-900 dark:text-white"
+                                            />
+                                        </label>
+
+                                        <label class="block space-y-2">
+                                            <span class="text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400">End Date (optional)</span>
+                                            <input
+                                                type="date"
+                                                bind:value={exportEndDate}
+                                                class="block w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:border-white/10 dark:bg-slate-900 dark:text-white"
+                                            />
+                                        </label>
+                                    </div>
 
                                     <div class="flex items-center justify-between gap-4">
                                         <div class="min-h-[2.5rem] text-xs">

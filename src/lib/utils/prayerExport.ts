@@ -1,5 +1,13 @@
 import { auth, db } from '$lib/firebase';
-import { collection, getDocs, orderBy, query, where, type Timestamp } from 'firebase/firestore';
+import {
+	collection,
+	getDocs,
+	orderBy,
+	query,
+	where,
+	Timestamp,
+	type QueryConstraint
+} from 'firebase/firestore';
 
 export type PrayerExportFormat = 'json' | 'csv' | 'markdown' | 'docx' | 'print';
 
@@ -33,6 +41,8 @@ export interface PrayerExportSummary {
 	archivedPrayers: number;
 	totalUpdates: number;
 	totalPrayedCount: number;
+	dateRangeStart: string | null;
+	dateRangeEnd: string | null;
 	exportedAt: string;
 	appVersion: string;
 }
@@ -45,6 +55,11 @@ export interface PrayerExportData {
 	};
 	summary: PrayerExportSummary;
 	prayers: ExportPrayer[];
+}
+
+export interface PrayerExportDateRange {
+	startDate?: string | null;
+	endDate?: string | null;
 }
 
 const EXPORT_TITLE = 'Prayer Odyssey Journal Export';
@@ -70,6 +85,27 @@ const formatDateOnly = (value: Date) => value.toISOString().slice(0, 10);
 const timestampToIso = (value: Timestamp | { toDate: () => Date } | null | undefined) => {
 	if (!value || typeof value.toDate !== 'function') return null;
 	return value.toDate().toISOString();
+};
+
+const parseDateInput = (value: string | null | undefined, endOfDay = false) => {
+	if (!value) return null;
+	const parsed = new Date(`${value}T${endOfDay ? '23:59:59.999' : '00:00:00.000'}`);
+	return Number.isNaN(parsed.getTime()) ? null : parsed;
+};
+
+const normalizeDateRange = (dateRange?: PrayerExportDateRange) => {
+	const startDate = parseDateInput(dateRange?.startDate ?? null);
+	const endDate = parseDateInput(dateRange?.endDate ?? null, true);
+	return { startDate, endDate };
+};
+
+const formatDateRange = (startDate: string | null, endDate: string | null) => {
+	const start = startDate ? formatDateOnly(new Date(startDate)) : null;
+	const end = endDate ? formatDateOnly(new Date(endDate)) : null;
+	if (start && end) return `${start} to ${end}`;
+	if (start) return `From ${start}`;
+	if (end) return `Through ${end}`;
+	return 'All dates';
 };
 
 const csvEscape = (value: string | number | null | undefined) =>
@@ -112,6 +148,7 @@ const buildMarkdown = (data: PrayerExportData) => {
 		`- Archived prayers: ${data.summary.archivedPrayers}`,
 		`- Total updates: ${data.summary.totalUpdates}`,
 		`- Total prayed count: ${data.summary.totalPrayedCount}`,
+		`- Date range: ${formatDateRange(data.summary.dateRangeStart, data.summary.dateRangeEnd)}`,
 		''
 	];
 
@@ -333,6 +370,7 @@ const buildPrintHtml = (data: PrayerExportData) => {
 						<p><strong>Archived prayers:</strong> ${data.summary.archivedPrayers}</p>
 						<p><strong>Total updates:</strong> ${data.summary.totalUpdates}</p>
 						<p><strong>Total prayed count:</strong> ${data.summary.totalPrayedCount}</p>
+						<p><strong>Date range:</strong> ${escapeHtml(formatDateRange(data.summary.dateRangeStart, data.summary.dateRangeEnd))}</p>
 					</div>
 				</section>
 				<section>
@@ -383,17 +421,28 @@ export const openPrayerExportLoadingWindow = () => {
 	return loadingWindow;
 };
 
-export const fetchOwnedPrayerExportData = async (appVersion: string): Promise<PrayerExportData> => {
+export const fetchOwnedPrayerExportData = async (
+	appVersion: string,
+	dateRange?: PrayerExportDateRange
+): Promise<PrayerExportData> => {
 	const currentUser = auth.currentUser;
 	if (!currentUser) throw new Error('User not logged in');
 
-	const prayersSnapshot = await getDocs(
-		query(
-			collection(db, 'prayers'),
-			where('ownerId', '==', currentUser.uid),
-			orderBy('createdAt', 'desc')
-		)
-	);
+	const normalizedDateRange = normalizeDateRange(dateRange);
+	const constraints: QueryConstraint[] = [
+		where('ownerId', '==', currentUser.uid),
+		orderBy('createdAt', 'desc')
+	];
+
+	if (normalizedDateRange.startDate) {
+		constraints.push(where('createdAt', '>=', Timestamp.fromDate(normalizedDateRange.startDate)));
+	}
+
+	if (normalizedDateRange.endDate) {
+		constraints.push(where('createdAt', '<=', Timestamp.fromDate(normalizedDateRange.endDate)));
+	}
+
+	const prayersSnapshot = await getDocs(query(collection(db, 'prayers'), ...constraints));
 
 	const prayers = await Promise.all(
 		prayersSnapshot.docs.map(async (prayerDoc) => {
@@ -438,6 +487,8 @@ export const fetchOwnedPrayerExportData = async (appVersion: string): Promise<Pr
 		archivedPrayers: prayers.filter((prayer) => prayer.status === 'archived').length,
 		totalUpdates: prayers.reduce((sum, prayer) => sum + prayer.updatesCount, 0),
 		totalPrayedCount: prayers.reduce((sum, prayer) => sum + prayer.prayedCount, 0),
+		dateRangeStart: normalizedDateRange.startDate?.toISOString() ?? null,
+		dateRangeEnd: normalizedDateRange.endDate?.toISOString() ?? null,
 		exportedAt,
 		appVersion
 	};
@@ -490,6 +541,8 @@ export const exportPrayerData = async (
 					'archivedPrayers',
 					'totalUpdates',
 					'totalPrayedCount',
+					'dateRangeStart',
+					'dateRangeEnd',
 					'exportedAt',
 					'appVersion'
 				],
@@ -501,6 +554,8 @@ export const exportPrayerData = async (
 						data.summary.archivedPrayers,
 						data.summary.totalUpdates,
 						data.summary.totalPrayedCount,
+						data.summary.dateRangeStart,
+						data.summary.dateRangeEnd,
 						data.summary.exportedAt,
 						data.summary.appVersion
 					]
@@ -584,7 +639,10 @@ export const exportPrayerData = async (
 			new Paragraph(`Answered prayers: ${data.summary.answeredPrayers}`),
 			new Paragraph(`Archived prayers: ${data.summary.archivedPrayers}`),
 			new Paragraph(`Total updates: ${data.summary.totalUpdates}`),
-			new Paragraph(`Total prayed count: ${data.summary.totalPrayedCount}`)
+			new Paragraph(`Total prayed count: ${data.summary.totalPrayedCount}`),
+			new Paragraph(
+				`Date range: ${formatDateRange(data.summary.dateRangeStart, data.summary.dateRangeEnd)}`
+			)
 		];
 
 		if (data.prayers.length === 0) {

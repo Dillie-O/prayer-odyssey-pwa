@@ -20,7 +20,9 @@
 
 <svelte:head>
 	<link rel="icon" href={favicon} />
+	<!-- eslint-disable-next-line svelte/no-at-html-tags -->
 	{@html pwaInfo?.webManifest?.linkTag}
+	<!-- eslint-disable-next-line svelte/no-at-html-tags -->
 	{@html pwaInfo?.registerSW?.scriptTag}
 </svelte:head>
 

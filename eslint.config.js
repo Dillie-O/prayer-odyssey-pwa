@@ -29,7 +29,6 @@ export default defineConfig(
 			'@typescript-eslint/no-require-imports': 'off',
 			'svelte/no-navigation-without-resolve': 'off',
 			'svelte/require-each-key': 'off',
-			'svelte/no-at-html-tags': 'off',
 			'svelte/prefer-writable-derived': 'off'
 		}
 	},

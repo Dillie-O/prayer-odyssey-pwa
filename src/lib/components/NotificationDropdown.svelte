@@ -22,9 +22,6 @@
 		);
 	}
 
-	async function handleMarkRead(id: string) {
-		await markAsRead(id);
-	}
 
 	async function handleDelete(e: Event, id: string) {
 		e.stopPropagation();

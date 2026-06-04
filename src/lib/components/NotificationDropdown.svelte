@@ -7,7 +7,6 @@
 		type AppNotification
 	} from '$lib/stores/notifications';
 	import { fly, fade } from 'svelte/transition';
-	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
 
 	let { isOpen = $bindable(false) } = $props<{ isOpen: boolean }>();

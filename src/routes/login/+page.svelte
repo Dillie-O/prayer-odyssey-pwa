@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
+	import { dev } from '$app/environment';
 	import { user, loginWithGoogle, loginWithEmail, registerWithEmail } from '$lib/stores/auth';
 	import { onMount } from 'svelte';
 
@@ -23,11 +24,11 @@
 	});
 
 	async function handleGoogleLogin() {
-		console.log('Login button clicked');
+		if (dev) console.log('Login button clicked');
 		errorMessage = '';
 		try {
 			await loginWithGoogle();
-			console.log('Login returned');
+			if (dev) console.log('Login returned');
 		} catch (e) {
 			console.error('Login Error:', e);
 			errorMessage = e instanceof Error ? e.message : String(e);

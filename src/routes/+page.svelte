@@ -19,7 +19,7 @@
 <!-- Public Landing Page -->
 <div class="py-24 text-center">
 	<h1
-		class="bg-gradient-to-r from-indigo-200 to-indigo-500 bg-clip-text text-4xl font-bold tracking-tight text-transparent text-white sm:text-6xl"
+		class="bg-gradient-to-r from-indigo-200 to-indigo-500 bg-clip-text text-4xl font-bold tracking-tight text-transparent sm:text-6xl"
 	>
 		Prayer Odyssey
 	</h1>

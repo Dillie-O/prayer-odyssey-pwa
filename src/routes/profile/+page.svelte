@@ -128,9 +128,12 @@
 			class="rounded-xl border border-slate-900/10 bg-white/80 p-6 backdrop-blur-sm dark:border-white/10 dark:bg-slate-900/50"
 		>
 			<div class="flex items-center space-x-4">
-				<img
-					src={$user.photoURL || `https://ui-avatars.com/api/?name=${$user.displayName}`}
-					alt="Profile"
+			<img
+				src={
+					$user.photoURL ||
+					`https://ui-avatars.com/api/?name=${encodeURIComponent($user.displayName ?? 'User')}`
+				}
+				alt="Profile"
 					class="h-16 w-16 rounded-full border-2 border-indigo-500/50"
 				/>
 				<div>

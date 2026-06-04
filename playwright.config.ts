@@ -7,9 +7,9 @@ const chromiumExecutableCandidates = [
 	'/usr/bin/google-chrome',
 	'/usr/bin/google-chrome-stable'
 ];
-const chromiumExecutablePath = chromiumExecutableCandidates.find((candidate) =>
-	fs.existsSync(candidate)
-);
+const chromiumExecutablePath =
+	process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH ??
+	chromiumExecutableCandidates.find((candidate) => fs.existsSync(candidate));
 
 export default defineConfig({
 	testDir: './tests',

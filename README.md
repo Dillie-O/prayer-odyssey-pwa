@@ -29,6 +29,20 @@ npm run dev
 npm run dev -- --open
 ```
 
+## End-to-end tests
+
+Run Playwright tests with:
+
+```sh
+npm run test:e2e
+```
+
+If your environment does not have a system Chromium/Chrome binary available, run:
+
+```sh
+npm run test:e2e:install
+```
+
 ## Building
 
 To create a production version of your app:

@@ -140,7 +140,7 @@
 							<span class="text-xs font-medium text-slate-500 dark:text-slate-400"
 								>Latest Update</span
 							>
-							<span class="text-xs text-slate-400 dark:text-slate-500">
+							<span class="text-xs text-slate-500 dark:text-slate-400">
 								{latestUpdate.createdAt?.toDate().toLocaleDateString() || 'Just now'}
 							</span>
 						</div>
@@ -158,7 +158,7 @@
 		<div class="-mx-1 mb-4 mt-3 flex flex-wrap gap-2">
 			{#each sharedGroups as group}
 				<span
-					class="mx-1 inline-flex items-center rounded-full bg-indigo-400/10 px-2 py-0.5 text-[10px] font-medium text-indigo-400 ring-1 ring-inset ring-indigo-400/20"
+					class="mx-1 inline-flex items-center rounded-full bg-indigo-50 px-2 py-0.5 text-[10px] font-medium text-indigo-700 ring-1 ring-inset ring-indigo-700/20 dark:bg-indigo-400/10 dark:text-indigo-300 dark:ring-indigo-400/30"
 				>
 					{group.name}
 				</span>
@@ -180,8 +180,8 @@
 						handleToggleStatus();
 					}}
 					class="p-3 {prayer.status === 'answered'
-						? 'text-indigo-400 hover:bg-indigo-400/10 hover:text-indigo-300'
-						: 'text-rose-400 hover:bg-rose-400/10 hover:text-rose-300'} rounded-full transition-colors"
+						? 'text-indigo-600 hover:bg-indigo-400/10 hover:text-indigo-500 dark:text-indigo-300 dark:hover:text-indigo-200'
+						: 'text-rose-600 hover:bg-rose-400/10 hover:text-rose-500 dark:text-rose-300 dark:hover:text-rose-200'} rounded-full transition-colors"
 					title={prayer.status === 'answered' ? 'Mark as Active' : 'Mark as Answered'}
 				>
 					{#if prayer.status === 'answered'}
@@ -219,7 +219,7 @@
 							e.stopPropagation();
 							isShareModalOpen = true;
 						}}
-						class="rounded-full p-2 text-indigo-400 transition-colors hover:bg-indigo-400/10 hover:text-indigo-300"
+						class="rounded-full p-2 text-indigo-600 transition-colors hover:bg-indigo-400/10 hover:text-indigo-500 dark:text-indigo-300 dark:hover:text-indigo-200"
 						title="Share with group"
 					>
 						<svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -237,11 +237,11 @@
 
 		<!-- Date, Status, Updates, and Prayer Count (right justified) -->
 		<div class="flex items-center space-x-3">
-			<span class="text-xs text-slate-400 dark:text-slate-500">
+			<span class="text-xs text-slate-500 dark:text-slate-400">
 				{prayer.createdAt?.toDate().toLocaleDateString() || 'Just now'}
 			</span>
 			{#if updates.length > 0}
-				<span class="text-xs text-indigo-500 dark:text-indigo-400">
+				<span class="text-xs text-indigo-600 dark:text-indigo-300">
 					{updates.length}
 					{updates.length === 1 ? 'Update' : 'Updates'}
 				</span>
@@ -249,8 +249,8 @@
 			<span
 				class="inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset {prayer.status ===
 				'answered'
-					? 'bg-green-400/10 text-green-400 ring-green-400/20'
-					: 'bg-indigo-400/10 text-indigo-400 ring-indigo-400/30'}"
+					? 'bg-green-50 text-green-700 ring-green-600/20 dark:bg-green-400/10 dark:text-green-300 dark:ring-green-400/30'
+					: 'bg-indigo-50 text-indigo-700 ring-indigo-700/20 dark:bg-indigo-400/10 dark:text-indigo-300 dark:ring-indigo-400/40'}"
 			>
 				{prayer.status.charAt(0).toUpperCase() + prayer.status.slice(1)}
 			</span>
@@ -265,8 +265,8 @@
 					class="inline-flex items-center space-x-1.5 rounded-md px-3 py-3 text-xs font-medium transition-all {isPraying
 						? 'scale-95 bg-indigo-600 text-white'
 						: hasPrayed
-							? 'bg-indigo-500/20 text-indigo-300 ring-1 ring-inset ring-indigo-500/40 hover:bg-indigo-500/30'
-							: 'bg-indigo-400/10 text-indigo-400 ring-1 ring-inset ring-indigo-400/30 hover:bg-indigo-400/20'}"
+							? 'bg-indigo-100 text-indigo-700 ring-1 ring-inset ring-indigo-500/40 hover:bg-indigo-200 dark:bg-indigo-500/20 dark:text-indigo-200 dark:hover:bg-indigo-500/30'
+							: 'bg-indigo-50 text-indigo-700 ring-1 ring-inset ring-indigo-400/30 hover:bg-indigo-100 dark:bg-indigo-400/10 dark:text-indigo-300 dark:hover:bg-indigo-400/20'}"
 					disabled={isPraying}
 					title="I'm praying for this"
 				>
@@ -275,7 +275,7 @@
 				</button>
 			{:else if (prayer.prayedCount || 0) > 0}
 				<div
-					class="inline-flex items-center space-x-1.5 rounded-md bg-indigo-400/5 px-2 py-1 text-xs font-medium text-indigo-300 ring-1 ring-inset ring-indigo-400/20"
+					class="inline-flex items-center space-x-1.5 rounded-md bg-indigo-50 px-2 py-1 text-xs font-medium text-indigo-700 ring-1 ring-inset ring-indigo-400/20 dark:bg-indigo-400/15 dark:text-indigo-200 dark:ring-indigo-400/30"
 				>
 					<span class="text-sm">🙏</span>
 					<span>{prayer.prayedCount}</span>

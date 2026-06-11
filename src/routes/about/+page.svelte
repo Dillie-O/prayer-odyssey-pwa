@@ -1,5 +1,19 @@
 <script lang="ts">
 	import { version as appVersion } from '$app/environment';
+	import QRCode from 'qrcode';
+	import { onMount } from 'svelte';
+
+	const APP_URL = 'https://app.prayerodyssey.com';
+	let qrDataUrl = $state('');
+	let isQRModalOpen = $state(false);
+
+	onMount(async () => {
+		qrDataUrl = await QRCode.toDataURL(APP_URL, {
+			width: 256,
+			margin: 2,
+			color: { dark: '#4338ca', light: '#ffffff' }
+		});
+	});
 </script>
 
 <div class="min-h-screen bg-slate-100 dark:bg-slate-950">
@@ -48,22 +62,38 @@
 				<p class="mb-4 text-slate-400">
 					Visit our main website for more information and resources.
 				</p>
-				<a
-					href="https://prayerodyssey.com"
-					target="_blank"
-					rel="noopener noreferrer"
-					class="inline-flex items-center rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-indigo-500"
-				>
-					Visit Website
-					<svg class="ml-2 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="2"
-							d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
-						/>
-					</svg>
-				</a>
+				<div class="flex flex-wrap gap-3">
+					<a
+						href="https://prayerodyssey.com"
+						target="_blank"
+						rel="noopener noreferrer"
+						class="inline-flex items-center rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-indigo-500"
+					>
+						Visit Website
+						<svg class="ml-2 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								stroke-width="2"
+								d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+							/>
+						</svg>
+					</a>
+					<button
+						onclick={() => (isQRModalOpen = true)}
+						class="inline-flex items-center rounded-lg border border-indigo-600 px-4 py-2 text-sm font-medium text-indigo-600 transition-colors hover:bg-indigo-50 dark:border-indigo-400 dark:text-indigo-400 dark:hover:bg-indigo-400/10"
+					>
+						<svg class="mr-2 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								stroke-width="2"
+								d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 3.5a.5.5 0 11-1 0 .5.5 0 011 0zm-12 0a.5.5 0 11-1 0 .5.5 0 011 0zm12-12a.5.5 0 11-1 0 .5.5 0 011 0zm-12 0a.5.5 0 11-1 0 .5.5 0 011 0z"
+							/>
+						</svg>
+						Share App
+					</button>
+				</div>
 			</div>
 
 			<div
@@ -135,11 +165,24 @@
 			<div class="space-y-4">
 				<div class="border-l-2 border-indigo-500/30 pl-4">
 					<div class="mb-2 flex items-center space-x-2">
-						<span class="text-sm font-medium text-indigo-400">Ver {appVersion} - June 3, 2026</span>
+						<span class="text-sm font-medium text-indigo-400">Ver {appVersion} - June 11, 2026</span>
 						<span
 							class="inline-flex items-center rounded-full bg-green-400/10 px-2 py-0.5 text-xs font-medium text-green-400"
 							>Latest</span
 						>
+					</div>
+					<h3 class="mb-2 text-lg font-medium text-slate-900 dark:text-white">
+						UI Polish & App Sharing
+					</h3>
+					<ul class="space-y-1 text-sm text-slate-500 dark:text-slate-400">
+						<li>• Improved color contrast across light and dark modes for better readability</li>
+						<li>• Added a QR code button on the About page to quickly share the app with others</li>
+					</ul>
+				</div>
+
+				<div class="border-l-2 border-slate-300/50 pl-4 dark:border-slate-600/30">
+					<div class="mb-2 flex items-center space-x-2">
+						<span class="text-sm font-medium text-slate-400">Ver 4.3.0 - June 3, 2026</span>
 					</div>
 					<h3 class="mb-2 text-lg font-medium text-slate-900 dark:text-white">
 						Export Date Ranges
@@ -221,3 +264,46 @@
 		</div>
 	</div>
 </div>
+
+<!-- QR Code Modal -->
+{#if isQRModalOpen}
+	<div
+		class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm"
+		onclick={() => (isQRModalOpen = false)}
+		role="dialog"
+		aria-modal="true"
+		aria-label="Share app QR code"
+	>
+		<div
+			class="relative w-full max-w-xs rounded-2xl bg-white p-8 text-center shadow-2xl dark:bg-slate-900"
+			onclick={(e) => e.stopPropagation()}
+		>
+			<button
+				onclick={() => (isQRModalOpen = false)}
+				class="absolute right-3 top-3 rounded-full p-1.5 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-slate-800 dark:hover:text-slate-300"
+				aria-label="Close"
+			>
+				<svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+				</svg>
+			</button>
+
+			<h3 class="mb-1 text-xl font-bold text-slate-900 dark:text-white">Share Prayer Odyssey</h3>
+			<p class="mb-5 text-sm text-slate-500 dark:text-slate-400">Scan to open the app</p>
+
+			{#if qrDataUrl}
+				<img
+					src={qrDataUrl}
+					alt="QR code for Prayer Odyssey app"
+					class="mx-auto rounded-xl"
+					width="200"
+					height="200"
+				/>
+			{:else}
+				<div class="mx-auto h-[200px] w-[200px] animate-pulse rounded-xl bg-slate-200 dark:bg-slate-700"></div>
+			{/if}
+
+			<p class="mt-4 text-xs text-slate-400 dark:text-slate-500">{APP_URL}</p>
+		</div>
+	</div>
+{/if}

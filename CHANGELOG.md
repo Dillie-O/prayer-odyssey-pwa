@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [4.3.2] - 2026-06-13
+
+### Security
+
+- Remove hardcoded Firebase credentials from `static/firebase-messaging-sw.js`; migrate to `src/firebase-messaging-sw.ts` processed by vite-plugin-pwa's `injectManifest` strategy so credentials come from `.env` variables at build time
+- Tighten Firestore `notifications` create rule: sender must match the authenticated uid and all required fields (`receiverId`, `senderId`, `senderName`, `type`, `read`, `createdAt`) must be present with `read` defaulting to `false`
+- Strip `userAgent` and `platform` from FCM token device info stored in Firestore (readable by any group member)
+
+### Fixed
+
+- Remove duplicate client-side `prayer_shared` notification fan-out in `addPrayer`; the `onPrayerCreated` Cloud Function already handles this server-side
+- `updatePrayerSharing` now only notifies groups that are newly added, preventing re-notification on every sharing edit
+- `clearAllNotifications` now chunks deletes into batches of 499 to stay within Firestore's 500-operation batch limit
+- `onPrayerUpdateCreated` Cloud Function now correctly notifies the prayer owner when a group member adds an update (author is already in `notifiedUsers` so no double-notification)
+- Debounce the dual `user` + `groupsStore` subscription in `prayers.ts` via `queueMicrotask` to prevent a redundant Firestore query when both stores update in the same tick
+
+---
+
 ## [4.3.1] - 2026-06-11
 
 ### Added

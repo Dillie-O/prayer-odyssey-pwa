@@ -94,17 +94,25 @@ const subscribeToPrayers = (u: any, userGroupIds: string[]) => {
 
 // Subscribe to both user and groups to restart the subscription when they change
 let currentUser: any = null;
+let subscriptionPending = false;
+
+function scheduleSubscription() {
+	if (subscriptionPending) return;
+	subscriptionPending = true;
+	queueMicrotask(() => {
+		subscriptionPending = false;
+		const groupIds = get(groupsStore).map((g) => g.id);
+		subscribeToPrayers(currentUser, groupIds);
+	});
+}
+
 user.subscribe((u) => {
 	currentUser = u;
-	const groupIds = get(groupsStore).map((g) => g.id);
-	subscribeToPrayers(u, groupIds);
+	scheduleSubscription();
 });
 
-groupsStore.subscribe((gs) => {
-	if (currentUser) {
-		const groupIds = gs.map((g) => g.id);
-		subscribeToPrayers(currentUser, groupIds);
-	}
+groupsStore.subscribe(() => {
+	if (currentUser) scheduleSubscription();
 });
 
 export const addPrayer = async (
@@ -114,7 +122,7 @@ export const addPrayer = async (
 ) => {
 	if (!auth.currentUser) throw new Error('User not logged in');
 
-	const prayerDoc = await addDoc(collection(db, 'prayers'), {
+	await addDoc(collection(db, 'prayers'), {
 		summary,
 		...(description ? { description } : {}),
 		ownerId: auth.currentUser.uid,
@@ -122,11 +130,6 @@ export const addPrayer = async (
 		createdAt: serverTimestamp(),
 		sharedWith
 	});
-
-	// Send notifications to group members if prayer is being shared with groups
-	if (sharedWith.length > 0) {
-		await notifyGroupMembersPrayerShared(prayerDoc.id, summary, sharedWith);
-	}
 };
 
 export const updatePrayerSharing = async (prayerId: string, groupIds: string[]) => {
@@ -144,9 +147,11 @@ export const updatePrayerSharing = async (prayerId: string, groupIds: string[]) 
 		updatedAt: serverTimestamp()
 	});
 
-	// Send notifications to group members if prayer is being shared with new groups
-	if (groupIds.length > 0) {
-		await notifyGroupMembersPrayerShared(prayerId, prayer.summary, groupIds);
+	// Only notify groups that are newly added
+	const previousGroups = new Set(prayer.sharedWith || []);
+	const newGroups = groupIds.filter((id) => !previousGroups.has(id));
+	if (newGroups.length > 0) {
+		await notifyGroupMembersPrayerShared(prayerId, prayer.summary, newGroups);
 	}
 };
 

@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [4.3.1] - 2026-06-11
+
+### Added
+
+- QR code sharing button on the About page (Website section) that opens a modal with a scannable link to `https://app.prayerodyssey.com`
+
+### Fixed
+
+- Improved color contrast in light mode for prayer card group tags, status badges, action icons, date text, and prayer count badges to meet WCAG AA ratios
+- Improved color contrast in dark mode for the same elements by using lighter color variants and more opaque ring/background values
+
+---
+
 ## [4.3.0] - 2026-06-03
 
 ### Changed

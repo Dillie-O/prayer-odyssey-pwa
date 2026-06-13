@@ -45,7 +45,7 @@
 						item.href
 					)
 						? 'text-indigo-500 dark:text-indigo-400'
-						: 'text-gray-500 hover:text-slate-900 dark:text-gray-400 dark:hover:text-white'}"
+						: 'text-gray-600 hover:text-slate-900 dark:text-gray-400 dark:hover:text-white'}"
 				>
 					<svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
 						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d={item.icon} />

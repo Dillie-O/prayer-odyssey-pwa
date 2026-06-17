@@ -3,9 +3,10 @@ import { precacheAndRoute } from 'workbox-precaching';
 import { initializeApp } from 'firebase/app';
 import { getMessaging, onBackgroundMessage } from 'firebase/messaging/sw';
 
-declare const self: ServiceWorkerGlobalScope & { __WB_MANIFEST: Array<{ url: string; revision: string | null }> };
+declare const self: ServiceWorkerGlobalScope;
 
-precacheAndRoute(self.__WB_MANIFEST);
+// self.__WB_MANIFEST is replaced at build time by vite-pwa with the asset manifest
+precacheAndRoute((self as unknown as { __WB_MANIFEST: unknown[] }).__WB_MANIFEST);
 
 const firebaseConfig = {
 	apiKey: import.meta.env.VITE_FIREBASE_API_KEY,

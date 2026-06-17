@@ -7,11 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [4.3.2] - 2026-06-13
+## [4.3.2] - 2026-06-17
 
 ### Security
 
-- Remove hardcoded Firebase credentials from `static/firebase-messaging-sw.js`; migrate to `src/firebase-messaging-sw.ts` processed by vite-plugin-pwa's `injectManifest` strategy so credentials come from `.env` variables at build time
+- Remove hardcoded Firebase credentials from `static/firebase-messaging-sw.js`; migrate to `src/service-worker.ts` processed by vite-pwa's `injectManifest` strategy so credentials come from `.env` variables at build time
 - Tighten Firestore `notifications` create rule: sender must match the authenticated uid and all required fields (`receiverId`, `senderId`, `senderName`, `type`, `read`, `createdAt`) must be present with `read` defaulting to `false`
 - Strip `userAgent` and `platform` from FCM token device info stored in Firestore (readable by any group member)
 
@@ -22,6 +22,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `clearAllNotifications` now chunks deletes into batches of 499 to stay within Firestore's 500-operation batch limit
 - `onPrayerUpdateCreated` Cloud Function now correctly notifies the prayer owner when a group member adds an update (author is already in `notifiedUsers` so no double-notification)
 - Debounce the dual `user` + `groupsStore` subscription in `prayers.ts` via `queueMicrotask` to prevent a redundant Firestore query when both stores update in the same tick
+
+### Changed
+
+- Upgrade GitHub Actions `actions/checkout` from v4 to v5 to resolve Node.js 20 deprecation warning in CI
 
 ---
 

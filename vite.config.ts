@@ -7,8 +7,6 @@ export default defineConfig({
 		sveltekit(),
 		SvelteKitPWA({
 			strategies: 'injectManifest',
-			srcDir: 'src',
-			filename: 'firebase-messaging-sw.ts',
 			registerType: 'autoUpdate',
 			manifest: {
 				name: 'Prayer Odyssey',

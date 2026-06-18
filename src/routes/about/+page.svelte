@@ -269,14 +269,15 @@
 {#if isQRModalOpen}
 	<div
 		class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm"
-		onclick={() => (isQRModalOpen = false)}
+		onclick={(e) => e.target === e.currentTarget && (isQRModalOpen = false)}
+		onkeydown={(e) => e.key === 'Escape' && (isQRModalOpen = false)}
 		role="dialog"
 		aria-modal="true"
 		aria-label="Share app QR code"
+		tabindex="0"
 	>
 		<div
 			class="relative w-full max-w-xs rounded-2xl bg-white p-8 text-center shadow-2xl dark:bg-slate-900"
-			onclick={(e) => e.stopPropagation()}
 		>
 			<button
 				onclick={() => (isQRModalOpen = false)}

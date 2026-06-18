@@ -19,17 +19,20 @@ export const loading = writable(true);
 if (browser) {
 	onAuthStateChanged(auth, async (u) => {
 		if (u) {
-			// Sync user profile to Firestore
-			await setDoc(
-				doc(db, 'users', u.uid),
-				{
-					displayName: u.displayName,
-					photoURL: u.photoURL,
-					email: u.email,
-					lastLogin: serverTimestamp()
-				},
-				{ merge: true }
-			);
+			try {
+				await setDoc(
+					doc(db, 'users', u.uid),
+					{
+						displayName: u.displayName,
+						photoURL: u.photoURL,
+						email: u.email,
+						lastLogin: serverTimestamp()
+					},
+					{ merge: true }
+				);
+			} catch (e) {
+				console.error('Failed to sync user profile to Firestore', e);
+			}
 		}
 		user.set(u);
 		loading.set(false);

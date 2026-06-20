@@ -51,7 +51,11 @@ service cloud.firestore {
     // Notifications collection
     match /notifications/{notificationId} {
       allow read, update, delete: if isAuthenticated() && isOwner(resource.data.receiverId);
-      allow create: if isAuthenticated();
+      // Sender must identify as themselves and include required fields
+      allow create: if isAuthenticated() &&
+        request.resource.data.senderId == request.auth.uid &&
+        request.resource.data.keys().hasAll(['receiverId', 'senderId', 'senderName', 'type', 'read', 'createdAt']) &&
+        request.resource.data.read == false;
     }
     
     // Groups collection

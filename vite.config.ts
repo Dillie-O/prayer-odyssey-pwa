@@ -6,6 +6,7 @@ export default defineConfig({
 	plugins: [
 		sveltekit(),
 		SvelteKitPWA({
+			strategies: 'injectManifest',
 			registerType: 'autoUpdate',
 			manifest: {
 				name: 'Prayer Odyssey',
@@ -63,8 +64,7 @@ export default defineConfig({
 			devOptions: {
 				enabled: true
 			},
-			workbox: {
-				importScripts: ['/firebase-messaging-sw.js'],
+			injectManifest: {
 				globPatterns: ['**/*.{js,css,html,png,svg,ico}']
 			}
 		})

@@ -182,22 +182,22 @@ export const clearAllNotifications = async () => {
 	if (!auth.currentUser) return;
 
 	try {
-		// Get all notifications for current user
 		const q = query(
 			collection(db, 'notifications'),
 			where('receiverId', '==', auth.currentUser.uid)
 		);
 
 		const querySnapshot = await getDocs(q);
-		const batch = writeBatch(db);
+		const docs = querySnapshot.docs;
+		const BATCH_SIZE = 499; // Firestore max is 500
 
-		// Delete all notifications in batch
-		querySnapshot.forEach((docSnapshot) => {
-			batch.delete(docSnapshot.ref);
-		});
+		for (let i = 0; i < docs.length; i += BATCH_SIZE) {
+			const batch = writeBatch(db);
+			docs.slice(i, i + BATCH_SIZE).forEach((d) => batch.delete(d.ref));
+			await batch.commit();
+		}
 
-		await batch.commit();
-		console.log(`Cleared ${querySnapshot.size} notifications for user`);
+		console.log(`Cleared ${docs.length} notifications for user`);
 	} catch (error) {
 		console.error('Error clearing all notifications:', error);
 		throw error;
@@ -325,10 +325,7 @@ const getDeviceInfo = () => {
 	if (typeof window === 'undefined') return null;
 
 	return {
-		platform: navigator.platform,
-		userAgent: navigator.userAgent.substring(0, 100), // Truncated for privacy
 		isPWA: window.matchMedia('(display-mode: standalone)').matches,
-		isStandalone: (window.navigator as any).standalone || false,
 		timestamp: new Date().toISOString()
 	};
 };

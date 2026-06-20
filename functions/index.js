@@ -185,8 +185,7 @@ exports.onPrayerUpdateCreated = onDocumentCreated(
 			if (groupDoc.exists) {
 				const members = groupDoc.data().members || [];
 				for (const memberId of members) {
-					if (!notifiedUsers.has(memberId) && memberId !== prayerData.ownerId) {
-						// Exclude prayer owner too
+					if (!notifiedUsers.has(memberId)) {
 						const notificationRef = admin.firestore().collection('notifications').doc();
 						batch.set(notificationRef, {
 							receiverId: memberId,

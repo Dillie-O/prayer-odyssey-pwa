@@ -28,3 +28,6 @@ vite.config.ts.timestamp-*
 artifacts/screenshots/*.png
 playwright-report/
 test-results/
+
+# Claude local settings
+.claude/

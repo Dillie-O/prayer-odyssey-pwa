@@ -165,11 +165,25 @@
 			<div class="space-y-4">
 				<div class="border-l-2 border-indigo-500/30 pl-4">
 					<div class="mb-2 flex items-center space-x-2">
-						<span class="text-sm font-medium text-indigo-400">Ver {appVersion} - June 11, 2026</span>
+						<span class="text-sm font-medium text-indigo-400">Ver {appVersion} - June 20, 2026</span>
 						<span
 							class="inline-flex items-center rounded-full bg-green-400/10 px-2 py-0.5 text-xs font-medium text-green-400"
 							>Latest</span
 						>
+					</div>
+					<h3 class="mb-2 text-lg font-medium text-slate-900 dark:text-white">
+						Security & Privacy Improvements
+					</h3>
+					<ul class="space-y-1 text-sm text-slate-500 dark:text-slate-400">
+						<li>• Strengthened security rules to better protect your prayer data</li>
+						<li>• Improved privacy by reducing the device information stored when enabling notifications</li>
+						<li>• Fixed group notifications so you only receive alerts for newly added groups</li>
+					</ul>
+				</div>
+
+				<div class="border-l-2 border-slate-300/50 pl-4 dark:border-slate-600/30">
+					<div class="mb-2 flex items-center space-x-2">
+						<span class="text-sm font-medium text-slate-400">Ver 4.3.1 - June 11, 2026</span>
 					</div>
 					<h3 class="mb-2 text-lg font-medium text-slate-900 dark:text-white">
 						UI Polish & App Sharing

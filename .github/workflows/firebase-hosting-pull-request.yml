@@ -7,12 +7,19 @@ permissions:
   checks: write
   contents: read
   pull-requests: write
+concurrency:
+  group: firebase-hosting-pr-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
 jobs:
   build_and_preview:
     if: ${{ github.event.pull_request.head.repo.full_name == github.repository }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24.18.0'
       - run: npm ci && npm run build && npm run test:e2e
         env:
           E2E_AUDIT_EMAIL: ${{ secrets.E2E_AUDIT_EMAIL }}

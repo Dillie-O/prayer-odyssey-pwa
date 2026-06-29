@@ -3,7 +3,7 @@
 	import { db } from '$lib/firebase';
 	import { doc, onSnapshot, collection, query, where, orderBy } from 'firebase/firestore';
 	import { onMount } from 'svelte';
-	import QRCode from 'qrcode';
+	import { generateQRCodeWithLogo } from '$lib/utils/qrCode';
 	import { user } from '$lib/stores/auth';
 	import { joinGroup, type Group } from '$lib/stores/groups';
 	import type { Prayer } from '$lib/stores/prayers';
@@ -86,7 +86,7 @@
 
 		try {
 			const inviteLink = getInviteLink();
-			qrCodeDataUrl = await QRCode.toDataURL(inviteLink, {
+			qrCodeDataUrl = await generateQRCodeWithLogo(inviteLink, {
 				width: QR_CODE_SIZE,
 				margin: QR_CODE_MARGIN
 			});

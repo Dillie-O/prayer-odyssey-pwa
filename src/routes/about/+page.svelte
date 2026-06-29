@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { version as appVersion } from '$app/environment';
-	import QRCode from 'qrcode';
+	import { generateQRCodeWithLogo } from '$lib/utils/qrCode';
 	import { onMount } from 'svelte';
 
 	const APP_URL = 'https://app.prayerodyssey.com';
@@ -8,7 +8,7 @@
 	let isQRModalOpen = $state(false);
 
 	onMount(async () => {
-		qrDataUrl = await QRCode.toDataURL(APP_URL, {
+		qrDataUrl = await generateQRCodeWithLogo(APP_URL, {
 			width: 256,
 			margin: 2,
 			color: { dark: '#4338ca', light: '#ffffff' }

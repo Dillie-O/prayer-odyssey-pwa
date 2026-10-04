@@ -17,7 +17,8 @@ This spec is meant to be handed to a fresh Claude Code session working in the **
 5. Work one milestone per PR and stop for the owner's review after each one. Don't chain milestones without a review.
 
 **Prerequisites the owner handles (an agent can't do these):**
-- [ ] The cloud environment can install Flutter stable: a setup script or SessionStart hook, plus network access to the Flutter SDK download hosts and pub.dev.
+- [ ] **Local development (primary, Windows):** native Windows install of Flutter stable, Git for Windows (Claude Code and the repo's `.sh` scripts use its Git Bash), Chrome, Node LTS (Firebase CLI, Workbox CLI, Playwright) and VS Code with the Flutter and Claude Code extensions. See §12.2.
+- [ ] **Cloud sessions (optional, later milestones):** the cloud environment can install Flutter stable, via a setup script or SessionStart hook plus network access to the Flutter SDK download hosts and pub.dev.
 - [ ] GitHub secrets in the new repo: `FIREBASE_SERVICE_ACCOUNT_PRAYER_ODYSSEY_96025` and the `FIREBASE_*` web config values (the same values as the old repo's `VITE_FIREBASE_*` secrets), plus `E2E_AUDIT_EMAIL` / `E2E_AUDIT_PASSWORD`.
 - [ ] Don't create a `release` branch in the new repo until cutover day. Pushing to `release` deploys to the **live** site (§14), while PRs only deploy to preview channels.
 - [ ] Optional: authorize a long-lived preview channel domain in Firebase Auth if you want to test Google sign-in on previews (§14.2).
@@ -912,6 +913,24 @@ Port `src/lib/utils/prayerExport.ts` (733 lines) to `features/export/`:
 - `firebase-messaging-sw.js` is generated from a template at build time (§10.2, step 2), keeping the 4.3.2 fix that removed hardcoded credentials. Note that omtb still hardcodes its config in `web/firebase-messaging-sw.js` and `web/firebase-config.js`, which is worth cleaning up there too.
 - Local dev: `flutter run -d chrome --web-port 5173 --dart-define-from-file=env/dev.json`. Add `localhost:5173` to Firebase Auth authorized domains. Optionally use the Firebase Emulator Suite (`--dart-define=USE_EMULATORS=true`).
 
+### 12.2 Developer machine (Windows)
+
+The owner develops on Windows with a **native Windows Flutter install, not WSL2**, because `flutter run -d chrome` launches Windows Chrome directly with hot reload. CI runs on Ubuntu, so the repo must behave the same on both:
+- **Line endings:** commit a `.gitattributes` in M0, before any other files:
+  ```
+  * text=auto eol=lf
+  *.png binary
+  *.jpg binary
+  *.ico binary
+  *.woff2 binary
+  *.ttf binary
+  *.wasm binary
+  ```
+  This keeps every text file LF on Windows checkouts, so `dart format --set-exit-if-changed` and the shell scripts don't fail in CI because of CRLF.
+- **Scripts:** keep repo scripts in bash (`tool/*.sh`) and run them with Git Bash on Windows. They must not rely on GNU-only flags that Git Bash lacks. Prefer Dart scripts (`dart run tool/...`) for anything non-trivial, since they're cross-platform by default.
+- **Paths:** never hardcode `/` vs `\` paths or Linux-only locations in scripts or tests. Use `package:path` in Dart.
+- **`flutter doctor`:** Android toolchain and Visual Studio (C++) warnings can be ignored; this project only targets web.
+
 ### 12.1 Analytics and error logging (cost-safe)
 
 - **Firebase Analytics (GA4) is free with no usage billing.** It doesn't move the project into a paid tier. The project is already on the Blaze (pay-as-you-go) plan, because deploying Cloud Functions requires it. The costs to watch are Functions invocations and Firestore reads/writes, which have free monthly quotas that a small app like this typically stays within.
@@ -1021,7 +1040,7 @@ Create `CLAUDE.md` (and/or `AGENTS.md`) in the new repo:
 Each milestone ends in a deployable preview channel and a version bump (5.0.0-alpha.N while pre-cutover).
 
 **M0: Repo and skeleton**
-- [ ] Create the repo; `flutter create --platforms=web --org com.dillieo prayer_odyssey`
+- [ ] First commit: `.gitattributes` (LF line endings, binaries marked; §12.2), then `flutter create --platforms=web --org com.dillieo prayer_odyssey`
 - [ ] Add packages; analysis options; `build_runner`
 - [ ] `env/` + `firebase_options.dart`; `usePathUrlStrategy()`
 - [ ] Copy the logo/icon set from the `logo/` folder next to this spec into `web/icons/`, `web/` and `assets/images/` (§7.8)

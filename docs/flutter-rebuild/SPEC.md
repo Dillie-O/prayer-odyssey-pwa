@@ -1,9 +1,19 @@
 # Prayer Odyssey — Flutter Web PWA Rebuild Spec
 
-**Status:** Draft v2 (decisions from review applied; palette choice pending)
+**Status:** v3 (review decisions applied; ready for implementation)
 **Date:** 2026-10-04
 **Replaces:** `prayer-odyssey-pwa` (SvelteKit 2 / Svelte 5 / Tailwind, v4.3.2)
 **Target:** New repository, Flutter web, installable PWA. Android and iOS are out of scope for now.
+
+---
+
+## How to use this document (for the implementing session)
+
+This spec is meant to be handed to a fresh Claude Code session working in the **new** repository.
+1. Read the whole document once, then work milestone by milestone (§18), starting at M0. Every milestone ends in a PR with a preview deploy.
+2. Ask for read access to the old repository (`Dillie-O/prayer-odyssey-pwa`) to port code, copy, `CHANGELOG.md`, Firebase rules and functions, and assets. Treat it as the reference implementation for behavior; §2 is the checklist.
+3. The design mockups and logo concept are at https://claude.ai/artifact/AVx1WmNX4Wk73DSbSW1Ugt (Olive & Linen row and Logo row). Every color token is also written out in §7.2, so the spec stands alone.
+4. Decisions already made are in §19. Don't reopen them; ask the owner if something seems to conflict.
 
 ---
 
@@ -22,6 +32,7 @@ This follows the setup that has worked for **omtb**: Flutter stable, `firebase_c
 3. A clean, testable architecture: typed models, repositories, and reactive state.
 4. Reliable web push notifications and offline viewing of data already loaded.
 5. A cutover with no downtime and no data migration.
+6. Treat the rebuild as a **major version of the same product**, not a new app: it ships as **5.0.0**, and the full changelog history carries over (§17.1).
 
 ### Non-goals (for this rebuild)
 
@@ -38,11 +49,11 @@ This follows the setup that has worked for **omtb**: Flutter stable, `firebase_c
 | Framework | Flutter (stable channel), Dart 3.x | Web target only. Use `flutter create --platforms=web`. |
 | Renderer | CanvasKit (default `flutter build web`) | Try `--wasm` (skwasm) later, once all plugins are confirmed wasm-compatible. |
 | Backend | Existing Firebase project and live data | Decided. Auth, Firestore, Functions (2nd gen, Node 22), FCM, Hosting. |
-| Firebase SDK | FlutterFire: `firebase_core`, `firebase_auth`, `cloud_firestore`, `firebase_messaging`, `firebase_analytics` (optional) | |
+| Firebase SDK | FlutterFire: `firebase_core`, `firebase_auth`, `cloud_firestore`, `firebase_messaging`, `firebase_analytics` | |
 | State management | **Riverpod 3** (`flutter_riverpod`) | Decided. omtb uses Provider; Riverpod fits this app's many Firestore streams that depend on auth and parameters (see §5). |
 | Routing | **go_router** with path URL strategy | Required so existing URLs keep working: `/prayers/:id`, `/groups/:id`, invite links, QR codes, push links. |
 | Models | `freezed` + `json_serializable` (or hand-written `fromFirestore`) | Custom `Timestamp` converters. |
-| Design | Material 3, custom palette (§7); Dawn Voyage recommended, choice pending the mockups | Light + dark + follow-system. |
+| Design | Material 3, **Olive & Linen** palette (§7.2) | Decided. Light + dark + follow-system. Logo refresh proposed (§7.8). |
 | Fonts | Bundled: **Lora** (headings) + **Inter** (body/UI) | Bundled as assets, not fetched at runtime, so they work offline. |
 | Icons | `material_symbols_icons` (Rounded) | No emoji in the UI (see §15). |
 | QR codes | `qr_flutter` with embedded logo | Same as omtb. |
@@ -51,7 +62,8 @@ This follows the setup that has worked for **omtb**: Flutter stable, `firebase_c
 | Service workers | `sw.js` (precache via Workbox CLI, post-build) + `firebase-messaging-sw.js` (push) | §10 |
 | Config | `--dart-define-from-file=env/<env>.json` | Firebase web config is also injected into the SW at build time. No hardcoded credentials (keeps the 4.3.2 security fix). |
 | Hosting/CI | Firebase Hosting; PR preview channels (no separate beta site); deploy `live` on push to `release` | Decided. Same pattern as both current repos. |
-| Version | Start at **5.0.0** | Continues the product's version history and CHANGELOG. |
+| Version | **5.0.0** (pre-releases `5.0.0-alpha.N`) | Decided. A major version of the same product; the full CHANGELOG carries over (§17.1). |
+| Analytics | Firebase Analytics (GA4), BigQuery export **off**; errors logged as Analytics events | Decided. No added cost (§12.1). No Sentry. |
 
 ---
 
@@ -502,9 +514,9 @@ PWA manifest shortcuts (like omtb): "New prayer" → `/prayers?new=1`, "Pray now
 
 ### 7.1 Direction
 
-The current UI is generic dark slate with indigo accents and glassmorphism. The rebuild should feel like a **quiet journal at dawn**: warm paper-like surfaces, deep harbor blue for structure, a candle-amber accent for the moment of prayer, and soft sage for answered prayers. It uses calm motion, generous spacing, and serif headings for warmth.
+The current UI is generic dark slate with indigo accents and glassmorphism. The rebuild should feel like **writing in a well-loved journal**: linen paper surfaces, olive-green ink for structure, a terracotta accent (the bookmark ribbon and candle) for the moment of prayer, and a calm teal for answered prayers. It uses calm motion, generous spacing, and serif headings for warmth.
 
-### 7.2 Palette: "Dawn Voyage" (proposed)
+### 7.2 Palette: "Olive & Linen" (decided)
 
 All text/background pairs below were checked against WCAG: every one is ≥ 4.5:1 (AA), and most are ≥ 7:1.
 
@@ -512,60 +524,58 @@ All text/background pairs below were checked against WCAG: every one is ≥ 4.5:
 
 | Role | Hex | Use |
 |---|---|---|
-| primary | `#24456B` | Harbor blue: app bar accents, primary buttons, links, selected nav |
-| onPrimary | `#FFFFFF` | 9.8:1 |
-| primaryContainer | `#D6E3F3` | Selected chips, active filter segment |
-| onPrimaryContainer | `#0E2440` | 12.0:1 |
-| secondary | `#8A5A12` | Candle amber (text-level): prayed counts, highlights |
-| secondaryContainer | `#FBE3B8` | **Pray button** background, pray-mode accents |
-| onSecondaryContainer | `#4A2E00` | 10.0:1 |
-| tertiary | `#3F7350` | Sage: **Answered** status |
-| tertiaryContainer | `#CFE8D5` | Answered badge background |
-| onTertiaryContainer | `#10301B` | 11.1:1 |
-| surface / background | `#FBF8F3` | Warm parchment |
+| primary | `#4E5D3A` | Olive: primary buttons, links, selected states, icons |
+| onPrimary | `#FFFFFF` | 7.1:1 |
+| primaryContainer | `#DDE5CC` | Selected filter segment, nav indicator, FAB, Active badge |
+| onPrimaryContainer | `#1F2A10` | 11.6:1 |
+| secondary | `#9A4F22` | Terracotta (text-level): prayed counts, highlights. 5.4:1 on surface |
+| secondaryContainer | `#F8DCC8` | **Pray button** and prayed-count pill |
+| onSecondaryContainer | `#4A1F05` | 10.8:1 |
+| tertiary | `#2F6F6A` | Teal: **Answered** status. 5.3:1 on surface |
+| tertiaryContainer | `#CDE7E3` | Answered badge, "Mark answered" button |
+| onTertiaryContainer | `#0C2F2C` | 11.1:1 |
+| surface / background | `#F7F4EC` | Linen |
 | surfaceContainerLowest | `#FFFFFF` | Cards |
-| surfaceContainerLow | `#F4EFE7` | Sections |
-| surfaceContainer | `#EEE8DE` | Nav bar, inputs |
-| surfaceContainerHigh | `#E7E0D4` | Dialogs/sheets |
-| onSurface | `#1D232B` | Body text (14.9:1) |
-| onSurfaceVariant | `#4D5560` | Secondary text (7.1:1 on surface, 5.8:1 on high) |
-| outline | `#8A8F96` | |
-| outlineVariant | `#D5CEC2` | Dividers, card borders |
-| error | `#B3261E` | Delete, destructive |
+| surfaceContainerLow | `#F2EEE4` | Sections |
+| surfaceContainer | `#EDE8DC` | Nav bar, inputs |
+| surfaceContainerHigh | `#E5DFD0` | Dialogs/sheets, latest-update box |
+| onSurface | `#22241E` | Body text (14.3:1) |
+| onSurfaceVariant | `#4F5246` | Secondary text (8.0:1 on cards, 6.0:1 on high) |
+| outline | `#7F8273` | Segmented buttons, outlined controls |
+| outlineVariant | `#D3CDBE` | Dividers, card borders |
+| error | `#B3261E` | Delete, destructive, unread badge |
 
 **Dark**
 
 | Role | Hex | Use |
 |---|---|---|
-| primary | `#A9C7EC` | 10.4:1 on surface |
-| onPrimary | `#0E2A47` | |
-| primaryContainer | `#2B4A6E` | |
-| onPrimaryContainer | `#D6E3F3` | 7.0:1 |
-| secondary | `#F0C374` | Amber glow, 11.0:1 |
-| onSecondary | `#422C00` | |
-| secondaryContainer | `#5E4210` | Pray button |
-| onSecondaryContainer | `#FBE3B8` | 7.4:1 |
-| tertiary | `#9FD2AC` | Answered, 10.6:1 |
-| tertiaryContainer | `#2A5537` | |
-| onTertiaryContainer | `#CFE8D5` | 6.6:1 |
-| surface / background | `#11161D` | Night sea |
-| surfaceContainerLowest | `#0C1015` | |
-| surfaceContainerLow | `#171D25` | Cards |
-| surfaceContainer | `#1C232C` | Nav bar |
-| surfaceContainerHigh | `#252D37` | Dialogs/sheets |
-| onSurface | `#E8E4DC` | 14.3:1 |
-| onSurfaceVariant | `#B9BEC6` | 8.5:1 |
-| outline | `#868C94` | |
-| outlineVariant | `#3A424C` | |
-| error | `#F2B8B5` | |
+| primary | `#BCCB9E` | 10.6:1 on surface |
+| onPrimary | `#26300F` | 8.1:1 |
+| primaryContainer | `#3A4628` | |
+| onPrimaryContainer | `#DDE5CC` | 7.7:1 |
+| secondary | `#F0B58E` | 10.2:1 on surface |
+| onSecondary | `#4A1F05` | 7.9:1 |
+| secondaryContainer | `#6B3415` | Pray button |
+| onSecondaryContainer | `#F8DCC8` | 7.6:1 |
+| tertiary | `#93D0C8` | Answered, 9.7:1 on cards |
+| tertiaryContainer | `#1F4F4A` | |
+| onTertiaryContainer | `#CDE7E3` | 7.1:1 |
+| surface / background | `#14160F` | |
+| surfaceContainerLowest | `#0F110B` | |
+| surfaceContainerLow | `#1B1E16` | Cards |
+| surfaceContainer | `#21251B` | Nav bar |
+| surfaceContainerHigh | `#2A2E23` | Dialogs/sheets |
+| onSurface | `#E6E3D8` | 14.2:1 |
+| onSurfaceVariant | `#C0C1B2` | 9.3:1 on cards |
+| outline | `#8C8F80` | |
+| outlineVariant | `#3F4337` | |
+| error | `#F2B8B5` | onError `#601410` |
 
-Implementation: start from `ColorScheme.fromSeed(seedColor: Color(0xFF24456B), brightness: …)` and `copyWith` the values above, so roles not listed still get sensible tonal values. Put status colors (active, answered, pray) in a `ThemeExtension<StatusColors>` so widgets never hardcode hex values.
+Brand accent (decorative only, never for text): terracotta `#C0763E`, used for the logo's bookmark ribbon. It is only 3.2:1 on linen, so it must not carry text.
 
-**Mockups:** all three palettes are rendered on phone screens (My Prayers list in light, Prayer detail in light, Carousel in dark) at https://claude.ai/artifact/AVx1WmNX4Wk73DSbSW1Ugt. Each screen has palette and light/dark tweaks. The full token values for the alternatives are in those mockups.
+Implementation: start from `ColorScheme.fromSeed(seedColor: Color(0xFF4E5D3A), brightness: …)` and `copyWith` the values above, so roles not listed still get sensible tonal values. Put status colors (active = primaryContainer, answered = tertiary/tertiaryContainer, pray = secondaryContainer) in a `ThemeExtension<StatusColors>` so widgets never hardcode hex values.
 
-**Alternative palettes:**
-- *Olive & Linen*: primary `#4E5D3A`, accent `#C0763E` (terracotta), surface `#F7F4EC`. Earthier and more rustic.
-- *Twilight Plum*: primary `#4B3B6B`, accent `#D9A441`, surface `#F8F6FA`. Closest to today's indigo, but warmer.
+**Mockups:** https://claude.ai/artifact/AVx1WmNX4Wk73DSbSW1Ugt, row 2 (Olive & Linen): My Prayers list (light), shared-prayer detail (light), carousel (dark). These are the visual reference for M1–M3. Rows 1 and 3 are the palettes that weren't chosen (Dawn Voyage, Twilight Plum), kept for reference only.
 
 ### 7.3 Typography
 
@@ -586,7 +596,7 @@ Bundle the variable font files in `assets/fonts/` and declare them in `pubspec.y
 - Spacing scale: 4, 8, 12, 16, 24, 32, 48. Page padding is 16 on compact layouts and 24 on medium and larger.
 - Radii: cards 16, dialogs/sheets 28 (M3 default), chips/badges 8, buttons stadium.
 - Elevation: cards are flat (`surfaceContainerLowest` + 1px `outlineVariant` border). Use tonal elevation, not shadows.
-- Motion: the M3 standard easing, 200–300 ms. A container transform or Hero from card to detail. The pray button gets a short scale and glow pulse plus a count tick animation. Marking a prayer answered gets a gentle sage shimmer (one-shot, respects `MediaQuery.disableAnimations`).
+- Motion: the M3 standard easing, 200–300 ms. A container transform or Hero from card to detail. The pray button gets a short scale and glow pulse plus a count tick animation. Marking a prayer answered gets a gentle teal shimmer (one-shot, respects `MediaQuery.disableAnimations`).
 
 ### 7.5 Responsive layout
 
@@ -602,7 +612,7 @@ The top app bar holds the screen title and the avatar menu. Notifications live i
 
 - `PrayerCard`: summary, clamped description, optional owner row, group chips, footer (date, updates count, `StatusBadge`, `PrayButton` or count). For the owner, a ⋮ overflow menu on the card holds Mark answered/active, Share with groups, and Edit, instead of a row of icon buttons (see the mockups)
 - `StatusBadge`: Active (primaryContainer) / Answered (tertiaryContainer)
-- `PrayButton`: amber tonal button with a praying-hands icon and count; "prayed" state; debounce; haptic-free animation
+- `PrayButton`: terracotta tonal button (`secondaryContainer`) with a candle-flame icon and count; "prayed" state; debounce; haptic-free animation
 - `FilterBar`: `SegmentedButton<PrayerFilter>` + view-mode toggle
 - `EmptyState`: illustration/icon, title, body, CTA
 - `SkeletonCard`: shimmer placeholder
@@ -618,6 +628,30 @@ The top app bar holds the screen title and the avatar menu. Notifications live i
 - Text scaling up to 200% without clipping.
 - Long-form text (descriptions, updates) inside a `SelectionArea` so users can select and copy it.
 - Contrast ratios as listed in §7.2.
+
+### 7.8 Logo and app icon (proposed refresh)
+
+Problems with the current logo (`static/prayer_icon_logo_*.png`): it has a transparent background, so Android/desktop maskable icons get an arbitrary backdrop; its white journal disappears on light backgrounds (that's why 4.1.0 added an indigo badge behind it in the navbar); the thin pen outline vanishes at small sizes; and it doesn't match the new palette.
+
+Recommendation: **refresh, don't replace.** Keep the "praying hands on a journal" idea so existing users still recognize it, and redraw it as clean vector art:
+- **App icon:** a solid olive tile (`#4E5D3A`), a linen journal with four binding dots (a nod to today's spiral rings), olive praying hands, and a terracotta bookmark ribbon instead of the pen.
+- **Glyph:** the praying hands alone in linen on the olive tile, with a short terracotta underline, for the favicon, small sizes and the Profile/About header. Dark-mode variant: sage tile (`#BCCB9E`) with dark hands.
+- **Lockup:** glyph + "Prayer Odyssey" in Lora 600.
+- **Notification badge:** a monochrome (white on transparent) hands silhouette, 96×96, for the `badge` field of web push (Android uses only its alpha channel).
+
+The concept is on the mockup canvas (Logo row), and the concept SVGs are committed beside this spec in `docs/flutter-rebuild/logo/`. **The concept is a sketch:** before M7, polish the vector shapes (hand curves, thumb lines) or have a designer refine them, then generate every size from one master SVG:
+
+| Asset | Size | Notes |
+|---|---|---|
+| `web/icons/Icon-192.png`, `Icon-512.png` | 192, 512 | purpose `any`, rounded tile |
+| `web/icons/Icon-maskable-192.png`, `-512.png` | 192, 512 | full-bleed olive square; artwork inside the central 80% safe zone |
+| `web/icons/apple-touch-icon.png` | 180 | full-bleed square (iOS applies its own mask) |
+| `web/favicon.png` / `favicon.svg` | 32 / vector | glyph |
+| `web/icons/badge-96.png` | 96 | monochrome silhouette |
+| `web/splash/*` | per `flutter_native_splash` | glyph on linen (light) / on `#14160F` (dark) |
+| `assets/images/logo_glyph.svg` | vector | in-app use (`flutter_svg`) |
+
+If the refresh isn't approved, keep the current artwork but at minimum put it on a solid tile for the maskable icons.
 
 ---
 
@@ -704,7 +738,7 @@ Sections (`ListTile`-based settings page):
 3. **Notifications**: push status with Enable/Disable, "Blocked in browser settings" help text when denied, and "Install the app to enable notifications" guidance on iOS Safari when not installed.
 4. **Your data**: Export → `/profile/export`.
 5. **Advanced** (expansion tile): Clear all devices (confirm).
-6. **About** → `/about`.
+6. **About Prayer Odyssey** → `/about`. The page footer also shows "Version 5.x.y", which opens About when tapped.
 7. **Sign out** (destructive text button).
 
 ### 8.13 Export (`/profile/export`)
@@ -714,9 +748,14 @@ Sections (`ListTile`-based settings page):
 - Details in §11.
 
 ### 8.14 About (`/about`)
+**How users get there** (it's no longer a nav tab):
+- Signed in: **Profile tab → "About Prayer Odyssey"** (main entry), the version line at the bottom of Profile, and **"About"** in the avatar menu in the top app bar (so it's one tap from any tab).
+- Signed out: **"Learn more"** on the Welcome page and an "About" link under the Login card.
+- It's a public route, so `/about` also works as a direct link.
+
 - Dillie-O Digital logo, name, "Version 5.x.y" (`package_info_plus`).
 - Cards: Website (open link, plus a "Share app" QR dialog), Discord.
-- **Recent updates**, rendered from `assets/release_notes.json` (`[{version, date, title, items[]}]`), the newest marked "Latest". This removes the hand-edited markup. Keep CHANGELOG.md as the developer-facing source; the JSON holds the user-facing copy.
+- **Release history**, rendered from `assets/release_notes.json` (`[{version, date, title, items[]}]`), the newest marked "Latest". Show the 5 most recent, with "Show full history" expanding the rest. Seed the JSON with the **entire** user-facing history from 4.0.0 through 4.3.2 (from the old About page and CHANGELOG), then 5.0.0 on top. This removes the hand-edited markup. CHANGELOG.md stays the developer-facing source; the JSON holds the user-facing copy.
 
 ---
 
@@ -760,8 +799,8 @@ Keep today's semantics: cap 10, prune > 30 days, `fcmTokenInfo` without the user
   "scope": "/",
   "display": "standalone",
   "display_override": ["window-controls-overlay", "standalone"],
-  "background_color": "#11161D",
-  "theme_color": "#24456B",
+  "background_color": "#F7F4EC",
+  "theme_color": "#4E5D3A",
   "description": "Track your prayers and share with groups.",
   "icons": [192/512 any + 192/512 maskable],
   "screenshots": [wide 1280x720, narrow 720x1280],
@@ -844,6 +883,16 @@ Port `src/lib/utils/prayerExport.ts` (733 lines) to `features/export/`:
 - `firebase-messaging-sw.js` is generated from a template at build time (§10.2, step 2), keeping the 4.3.2 fix that removed hardcoded credentials. Note that omtb still hardcodes its config in `web/firebase-messaging-sw.js` and `web/firebase-config.js`, which is worth cleaning up there too.
 - Local dev: `flutter run -d chrome --web-port 5173 --dart-define-from-file=env/dev.json`. Add `localhost:5173` to Firebase Auth authorized domains. Optionally use the Firebase Emulator Suite (`--dart-define=USE_EMULATORS=true`).
 
+### 12.1 Analytics and error logging (cost-safe)
+
+- **Firebase Analytics (GA4) is free with no usage billing.** It doesn't move the project into a paid tier. The project is already on the Blaze (pay-as-you-go) plan, because deploying Cloud Functions requires it. The costs to watch are Functions invocations and Firestore reads/writes, which have free monthly quotas that a small app like this typically stays within.
+- Keep the **BigQuery export turned off**. That's the one Analytics feature that can create charges (BigQuery storage and queries).
+- Recommended: set a **budget alert** (e.g. $5/month) in Google Cloud Billing for the project, so any unexpected cost shows up early.
+- Events to log (small, intentional set): `login` / `sign_up` (method), `prayer_created`, `prayer_answered`, `prayed_for`, `group_created`, `group_joined`, `invite_shared` (link/qr/share), `export` (format), `push_enabled` / `push_disabled`, `pwa_installed`, `view_mode_changed`. Plus automatic `screen_view` via a go_router observer.
+- **Never log prayer or update text, names, emails, or group names.** Only IDs where needed, and counts and enums.
+- **Error logging without Sentry:** Crashlytics doesn't support web, so log caught and uncaught errors (`FlutterError.onError`, `PlatformDispatcher.instance.onError`) as an `app_error` event with `screen`, `error_type` and a short code (no stack traces or user content). It's free, and it's visible in the Analytics console.
+- In the GA property settings, leave Google signals and ads personalization **off**. Add one sentence about anonymous usage analytics to the About page.
+
 ---
 
 ## 13. Testing and quality
@@ -918,6 +967,15 @@ Ordered by value versus effort:
 
 ## 17. Repo conventions (carry over from the current `.github/copilot-instructions.md`)
 
+### 17.1 Versioning and changelog continuity
+- The new repo is a **new codebase for the same product**. In software-lifecycle terms it's a major release of Prayer Odyssey: **5.0.0**, not 1.0.0.
+- Copy the **entire** `CHANGELOG.md` from the old repo verbatim (4.0.0 → 4.3.2) as the starting point. Add entries above it.
+- During development, use `## [Unreleased]` plus pre-release versions in `pubspec.yaml` (`5.0.0-alpha.N+build`). The cutover release becomes `## [5.0.0]`, with a summary along the lines of: "Rebuilt from the ground up in Flutter with a new design (Olive & Linen), Activity tab, carousel improvements, Word/PDF export upgrades, and backend reliability fixes. All accounts, prayers and groups carry over."
+- README: a short "History" section saying versions ≤ 4.3.2 were built in the archived `prayer-odyssey-pwa` repo (SvelteKit), with a link.
+- Tag the first production release `v5.0.0`.
+
+### 17.2 Agent/contributor rules
+
 Create `CLAUDE.md` (and/or `AGENTS.md`) in the new repo:
 1. Every PR with app changes: bump `version:` in `pubspec.yaml` (`X.Y.Z+build`), add a `CHANGELOG.md` entry (Keep a Changelog), and add an entry to `assets/release_notes.json` when it's user-facing.
 2. Attach refreshed screenshots (light and dark, mobile and desktop) **in the PR description**, not committed to the repo. The Playwright smoke job produces them.
@@ -938,7 +996,7 @@ Each milestone ends in a deployable preview channel and a version bump (5.0.0-al
 - [ ] `env/` + `firebase_options.dart`; `usePathUrlStrategy()`
 - [ ] Move `firestore.rules`, `firestore.indexes.json`, `functions/` into `firebase/`
 - [ ] CI workflow (analyze, test, build, preview deploy) green on a hello-world
-- [ ] `CLAUDE.md`, `CHANGELOG.md` (5.0.0-alpha.1)
+- [ ] `CLAUDE.md`; copy the full `CHANGELOG.md` from the old repo and add `[Unreleased]` (5.0.0-alpha.1), per §17.1
 - **Done when:** the PR preview URL loads the app with a Firebase connection.
 
 **M1: Design system and shell**
@@ -979,7 +1037,7 @@ Each milestone ends in a deployable preview channel and a version bump (5.0.0-al
 **M6: Profile, export, about**
 - [ ] Profile settings page
 - [ ] Export: all five formats with date range, formatter golden tests
-- [ ] About + `release_notes.json` + app share QR
+- [ ] About + `release_notes.json` (seeded with the full 4.0.0–4.3.2 history) + app share QR
 - **Done when:** checklists §2.12–§2.14 pass, exports match the old JSON schema, and the .docx opens cleanly in Word, Google Docs and LibreOffice with working heading styles.
 
 **M7: PWA polish and performance**
@@ -1006,26 +1064,26 @@ Each milestone ends in a deployable preview channel and a version bump (5.0.0-al
 
 ## 19. Decisions log and open questions
 
-### Decided (review of v1)
+### Decided
 
 | # | Topic | Decision |
 |---|---|---|
 | D1 | Backend/data | Use the same Firebase project and live database. |
 | D2 | State management | Riverpod. |
-| D3 | Notification location | Follow Material 3: an "Activity" navigation destination with an unread badge, in the bottom bar on phones and the rail on wider screens. No app-bar bell. About moves under Profile (§9.0). |
+| D3 | Notification location | Follow Material 3: an "Activity" navigation destination with an unread badge, in the bottom bar on phones and the rail on wider screens. No app-bar bell (§9.0). |
 | D4 | Carousel | Keep the name "Carousel". Implemented with `PageView` (§8.5). |
 | D5 | Export | Keep **both** Word (.docx, editable and mergeable, §11) and PDF. |
 | D6 | Testing before cutover | PR preview channels only. No beta site or extra DNS (§14.2). |
+| D7 | Palette | **Olive & Linen** (§7.2). |
+| D8 | About page | Not a tab. Reached from Profile, the avatar menu, and Welcome/Login when signed out (§8.14). |
+| D9 | Versioning | Major release **5.0.0** of the same product; the full CHANGELOG and release history carry over (§17.1). |
+| D10 | Analytics | Keep Firebase Analytics, BigQuery export off, errors as Analytics events, no Sentry (§12.1). |
+| D11 | Repo | The owner creates the new repo; the package name defaults to `prayer_odyssey`. |
+| D12 | Backend ownership (default) | Move `functions/` and the Firestore rules/indexes into the new repo under `firebase/`, so there's one source of truth. Until cutover, deploy backend changes only from the new repo, and only the ones marked safe for the old client (§4.4). |
 
 ### Still open
 
-**Q3. Palette.** Mockups of all three palettes (list, detail, carousel) are on the design canvas. Pick one, or mix (for example, Dawn Voyage structure with Olive's warmer surfaces). Will the app icon and logo be refreshed to match, or stay as they are?
-
-**Q8. Backend ownership.** Move `functions/` and the rules into the new repo (recommended, one source of truth), or keep backend deploys in the old repo until cutover?
-
-**Q9. Repo/package name.** Is `prayer-odyssey` / `prayer_odyssey` OK? Should it be public or private?
-
-**Q10. Analytics and error reporting.** Keep Firebase Analytics? Add Sentry (or similar) for Flutter web error reporting?
+**Q3. Logo refresh.** Approve the refreshed icon direction in §7.8 (concept on the canvas), ask for changes, or keep the current artwork on a solid tile. Needed before M7.
 
 ---
 

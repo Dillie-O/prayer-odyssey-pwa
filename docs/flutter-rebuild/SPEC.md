@@ -521,7 +521,16 @@ PWA manifest shortcuts (like omtb): "New prayer" → `/prayers?new=1`, "Pray now
 
 ### 7.1 Direction
 
-The current UI is generic dark slate with indigo accents and glassmorphism. The rebuild should feel like **writing in a well-loved journal**: linen paper surfaces, olive-green ink for structure, a terracotta accent (the bookmark ribbon and candle) for the moment of prayer, and a calm teal for answered prayers. It uses calm motion, generous spacing, and serif headings for warmth.
+The current UI is generic dark slate with indigo accents and glassmorphism. The rebuild should look and behave like a **familiar, standard Material 3 app**. The personality comes only from the theme: the Olive & Linen colors (olive for structure, linen surfaces, terracotta for the pray action, teal for answered prayers), Lora headings, and generous spacing.
+
+**Use traditional controls.** Build every screen from stock Material 3 widgets (`Scaffold`, `AppBar`, `NavigationBar`/`NavigationRail`, `Card`, `ListTile`, `FilledButton`/`OutlinedButton`/`TextButton`, `FloatingActionButton`, `SegmentedButton`, `Chip`, `TextField`, `Dialog`, `BottomSheet`, `SnackBar`, `Badge`, `PopupMenuButton`), styled through `ThemeData` and component themes. Users should recognize every control without learning anything.
+
+**Avoid:**
+- Skeuomorphic or decorative treatments: paper textures, torn edges, handwriting fonts, ink effects, book-page curls.
+- Custom-drawn controls or novel interaction patterns where a stock widget exists.
+- Decorative animation beyond Material's standard transitions.
+
+The "journal" idea lives in the palette, the logo and the copy, not in the controls.
 
 ### 7.2 Palette: "Olive & Linen" (decided)
 
@@ -603,7 +612,7 @@ Bundle the variable font files in `assets/fonts/` and declare them in `pubspec.y
 - Spacing scale: 4, 8, 12, 16, 24, 32, 48. Page padding is 16 on compact layouts and 24 on medium and larger.
 - Radii: cards 16, dialogs/sheets 28 (M3 default), chips/badges 8, buttons stadium.
 - Elevation: cards are flat (`surfaceContainerLowest` + 1px `outlineVariant` border). Use tonal elevation, not shadows.
-- Motion: the M3 standard easing, 200–300 ms. A container transform or Hero from card to detail. The pray button gets a short scale and glow pulse plus a count tick animation. Marking a prayer answered gets a gentle teal shimmer (one-shot, respects `MediaQuery.disableAnimations`).
+- Motion: Material 3's standard transitions and durations only (default page transitions, ink ripples, dialog and sheet animations). Small state feedback is fine: the pray button's count updates with a brief `AnimatedSwitcher`, and the status badge cross-fades when a prayer is marked answered. No custom decorative effects. Respect `MediaQuery.disableAnimations`.
 
 ### 7.5 Responsive layout
 
@@ -616,6 +625,8 @@ Bundle the variable font files in `assets/fonts/` and declare them in `pubspec.y
 The top app bar holds the screen title and the avatar menu. Notifications live in **one place only**: the **Activity** navigation destination with an unread `Badge` (§9.0). There is no app-bar bell.
 
 ### 7.6 Shared components (build these first; add a debug-only `/dev/gallery` route)
+
+These are thin wrappers that compose stock Material widgets with app data. For example, `PrayerCard` is a `Card` with `ListTile`-style content and a `PopupMenuButton`, and `PrayButton` is a `FilledButton.tonal`. They're not custom-painted controls.
 
 - `PrayerCard`: summary, clamped description, optional owner row, group chips, footer (date, updates count, `StatusBadge`, `PrayButton` or count). For the owner, a ⋮ overflow menu on the card holds Mark answered/active, Share with groups, and Edit, instead of a row of icon buttons (see the mockups)
 - `StatusBadge`: Active (primaryContainer) / Answered (tertiaryContainer)
@@ -713,7 +724,7 @@ Native HTML splash in the palette colors (like omtb's `flutter_native_splash`), 
   - Summary (Lora), description (`SelectionArea`)
   - "Shared with" chips (owner)
   - Meta row: created date, `StatusBadge`, prayed count / `PrayButton`
-- **Updates** section as a vertical timeline (dot + line), newest first. Owner: an "Add update" button that opens a sheet. Author: Edit (inline `TextField` that swaps in) and Delete (confirm). "(edited)" marker.
+- **Updates** section as a standard list, newest first (`ListTile`s or simple cards with the date as subtitle). The dot-and-line accent in the mockup is optional styling, not a custom control. Owner: an "Add update" button that opens a sheet. Author: Edit (inline `TextField` that swaps in) and Delete (confirm). "(edited)" marker.
 - Delete prayer: `ConfirmDialog`, then `context.go('/prayers')` and a SnackBar "Prayer deleted".
 - Not found / no permission: friendly message plus "Back to prayers".
 
@@ -990,6 +1001,7 @@ Create `CLAUDE.md` (and/or `AGENTS.md`) in the new repo:
 3. Never commit `env/*.json` (except `example.json`) or generated SW files containing config.
 4. Run `dart format`, `flutter analyze`, `flutter test` before pushing.
 5. Widgets don't talk to Firebase directly (see §3.1).
+5a. Use stock Material 3 widgets themed through `ThemeData`. Shared components (§7.6) compose stock widgets; they don't reimplement them (see §7.1).
 6. Colors come only from `Theme.of(context).colorScheme` or `StatusColors`, never as hex literals in widgets.
 
 ---
@@ -1025,7 +1037,7 @@ Each milestone ends in a deployable preview channel and a version bump (5.0.0-al
 - [ ] Models + `PrayerRepository` + providers (with repository tests)
 - [ ] My Prayers: filter, list grid, skeleton, empty states
 - [ ] Add/Edit (with group selection), delete, status toggle, share sheet
-- [ ] Prayer detail + updates timeline CRUD
+- [ ] Prayer detail + updates list CRUD
 - [ ] Pray button (non-owner) + `prayer_reaction` notification
 - [ ] Carousel (PageView, keys, swipe, dots), with the view mode saved
 - **Done when:** checklists §2.2–§2.7 pass.

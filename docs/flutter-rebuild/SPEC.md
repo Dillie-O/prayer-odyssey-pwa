@@ -12,7 +12,7 @@
 This spec is meant to be handed to a fresh Claude Code session working in the **new** repository.
 1. Read the whole document once, then work milestone by milestone (§18), starting at M0. Every milestone ends in a PR with a preview deploy.
 2. Ask for read access to the old repository (`Dillie-O/prayer-odyssey-pwa`) to port code, copy, `CHANGELOG.md`, Firebase rules and functions, and assets. Treat it as the reference implementation for behavior; §2 is the checklist.
-3. The design mockups and logo concept are at https://claude.ai/artifact/AVx1WmNX4Wk73DSbSW1Ugt (Olive & Linen row and Logo row). Every color token is also written out in §7.2, so the spec stands alone.
+3. The design mockups and final logo are at https://claude.ai/artifact/AVx1WmNX4Wk73DSbSW1Ugt (the Olive & Linen row and the "Final logo" row). The logo files themselves are in `docs/flutter-rebuild/logo/` in the old repo. Every color token is also written out in §7.2, so the spec stands alone.
 4. Decisions already made are in §19. Don't reopen them; ask the owner if something seems to conflict.
 
 ---
@@ -53,7 +53,7 @@ This follows the setup that has worked for **omtb**: Flutter stable, `firebase_c
 | State management | **Riverpod 3** (`flutter_riverpod`) | Decided. omtb uses Provider; Riverpod fits this app's many Firestore streams that depend on auth and parameters (see §5). |
 | Routing | **go_router** with path URL strategy | Required so existing URLs keep working: `/prayers/:id`, `/groups/:id`, invite links, QR codes, push links. |
 | Models | `freezed` + `json_serializable` (or hand-written `fromFirestore`) | Custom `Timestamp` converters. |
-| Design | Material 3, **Olive & Linen** palette (§7.2) | Decided. Light + dark + follow-system. Logo refresh proposed (§7.8). |
+| Design | Material 3, **Olive & Linen** palette (§7.2) | Decided. Light + dark + follow-system. New logo, variation D (§7.8). |
 | Fonts | Bundled: **Lora** (headings) + **Inter** (body/UI) | Bundled as assets, not fetched at runtime, so they work offline. |
 | Icons | `material_symbols_icons` (Rounded) | No emoji in the UI (see §15). |
 | QR codes | `qr_flutter` with embedded logo | Same as omtb. |
@@ -629,29 +629,30 @@ The top app bar holds the screen title and the avatar menu. Notifications live i
 - Long-form text (descriptions, updates) inside a `SelectionArea` so users can select and copy it.
 - Contrast ratios as listed in §7.2.
 
-### 7.8 Logo and app icon (proposed refresh)
+### 7.8 Logo and app icon (decided: variation D)
 
-Problems with the current logo (`static/prayer_icon_logo_*.png`): it has a transparent background, so Android/desktop maskable icons get an arbitrary backdrop; its white journal disappears on light backgrounds (that's why 4.1.0 added an indigo badge behind it in the navbar); the thin pen outline vanishes at small sizes; and it doesn't match the new palette.
+The new logo is **praying hands over an open journal**, with a terracotta ribbon bookmark in the gutter. It stays close to the original "praying hands + journal" idea, so existing users still recognize it, while fixing the old logo's problems: a transparent background that gave maskable icons an arbitrary backdrop, a white journal that disappeared on light backgrounds (hence the indigo badge added in 4.1.0), and a thin pen that vanished at small sizes.
 
-Recommendation: **refresh, don't replace.** Keep the "praying hands on a journal" idea so existing users still recognize it, and redraw it as clean vector art:
-- **App icon:** a solid olive tile (`#4E5D3A`), a linen journal with four binding dots (a nod to today's spiral rings), olive praying hands, and a terracotta bookmark ribbon instead of the pen.
-- **Glyph:** the praying hands alone in linen on the olive tile, with a short terracotta underline, for the favicon, small sizes and the Profile/About header. Dark-mode variant: sage tile (`#BCCB9E`) with dark hands.
-- **Lockup:** glyph + "Prayer Odyssey" in Lora 600.
-- **Notification badge:** a monochrome (white on transparent) hands silhouette, 96×96, for the `badge` field of web push (Android uses only its alpha channel).
+**Final assets are committed in `docs/flutter-rebuild/logo/`**. Copy them into the new repo during M0, and don't redraw them.
 
-The concept is on the mockup canvas (Logo row), and the concept SVGs are committed beside this spec in `docs/flutter-rebuild/logo/`. **The concept is a sketch:** before M7, polish the vector shapes (hand curves, thumb lines) or have a designer refine them, then generate every size from one master SVG:
+| File | Use in the new repo |
+|---|---|
+| `svg/logo-mark-olive.svg` | Transparent mark for light backgrounds → `assets/images/logo_mark_olive.svg` (in-app via `flutter_svg`: About header, Welcome hero, lockup) |
+| `svg/logo-mark-linen.svg` | Transparent mark for dark backgrounds → `assets/images/logo_mark_linen.svg` |
+| `svg/app-icon.svg` | Master for the rounded-tile icon; also `web/favicon.svg` |
+| `svg/app-icon-circle.svg` | Olive circle version (social/profile images, anywhere a round badge fits) |
+| `svg/app-icon-maskable.svg` | Full-bleed square; mark sits inside the 80% safe zone |
+| `svg/badge-mono.svg` | Monochrome (alpha-only) silhouette for the web-push `badge` |
+| `png/Icon-192.png`, `png/Icon-512.png` | `web/icons/`, manifest purpose `any` |
+| `png/Icon-maskable-192.png`, `png/Icon-maskable-512.png` | `web/icons/`, manifest purpose `maskable` |
+| `png/apple-touch-icon-180.png` | `web/icons/`, `<link rel="apple-touch-icon">` |
+| `png/favicon-32.png`, `png/favicon-16.png` | `web/` favicons (alongside `favicon.svg`) |
+| `png/badge-96.png` | `web/icons/badge-96.png`, referenced by the Cloud Function's `webpush.notification.badge` |
+| `png/splash-mark-olive-512.png`, `png/splash-mark-linen-512.png` | `flutter_native_splash` image (light) and `image_dark` (dark), on `#F7F4EC` / `#14160F` |
 
-| Asset | Size | Notes |
-|---|---|---|
-| `web/icons/Icon-192.png`, `Icon-512.png` | 192, 512 | purpose `any`, rounded tile |
-| `web/icons/Icon-maskable-192.png`, `-512.png` | 192, 512 | full-bleed olive square; artwork inside the central 80% safe zone |
-| `web/icons/apple-touch-icon.png` | 180 | full-bleed square (iOS applies its own mask) |
-| `web/favicon.png` / `favicon.svg` | 32 / vector | glyph |
-| `web/icons/badge-96.png` | 96 | monochrome silhouette |
-| `web/splash/*` | per `flutter_native_splash` | glyph on linen (light) / on `#14160F` (dark) |
-| `assets/images/logo_glyph.svg` | vector | in-app use (`flutter_svg`) |
+Lockup (in app, not an image): the transparent mark at 40–56px plus "Prayer Odyssey" in Lora 600, mark-olive on light and mark-linen on dark.
 
-If the refresh isn't approved, keep the current artwork but at minimum put it on a solid tile for the maskable icons.
+Regenerating: the geometry lives in `logo/tool/build_logo.py` (shapely; the thumb and cuff lines are real cut-outs, so the marks are truly transparent). `logo/tool/render_png.sh` rasterizes the PNGs with headless Chromium. Edit the script rather than the SVGs by hand.
 
 ---
 
@@ -994,6 +995,7 @@ Each milestone ends in a deployable preview channel and a version bump (5.0.0-al
 - [ ] Create the repo; `flutter create --platforms=web --org com.dillieo prayer_odyssey`
 - [ ] Add packages; analysis options; `build_runner`
 - [ ] `env/` + `firebase_options.dart`; `usePathUrlStrategy()`
+- [ ] Copy the logo/icon set from the old repo's `docs/flutter-rebuild/logo/` into `web/icons/`, `web/` and `assets/images/` (§7.8)
 - [ ] Move `firestore.rules`, `firestore.indexes.json`, `functions/` into `firebase/`
 - [ ] CI workflow (analyze, test, build, preview deploy) green on a hello-world
 - [ ] `CLAUDE.md`; copy the full `CHANGELOG.md` from the old repo and add `[Unreleased]` (5.0.0-alpha.1), per §17.1
@@ -1041,7 +1043,7 @@ Each milestone ends in a deployable preview channel and a version bump (5.0.0-al
 - **Done when:** checklists §2.12–§2.14 pass, exports match the old JSON schema, and the .docx opens cleanly in Word, Google Docs and LibreOffice with working heading styles.
 
 **M7: PWA polish and performance**
-- [ ] Manifest, icons (regenerate maskable icons in the new palette), splash, shortcuts, screenshots
+- [ ] Manifest (icons from §7.8), splash via `flutter_native_splash`, shortcuts, screenshots
 - [ ] Offline shell test (DevTools offline → reload works), connectivity banner
 - [ ] Update banner via `version.json`
 - [ ] Install prompt
@@ -1080,10 +1082,11 @@ Each milestone ends in a deployable preview channel and a version bump (5.0.0-al
 | D10 | Analytics | Keep Firebase Analytics, BigQuery export off, errors as Analytics events, no Sentry (§12.1). |
 | D11 | Repo | The owner creates the new repo; the package name defaults to `prayer_odyssey`. |
 | D12 | Backend ownership (default) | Move `functions/` and the Firestore rules/indexes into the new repo under `firebase/`, so there's one source of truth. Until cutover, deploy backend changes only from the new repo, and only the ones marked safe for the old client (§4.4). |
+| D13 | Logo | Variation D, praying hands over an open journal; final asset set in `docs/flutter-rebuild/logo/` (§7.8). |
 
 ### Still open
 
-**Q3. Logo refresh.** Approve the refreshed icon direction in §7.8 (concept on the canvas), ask for changes, or keep the current artwork on a solid tile. Needed before M7.
+None. All decisions are made; anything new goes to the owner.
 
 ---
 

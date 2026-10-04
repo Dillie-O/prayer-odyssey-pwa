@@ -1,6 +1,6 @@
 # Prayer Odyssey — Flutter Web PWA Rebuild Spec
 
-**Status:** Draft v1 (for review)
+**Status:** Draft v2 (decisions from review applied; palette choice pending)
 **Date:** 2026-10-04
 **Replaces:** `prayer-odyssey-pwa` (SvelteKit 2 / Svelte 5 / Tailwind, v4.3.2)
 **Target:** New repository, Flutter web, installable PWA. Android and iOS are out of scope for now.
@@ -37,20 +37,20 @@ This follows the setup that has worked for **omtb**: Flutter stable, `firebase_c
 |---|---|---|
 | Framework | Flutter (stable channel), Dart 3.x | Web target only. Use `flutter create --platforms=web`. |
 | Renderer | CanvasKit (default `flutter build web`) | Try `--wasm` (skwasm) later, once all plugins are confirmed wasm-compatible. |
-| Backend | Existing Firebase project | Auth, Firestore, Functions (2nd gen, Node 22), FCM, Hosting. |
+| Backend | Existing Firebase project and live data | Decided. Auth, Firestore, Functions (2nd gen, Node 22), FCM, Hosting. |
 | Firebase SDK | FlutterFire: `firebase_core`, `firebase_auth`, `cloud_firestore`, `firebase_messaging`, `firebase_analytics` (optional) | |
-| State management | **Riverpod 3** (`flutter_riverpod`) | omtb uses Provider. Riverpod fits this app better because of its many Firestore streams that depend on auth and parameters (see §5). |
+| State management | **Riverpod 3** (`flutter_riverpod`) | Decided. omtb uses Provider; Riverpod fits this app's many Firestore streams that depend on auth and parameters (see §5). |
 | Routing | **go_router** with path URL strategy | Required so existing URLs keep working: `/prayers/:id`, `/groups/:id`, invite links, QR codes, push links. |
 | Models | `freezed` + `json_serializable` (or hand-written `fromFirestore`) | Custom `Timestamp` converters. |
-| Design | Material 3, custom "Dawn Voyage" palette (§7) | Light + dark + follow-system. |
+| Design | Material 3, custom palette (§7); Dawn Voyage recommended, choice pending the mockups | Light + dark + follow-system. |
 | Fonts | Bundled: **Lora** (headings) + **Inter** (body/UI) | Bundled as assets, not fetched at runtime, so they work offline. |
 | Icons | `material_symbols_icons` (Rounded) | No emoji in the UI (see §15). |
 | QR codes | `qr_flutter` with embedded logo | Same as omtb. |
 | Sharing | `share_plus` (Web Share API, falls back to clipboard) | |
-| Export | `archive`, `csv`, `pdf` + `printing` | §11 |
+| Export | `archive`, `csv`, `pdf` + `printing`; keep **both** Word and PDF | Decided (§11). |
 | Service workers | `sw.js` (precache via Workbox CLI, post-build) + `firebase-messaging-sw.js` (push) | §10 |
 | Config | `--dart-define-from-file=env/<env>.json` | Firebase web config is also injected into the SW at build time. No hardcoded credentials (keeps the 4.3.2 security fix). |
-| Hosting/CI | Firebase Hosting; PR preview channels; deploy `live` on push to `release` | Same pattern as both current repos. |
+| Hosting/CI | Firebase Hosting; PR preview channels (no separate beta site); deploy `live` on push to `release` | Decided. Same pattern as both current repos. |
 | Version | Start at **5.0.0** | Continues the product's version history and CHANGELOG. |
 
 ---
@@ -212,7 +212,7 @@ prayer_odyssey/
 │   │   ├── prayers/    {data, domain, application, presentation}
 │   │   ├── updates/    {data, domain, presentation}
 │   │   ├── groups/     {data, domain, application, presentation}
-│   │   ├── inbox/      {data, domain, presentation}      # in-app notifications
+│   │   ├── activity/   {data, domain, presentation}      # in-app notifications
 │   │   ├── push/       {data, application}                # FCM token lifecycle
 │   │   ├── profile/    {presentation}
 │   │   ├── export/     {application, formatters/}
@@ -341,7 +341,7 @@ Model notes:
 | `myPrayersProvider` | `prayers where ownerId == uid orderBy createdAt desc` | exists |
 | `groupPrayersProvider(groupId)` | `prayers where sharedWith array-contains groupId orderBy createdAt desc` | exists |
 | `myGroupsProvider` | `groups where members array-contains uid` | single-field (auto) |
-| `inboxProvider` | `notifications where receiverId == uid orderBy createdAt desc` | exists |
+| `activityProvider` | `notifications where receiverId == uid orderBy createdAt desc` | exists |
 | `prayerUpdatesProvider(prayerId)` | `prayers/{id}/updates orderBy createdAt desc` | auto |
 
 **Change from today:** the current app runs one `or(ownerId == uid, sharedWith array-contains-any myGroupIds)` query and then filters to owned prayers on `/prayers`. That downloads every shared prayer for nothing, and `array-contains-any` is capped at 30 values. The rebuild uses the separate queries above. If the optional "Praying for others" feed (§16) is built, it should use per-group queries merged on the client.
@@ -400,7 +400,7 @@ final currentUidProvider          = Provider<String?>((ref) => ref.watch(authSta
 // Repos
 final prayerRepositoryProvider    = Provider((ref) => PrayerRepository(FirebaseFirestore.instance));
 final groupRepositoryProvider     = Provider(...);
-final inboxRepositoryProvider     = Provider(...);
+final activityRepositoryProvider  = Provider(...);
 final pushRepositoryProvider      = Provider(...);
 
 // Streams (autoDispose + family where parameterized)
@@ -411,12 +411,12 @@ final myGroupsProvider            = StreamProvider.autoDispose<List<Group>>(...)
 final groupProvider               = StreamProvider.autoDispose.family<Group?, String>(...);
 final groupPrayersProvider        = StreamProvider.autoDispose.family<List<Prayer>, String>(...);
 final userProfileProvider         = StreamProvider.autoDispose.family<UserProfile?, String>(...); // cached by family key
-final inboxProvider               = StreamProvider.autoDispose<List<AppNotification>>(...);
+final activityProvider            = StreamProvider.autoDispose<List<AppNotification>>(...);
 final unreadCountProvider         = Provider<int>((ref) => ...);
 
 // UI prefs
 final themeModeProvider           = NotifierProvider<ThemeModeNotifier, ThemeMode>(...);   // system/light/dark
-final prayerViewModeProvider      = NotifierProvider<ViewModeNotifier, PrayerViewMode>(...); // list/focus
+final prayerViewModeProvider      = NotifierProvider<ViewModeNotifier, PrayerViewMode>(...); // list/carousel
 final prayerFilterProvider        = NotifierProvider.family<PrayerFilterNotifier, PrayerFilter, String>(...); // per screen key
 
 // Derived
@@ -447,7 +447,7 @@ Future<void> deleteUpdate(String prayerId, String updateId);
 Future<String> createGroup(String name, {String description = ''}); // + users/{uid}.groups arrayUnion (set-merge if missing)
 Future<void> joinGroup(String groupId);                            // members arrayUnion + users/{uid}.groups arrayUnion
 
-// InboxRepository
+// ActivityRepository
 Future<void> markRead(String id);
 Future<void> delete(String id);
 Future<void> clearAll();                                           // batches of 499
@@ -480,7 +480,7 @@ Fixes compared with today, covered by tests:
 | `/prayers/:id` | Prayer detail | required | Prayers |
 | `/groups` | Groups list | required | Groups |
 | `/groups/:id` | Group detail / join | required* | Groups |
-| `/inbox` | Notifications | required | Inbox |
+| `/activity` | Activity (notifications) | required | Activity |
 | `/profile` | Profile & settings | required | Profile |
 | `/profile/export` | Export | required | Profile |
 | `/about` | About | public | Profile (when signed in) |
@@ -490,11 +490,11 @@ Redirect logic (`GoRouter.redirect` + `refreshListenable` bound to the auth stre
 - Unauthenticated visits to a protected route go to `/login?from=<encoded original path>`. After signing in, return to `from`. *This matters for invite links:* today a logged-out user who opens `/groups/abc` sees no way to join.
 - Authenticated visits to `/login` or `/welcome` go to `from` or `/prayers`.
 
-Shell: `StatefulShellRoute.indexedStack` with four branches (Prayers, Groups, Inbox, Profile), so each tab keeps its own navigation stack and scroll position.
+Shell: `StatefulShellRoute.indexedStack` with four branches (Prayers, Groups, Activity, Profile), so each tab keeps its own navigation stack and scroll position.
 
 Deep links that must keep working: `/prayers/{id}` (push `data.url` and the new `fcmOptions.link`), `/groups/{id}` (existing invite links and printed QR codes), `/login`, `/about`, `/profile`.
 
-PWA manifest shortcuts (like omtb): "New prayer" → `/prayers?new=1`, "Pray now" → `/prayers?view=focus`.
+PWA manifest shortcuts (like omtb): "New prayer" → `/prayers?new=1`, "Pray now" → `/prayers?view=carousel`.
 
 ---
 
@@ -561,7 +561,9 @@ All text/background pairs below were checked against WCAG: every one is ≥ 4.5:
 
 Implementation: start from `ColorScheme.fromSeed(seedColor: Color(0xFF24456B), brightness: …)` and `copyWith` the values above, so roles not listed still get sensible tonal values. Put status colors (active, answered, pray) in a `ThemeExtension<StatusColors>` so widgets never hardcode hex values.
 
-**Alternative palettes** to offer if Dawn Voyage isn't right:
+**Mockups:** all three palettes are rendered on phone screens (My Prayers list in light, Prayer detail in light, Carousel in dark) at https://claude.ai/artifact/AVx1WmNX4Wk73DSbSW1Ugt. Each screen has palette and light/dark tweaks. The full token values for the alternatives are in those mockups.
+
+**Alternative palettes:**
 - *Olive & Linen*: primary `#4E5D3A`, accent `#C0763E` (terracotta), surface `#F7F4EC`. Earthier and more rustic.
 - *Twilight Plum*: primary `#4B3B6B`, accent `#D9A441`, surface `#F8F6FA`. Closest to today's indigo, but warmer.
 
@@ -571,7 +573,7 @@ Implementation: start from `ColorScheme.fromSeed(seedColor: Color(0xFF24456B), b
 |---|---|---|---|
 | displaySmall | Lora | 36 / 600 | Landing hero |
 | headlineMedium | Lora | 28 / 600 | Screen titles ("My Prayers") |
-| titleLarge | Lora | 22 / 600 | Prayer summary on detail and focus mode |
+| titleLarge | Lora | 22 / 600 | Prayer summary on detail and carousel |
 | titleMedium | Inter | 16 / 600 | Card titles |
 | bodyLarge | Inter | 16 / 400, height 1.5 | Descriptions |
 | bodyMedium | Inter | 14 / 400 | Default |
@@ -594,11 +596,11 @@ Bundle the variable font files in `assets/fonts/` and declare them in `pubspec.y
 | 600–839 | medium | `NavigationRail` | 2 columns | Centered dialogs (max 560) |
 | ≥ 840 | expanded | `NavigationRail` (extended ≥ 1200) | 2–3 columns; detail max width 720 | Centered dialogs |
 
-The top app bar holds the screen title, the inbox bell with an unread badge (on medium and larger; on compact the Inbox tab shows the badge), and the avatar menu.
+The top app bar holds the screen title and the avatar menu. Notifications live in **one place only**: the **Activity** navigation destination with an unread `Badge` (§9.0). There is no app-bar bell.
 
 ### 7.6 Shared components (build these first; add a debug-only `/dev/gallery` route)
 
-- `PrayerCard`: summary, clamped description, optional owner row, group chips, footer (date, updates count, `StatusBadge`, `PrayButton` or count)
+- `PrayerCard`: summary, clamped description, optional owner row, group chips, footer (date, updates count, `StatusBadge`, `PrayButton` or count). For the owner, a ⋮ overflow menu on the card holds Mark answered/active, Share with groups, and Edit, instead of a row of icon buttons (see the mockups)
 - `StatusBadge`: Active (primaryContainer) / Answered (tertiaryContainer)
 - `PrayButton`: amber tonal button with a praying-hands icon and count; "prayed" state; debounce; haptic-free animation
 - `FilterBar`: `SegmentedButton<PrayerFilter>` + view-mode toggle
@@ -612,7 +614,7 @@ The top app bar holds the screen title, the inbox bell with an unread badge (on 
 ### 7.7 Accessibility
 - Every interactive target is at least 48×48.
 - Semantic labels on icon buttons (the current app relies on `title` attributes).
-- Keyboard: focus traversal order, Esc closes dialogs (M3 default), arrow keys in focus mode, Enter submits forms.
+- Keyboard: focus traversal order, Esc closes dialogs (M3 default), arrow keys in the carousel, Enter submits forms.
 - Text scaling up to 200% without clipping.
 - Long-form text (descriptions, updates) inside a `SelectionArea` so users can select and copy it.
 - Contrast ratios as listed in §7.2.
@@ -642,13 +644,14 @@ Native HTML splash in the palette colors (like omtb's `flutter_native_splash`), 
 
 ### 8.4 My Prayers (`/prayers`)
 - App bar title "My Prayers". FAB "New prayer" on compact; a filled button in the header on wider layouts.
-- `FilterBar`: Active | Answered | All, plus a view toggle (List / Focus).
+- `FilterBar`: Active | Answered | All, plus a view toggle (List / Carousel).
 - **List view:** responsive grid of `PrayerCard`s (owner info hidden, group chips shown).
-- **Focus view** (today's "Carousel", renamed): see §8.5.
+- **Carousel view:** see §8.5.
 - Empty (no prayers): illustration, "No prayers yet", "Start your prayer journey by creating your first prayer request.", CTA.
 - Filtered empty: "No answered prayers yet", etc.
 
-### 8.5 Focus mode (Carousel)
+### 8.5 Carousel view
+- Keep the name **Carousel**. Build it with a `PageView`, **not** Flutter's M3 `CarouselView` widget: that widget shows several items at once in a scrolling strip, while this view shows one prayer at a time.
 - `PageView` with one prayer per page and a large-type layout (summary in Lora titleLarge, full description, latest update preview from the denormalized `latestUpdate`).
 - Header: "3 of 12", prev/next icon buttons. Footer: page dots (compact "n / N" when there are more than 5 on narrow screens), and a hint ("Swipe or use ← →").
 - Arrow-key `Shortcuts`/`Actions` on desktop.
@@ -684,9 +687,9 @@ A modal bottom sheet (compact) or dialog listing the user's groups as `CheckboxL
 - Header card: name (Lora), description, member count, "Member" / "Admin" chip.
 - Actions: **Invite** split/menu button with *Copy link*, *Show QR code*, and *Share…* (`share_plus`, Web Share on mobile). The invite URL is `https://app.prayerodyssey.com/groups/{id}`, built from config rather than `window.location`.
 - Non-member: a prominent "Join this group" card with the group description and a Join button. Prayers are not loaded (the rules would block them anyway).
-- Member: `FilterBar`, then the group prayer list or focus view (owner info shown). FAB "New prayer" with this group pre-selected.
+- Member: `FilterBar`, then the group prayer list or carousel (owner info shown). FAB "New prayer" with this group pre-selected.
 
-### 8.11 Inbox (`/inbox`)
+### 8.11 Activity (`/activity`)
 - App bar actions: "Mark all read" (**new**, batch update) and "Clear all" (confirm).
 - List grouped by day (Today / Yesterday / Earlier). Each tile shows a type icon in a tonal circle, a rich-text message (sender bold, quoted summary, "in {group}"), a relative time, and an unread dot.
 - Tap: mark read, then navigate (prayer → `/prayers/:id`; group-only → `/groups/:id`).
@@ -719,13 +722,16 @@ Sections (`ListTile`-based settings page):
 
 ## 9. Notifications
 
-### 9.1 In-app inbox
-See §8.11. Backed by `inboxProvider`. `unreadCountProvider` drives the badges (nav bar destination badge, app bar bell, and the browser tab title prefix "(3) Prayer Odyssey" through `SystemChrome.setApplicationSwitcherDescription` / `Title`).
+### 9.0 Where notifications live (decided)
+Following Material 3 guidance, notifications are a **top-level navigation destination** ("Activity") with a `Badge` showing the unread count. It is the third of four destinations in the `NavigationBar` on phones and in the `NavigationRail` on wider screens. This is the right choice when notifications are a core part of the app ("someone is praying for you"), and it gives one consistent location at every screen size. M3 reserves top-app-bar action icons for actions on the current screen. About moves under Profile, so there are four destinations: Prayers, Groups, Activity, Profile (M3 recommends 3–5).
+
+### 9.1 In-app activity feed
+See §8.11. Backed by `activityProvider`. `unreadCountProvider` drives the badges (the Activity destination badge and the browser tab title prefix "(3) Prayer Odyssey" through `SystemChrome.setApplicationSwitcherDescription` / `Title`).
 
 ### 9.2 Push permission UX (change from today)
 Today the app calls `Notification.requestPermission()` **automatically on every login**. Browsers penalize this: Chrome quiets the prompt, and Safari requires a user gesture. The new flow:
 1. Never prompt automatically.
-2. Show a soft-ask card (inbox top, and once after the first prayer is created) explaining the benefit. Tapping **Enable** triggers the browser prompt.
+2. Show a soft-ask card (top of Activity, and once after the first prayer is created) explaining the benefit. Tapping **Enable** triggers the browser prompt.
 3. iOS/iPadOS: Web Push works **only in an installed PWA** (16.4+). If the app isn't running standalone (`matchMedia('(display-mode: standalone)')`), show "Add to Home Screen" instructions instead of Enable.
 4. On every app start, if permission is already `granted` and this device's token is registered, refresh the token silently and update `lastUsed`. Listen to `onTokenRefresh` and swap the token in the profile.
 
@@ -733,7 +739,7 @@ Today the app calls `Notification.requestPermission()` **automatically on every 
 Keep today's semantics: cap 10, prune > 30 days, `fcmTokenInfo` without the user agent or platform. Use **one** `set(merge)` write per change, not today's read-modify-write chains. Server-side pruning of dead tokens is in §4.4.
 
 ### 9.4 Foreground messages
-`FirebaseMessaging.onMessage` shows an in-app `SnackBar` with a "View" action that navigates to `data.url`, **not** an OS notification while the app is focused. The inbox already updates live.
+`FirebaseMessaging.onMessage` shows an in-app `SnackBar` with a "View" action that navigates to `data.url`, **not** an OS notification while the app is focused. The Activity feed already updates live.
 
 ### 9.5 Background messages
 `firebase-messaging-sw.js` (from a template, §12) uses the compat SDK to call `onBackgroundMessage` → `showNotification`. With `webpush.fcmOptions.link` set by the function, clicks are handled automatically. Also add a `notificationclick` handler as a fallback, which focuses an existing client and navigates it, or opens a new window.
@@ -761,7 +767,7 @@ Keep today's semantics: cap 10, prune > 30 days, `fcmTokenInfo` without the user
   "screenshots": [wide 1280x720, narrow 720x1280],
   "shortcuts": [
     {"name": "New prayer", "url": "/prayers?new=1"},
-    {"name": "Pray now", "url": "/prayers?view=focus"}
+    {"name": "Pray now", "url": "/prayers?view=carousel"}
   ],
   "prefer_related_applications": false
 }
@@ -806,8 +812,13 @@ Port `src/lib/utils/prayerExport.ts` (733 lines) to `features/export/`:
   - `JsonFormatter` → `prayer-odyssey-export-YYYY-MM-DD.json` (keep the same schema as today, so old and new exports are interchangeable)
   - `CsvZipFormatter` → `prayers.csv`, `updates.csv`, `summary.csv` zipped with `archive`
   - `MarkdownFormatter` → `.md`
-  - `DocxFormatter` → build minimal OOXML (`[Content_Types].xml`, `_rels/.rels`, `word/document.xml`, `word/styles.xml`) and zip it with `archive`. Headings, paragraphs and bullet lists are enough. *(Fallback if this proves fiddly: drop .docx and point Word users at Markdown/PDF. See open question Q6.)*
-  - `PdfFormatter` → a journal-styled PDF with the `pdf` package (embedded Lora/Inter, cover page, one prayer per section, update timeline). "Print" calls `Printing.layoutPdf` (opens the browser print dialog); "Download PDF" calls `Printing.sharePdf`. This replaces the pop-up window, so "Please allow pop-ups" goes away.
+  - `DocxFormatter` (**required**: people edit their prayers after export or merge them into other documents) → build minimal OOXML (`[Content_Types].xml`, `_rels/.rels`, `word/document.xml`, `word/styles.xml`, `docProps/core.xml`) and zip it with `archive`. To make the file easy to edit and merge:
+    - Use Word's **built-in style IDs** (`Title`, `Heading1`, `Heading2`, `Normal`, `ListBullet`) rather than direct formatting. Then the navigation pane, table of contents and "merge styles" all work, and pasted content picks up the destination document's styles.
+    - One `Heading1` per prayer (the summary), a small metadata line (status, created date, groups, prayed count), the description as `Normal` paragraphs, and an "Updates" `Heading2` with dated entries.
+    - No text boxes, tables or floating shapes for layout. Plain paragraphs survive copy, paste and merge best.
+    - Open-test the output in Word, Google Docs and LibreOffice (part of M6 done criteria).
+    - If hand-rolled OOXML gets fiddly, use a `.dotx`-style template stored in `assets/export/` with placeholders filled in, but keep the same style IDs.
+  - `PdfFormatter` (**required**, alongside Word) → a journal-styled PDF with the `pdf` package (embedded Lora/Inter, cover page, one prayer per section, update timeline). "Print" calls `Printing.layoutPdf` (opens the browser print dialog); "Download PDF" calls `Printing.sharePdf`. This replaces the pop-up window, so "Please allow pop-ups" goes away.
 - `web_download.dart`: `Blob` → object URL → `<a download>` click → revoke after 1 s.
 
 ---
@@ -842,7 +853,7 @@ Port `src/lib/utils/prayerExport.ts` (733 lines) to `features/export/`:
 | Static | `flutter analyze` (`flutter_lints` or `very_good_analysis`), `dart format --set-exit-if-changed` | CI gate |
 | Unit | `flutter test` | Models (`fromFirestore` incl. legacy `content`, null timestamps, unknown enums), filters, export formatters (golden text fixtures), date-range logic, token cap/prune logic |
 | Repository | `fake_cloud_firestore`, `firebase_auth_mocks` | Every write method from §5.2 produces the exact document shape in §4.1 |
-| Widget | `flutter test` + `ProviderScope` overrides | PrayerCard (owner/non-owner/answered), FilterBar, focus-mode navigation (keys, swipe), dialogs, login error mapping, inbox tap → navigation |
+| Widget | `flutter test` + `ProviderScope` overrides | PrayerCard (owner/non-owner/answered), FilterBar, carousel navigation (keys, swipe), dialogs, login error mapping, activity tap → navigation |
 | Golden | `matchesGoldenFile` (light + dark, compact + expanded) | Key components and screens; catches visual regressions |
 | Rules | `@firebase/rules-unit-testing` in `firebase/` (Node) | Codify the current rules plus the hardening in §4.3 |
 | Functions | `firebase-functions-test` + emulator | Fan-out recipients, dead-token pruning, count maintenance |
@@ -860,13 +871,16 @@ Target: 80%+ coverage of `features/*/data`, `application`, and `export/formatter
 - Use the existing `FIREBASE_SERVICE_ACCOUNT_PRAYER_ODYSSEY_96025` secret (add it to the new repo).
 
 ### 14.2 Cutover plan (no downtime, no data migration)
-1. **Build the beta on a second Hosting site** in the same Firebase project (e.g. `prayer-odyssey-beta` → `beta.prayerodyssey.com`). Add the domain to Auth authorized domains. Testers use the real data.
-   - Push tokens are scoped per origin, so beta users must enable push separately. That's fine.
+Testing happens on **PR preview channels** only. There is no separate beta site.
+
+1. **Test on preview channels.** Every PR deploys to a Firebase Hosting preview channel in the same project (`prayer-odyssey-96025--pr-<n>-<hash>.web.app`), so testers use the real data and real accounts.
+   - **Google sign-in on previews:** Firebase Auth only allows OAuth popups/redirects from domains on its authorized list, and preview channel domains aren't on it by default. Either sign in with email/password on previews (the E2E audit account already does), or add a long-lived channel's domain to Auth → Settings → Authorized domains. A long-lived channel can be created with `firebase hosting:channel:deploy dogfood --expires 30d`, which gives a stable URL to share with a few testers while the old app stays live.
+   - Push tokens are scoped per origin, so push on a preview channel must be enabled separately. That's fine for testing.
    - Do **not** deploy function change 2 (`onPrayerStatusChanged`) yet. Until cutover, the Flutter client sends `prayer_answered` client-side, the same as today, behind a `CLIENT_ANSWERED_FANOUT` flag.
-2. **Parity sign-off** against the §2 checklist, then a short dogfood period.
+2. **Parity sign-off** against the §2 checklist on the final preview.
 3. **Find the old service worker's URL** (DevTools → Application on app.prayerodyssey.com; vite-pwa's injectManifest output, likely `/sw.js` or `/service-worker.js`). The new build **must serve a SW at that same path**, either the new `sw.js` itself or a tiny "replacement" SW that calls `skipWaiting`, clears all old caches, `clients.claim()`, and reloads its clients. Otherwise installed users can stay stuck on the cached Svelte app.
-4. **Cutover release:** deploy the Flutter app to the `live` site on app.prayerodyssey.com, deploy the functions changes (§4.4), and turn the client fan-out flag off. Same origin + same `id`/`start_url` + same `firebase-messaging-sw.js` path means installed PWAs update in place and existing FCM tokens should keep working (verify on one device first).
-5. **Post-cutover:** watch Functions logs and Crashlytics-equivalent error logging (Analytics `app_exception` events, or Sentry if desired). Ship the §4.3 privacy split as a follow-up.
+4. **Cutover release:** merge to `release`, which deploys the Flutter app to `live` on app.prayerodyssey.com. Deploy the functions changes (§4.4) and turn the client fan-out flag off in the same release. Same origin + same `id`/`start_url` + same `firebase-messaging-sw.js` path means installed PWAs update in place and existing FCM tokens should keep working (verify on one device first).
+5. **Post-cutover:** watch the Functions logs and client error logging (Analytics `app_exception` events, or Sentry if desired). Ship the §4.3 privacy split as a follow-up.
 6. **Rollback:** Firebase Hosting → release history → roll back `live` to the last Svelte release (one click). Functions: redeploy the previous `functions/` from the old repo tag `v4.3.2`. The data stays compatible both ways because the schema only gains optional fields.
 7. **Archive** `prayer-odyssey-pwa` once the app has been stable for ~30 days. Tag the final state `v4.3.2-final`.
 
@@ -877,7 +891,7 @@ Target: 80%+ coverage of `features/*/data`, `application`, and `export/formatter
 | Trade-off | Mitigation |
 |---|---|
 | Larger first load (~2–3 MB compressed with CanvasKit) than SvelteKit | HTML splash in brand colors; SW precache makes later loads instant; consider `--wasm` later |
-| Canvas rendering: no native Ctrl+F, text selection is opt-in | `SelectionArea` on detail and focus views; search within the app is a possible enhancement |
+| Canvas rendering: no native Ctrl+F, text selection is opt-in | `SelectionArea` on detail and carousel views; search within the app is a possible enhancement |
 | Emoji need fallback-font downloads at runtime (and render as tofu offline) | Use Material Symbols icons in the UI (`volunteer_activism`, `edit_note`, `auto_awesome`, `share`, `notifications`) or a custom praying-hands SVG. Keep emoji only in OS push titles, which the OS renders |
 | Cross-origin images (Google profile photos) can fail under CanvasKit's CORS requirements | `Image.network(..., webHtmlElementStrategy: WebHtmlElementStrategy.fallback)` plus the initials-avatar fallback |
 | Password-manager autofill is weaker than native forms | `AutofillGroup` + `autofillHints`; call `TextInput.finishAutofillContext()` on submit |
@@ -891,7 +905,7 @@ Target: 80%+ coverage of `features/*/data`, `application`, and `export/formatter
 
 Ordered by value versus effort:
 1. **Leave group** and **admin tools** (edit name/description, remove member, delete group, promote admin). Needs the rule change in §4.3.4.
-2. **Mark all read** in the inbox (cheap; listed in §8.11).
+2. **Mark all read** in Activity (cheap; listed in §8.11).
 3. **"Praying for others" feed**: one stream of active prayers shared to all my groups, newest first, so users can pray through them without visiting each group. Could become the Prayers tab's second segment ("Mine | Shared").
 4. **Notification preferences** per type (stored in `users/{uid}/private/settings`, respected by functions).
 5. **Archive** status in the UI (the enum already exists).
@@ -946,18 +960,18 @@ Each milestone ends in a deployable preview channel and a version bump (5.0.0-al
 - [ ] Add/Edit (with group selection), delete, status toggle, share sheet
 - [ ] Prayer detail + updates timeline CRUD
 - [ ] Pray button (non-owner) + `prayer_reaction` notification
-- [ ] Focus mode (PageView, keys, swipe, dots), with the view mode saved
+- [ ] Carousel (PageView, keys, swipe, dots), with the view mode saved
 - **Done when:** checklists §2.2–§2.7 pass.
 
 **M4: Groups**
 - [ ] `GroupRepository` + providers
 - [ ] Groups list, create
-- [ ] Group detail: join, members view, filter, focus mode, add prayer pre-selected
+- [ ] Group detail: join, members view, filter, carousel, add prayer pre-selected
 - [ ] Invite: copy, QR (logo), share
 - **Done when:** checklists §2.8–§2.9 pass, and a second account can join through a QR scan on a phone.
 
-**M5: Inbox and push**
-- [ ] Inbox screen, unread badges, mark read, delete, clear all, mark all read
+**M5: Activity and push**
+- [ ] Activity screen, unread badges, mark read, delete, clear all, mark all read
 - [ ] `firebase-messaging-sw.js` template + generator; `sw.js` via Workbox; `tool/build_web.sh`
 - [ ] Permission soft-ask, iOS install guidance, token lifecycle, foreground SnackBar
 - **Done when:** push arrives on desktop Chrome, Android Chrome (installed) and iOS (installed PWA), and tapping it opens the right prayer.
@@ -966,7 +980,7 @@ Each milestone ends in a deployable preview channel and a version bump (5.0.0-al
 - [ ] Profile settings page
 - [ ] Export: all five formats with date range, formatter golden tests
 - [ ] About + `release_notes.json` + app share QR
-- **Done when:** checklists §2.12–§2.14 pass and exports match the old JSON schema.
+- **Done when:** checklists §2.12–§2.14 pass, exports match the old JSON schema, and the .docx opens cleanly in Word, Google Docs and LibreOffice with working heading styles.
 
 **M7: PWA polish and performance**
 - [ ] Manifest, icons (regenerate maskable icons in the new palette), splash, shortcuts, screenshots
@@ -981,8 +995,8 @@ Each milestone ends in a deployable preview channel and a version bump (5.0.0-al
 - [ ] Rules unit tests for current behavior
 - **Done when:** the emulator tests pass and the backfill has been dry-run against prod (read-only mode).
 
-**M9: Beta, cutover, cleanup**
-- [ ] Deploy to the beta site; dogfood with real groups
+**M9: Dogfood, cutover, cleanup**
+- [ ] Dogfood on a preview channel with real groups
 - [ ] Replacement SW at the old SW path
 - [ ] Cutover per §14.2; release 5.0.0
 - [ ] Follow-up: privacy split of `users` (§4.3.1)
@@ -990,21 +1004,22 @@ Each milestone ends in a deployable preview channel and a version bump (5.0.0-al
 
 ---
 
-## 19. Open questions
+## 19. Decisions log and open questions
 
-**Q1. Same Firebase project and live data?** *Recommended: yes* (no migration, users keep their accounts and prayers). The alternative is a fresh project with an export/import, which isn't worth it.
+### Decided (review of v1)
 
-**Q2. Riverpod or Provider?** omtb uses Provider and it works. Riverpod is recommended here because of the ~8 parameterized Firestore streams that depend on auth. If you'd rather keep one pattern across both apps, Provider + `StreamProvider`/`ChangeNotifier` is workable.
+| # | Topic | Decision |
+|---|---|---|
+| D1 | Backend/data | Use the same Firebase project and live database. |
+| D2 | State management | Riverpod. |
+| D3 | Notification location | Follow Material 3: an "Activity" navigation destination with an unread badge, in the bottom bar on phones and the rail on wider screens. No app-bar bell. About moves under Profile (§9.0). |
+| D4 | Carousel | Keep the name "Carousel". Implemented with `PageView` (§8.5). |
+| D5 | Export | Keep **both** Word (.docx, editable and mergeable, §11) and PDF. |
+| D6 | Testing before cutover | PR preview channels only. No beta site or extra DNS (§14.2). |
 
-**Q3. Palette.** Is "Dawn Voyage" the right feel, or would you prefer *Olive & Linen* / *Twilight Plum*, or something tied to the existing logo colors? (I can mock up the three side by side.) Will the app icon and logo be refreshed to match, or stay as they are?
+### Still open
 
-**Q4. Navigation.** Inbox as its own bottom tab (recommended on mobile), or keep the bell + dropdown in the app bar? Should About stay a top-level tab (as today) or move under Profile?
-
-**Q5. "Carousel" → "Focus mode"?** Fine to rename it and make it more of a dedicated "pray through my list" experience?
-
-**Q6. Word (.docx) export.** Is anyone using it? Dropping it in favor of a much nicer PDF would save effort. Keeping it is fine too, just a bit fiddly.
-
-**Q7. Beta period.** Is a `beta.prayerodyssey.com` second site acceptable (DNS record needed), or should beta testing just use PR preview channels?
+**Q3. Palette.** Mockups of all three palettes (list, detail, carousel) are on the design canvas. Pick one, or mix (for example, Dawn Voyage structure with Olive's warmer surfaces). Will the app icon and logo be refreshed to match, or stay as they are?
 
 **Q8. Backend ownership.** Move `functions/` and the rules into the new repo (recommended, one source of truth), or keep backend deploys in the old repo until cutover?
 
@@ -1036,7 +1051,7 @@ Each milestone ends in a deployable preview channel and a version bump (5.0.0-al
 | omtb | Prayer Odyssey rebuild |
 |---|---|
 | `MaterialApp` + named routes | `MaterialApp.router` + go_router (deep links needed) |
-| Provider + ChangeNotifier | Riverpod (Q2) |
+| Provider + ChangeNotifier | Riverpod (D2) |
 | `colorSchemeSeed` only | Seed + explicit role overrides + ThemeExtension |
 | Drift/SQLite (wasm) local DB | Not needed; Firestore offline cache |
 | Supabase + edge functions for reminders | Firebase Functions (already in place) |

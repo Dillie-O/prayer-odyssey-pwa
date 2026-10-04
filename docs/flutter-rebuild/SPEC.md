@@ -12,8 +12,15 @@
 This spec is meant to be handed to a fresh Claude Code session working in the **new** repository.
 1. Read the whole document once, then work milestone by milestone (§18), starting at M0. Every milestone ends in a PR with a preview deploy.
 2. Ask for read access to the old repository (`Dillie-O/prayer-odyssey-pwa`) to port code, copy, `CHANGELOG.md`, Firebase rules and functions, and assets. Treat it as the reference implementation for behavior; §2 is the checklist.
-3. The design mockups and final logo are at https://claude.ai/artifact/AVx1WmNX4Wk73DSbSW1Ugt (the Olive & Linen row and the "Final logo" row). The logo files themselves are in `docs/flutter-rebuild/logo/` in the old repo. Every color token is also written out in §7.2, so the spec stands alone.
+3. The design mockups and final logo are at https://claude.ai/artifact/AVx1WmNX4Wk73DSbSW1Ugt (the Olive & Linen row and the "Final logo" row). The logo files themselves are in the `logo/` folder next to this spec. Every color token is also written out in §7.2, so the spec stands alone.
 4. Decisions already made are in §19. Don't reopen them; ask the owner if something seems to conflict.
+5. Work one milestone per PR and stop for the owner's review after each one. Don't chain milestones without a review.
+
+**Prerequisites the owner handles (an agent can't do these):**
+- [ ] The cloud environment can install Flutter stable: a setup script or SessionStart hook, plus network access to the Flutter SDK download hosts and pub.dev.
+- [ ] GitHub secrets in the new repo: `FIREBASE_SERVICE_ACCOUNT_PRAYER_ODYSSEY_96025` and the `FIREBASE_*` web config values (the same values as the old repo's `VITE_FIREBASE_*` secrets), plus `E2E_AUDIT_EMAIL` / `E2E_AUDIT_PASSWORD`.
+- [ ] Don't create a `release` branch in the new repo until cutover day. Pushing to `release` deploys to the **live** site (§14), while PRs only deploy to preview channels.
+- [ ] Optional: authorize a long-lived preview channel domain in Firebase Auth if you want to test Google sign-in on previews (§14.2).
 
 ---
 
@@ -633,7 +640,7 @@ The top app bar holds the screen title and the avatar menu. Notifications live i
 
 The new logo is **praying hands over an open journal**, with a terracotta ribbon bookmark in the gutter. It stays close to the original "praying hands + journal" idea, so existing users still recognize it, while fixing the old logo's problems: a transparent background that gave maskable icons an arbitrary backdrop, a white journal that disappeared on light backgrounds (hence the indigo badge added in 4.1.0), and a thin pen that vanished at small sizes.
 
-**Final assets are committed in `docs/flutter-rebuild/logo/`**. Copy them into the new repo during M0, and don't redraw them.
+**Final assets are in the `logo/` folder next to this spec**. Copy them into the new repo during M0, and don't redraw them.
 
 | File | Use in the new repo |
 |---|---|
@@ -995,7 +1002,7 @@ Each milestone ends in a deployable preview channel and a version bump (5.0.0-al
 - [ ] Create the repo; `flutter create --platforms=web --org com.dillieo prayer_odyssey`
 - [ ] Add packages; analysis options; `build_runner`
 - [ ] `env/` + `firebase_options.dart`; `usePathUrlStrategy()`
-- [ ] Copy the logo/icon set from the old repo's `docs/flutter-rebuild/logo/` into `web/icons/`, `web/` and `assets/images/` (§7.8)
+- [ ] Copy the logo/icon set from the `logo/` folder next to this spec into `web/icons/`, `web/` and `assets/images/` (§7.8)
 - [ ] Move `firestore.rules`, `firestore.indexes.json`, `functions/` into `firebase/`
 - [ ] CI workflow (analyze, test, build, preview deploy) green on a hello-world
 - [ ] `CLAUDE.md`; copy the full `CHANGELOG.md` from the old repo and add `[Unreleased]` (5.0.0-alpha.1), per §17.1
@@ -1082,7 +1089,7 @@ Each milestone ends in a deployable preview channel and a version bump (5.0.0-al
 | D10 | Analytics | Keep Firebase Analytics, BigQuery export off, errors as Analytics events, no Sentry (§12.1). |
 | D11 | Repo | The owner creates the new repo; the package name defaults to `prayer_odyssey`. |
 | D12 | Backend ownership (default) | Move `functions/` and the Firestore rules/indexes into the new repo under `firebase/`, so there's one source of truth. Until cutover, deploy backend changes only from the new repo, and only the ones marked safe for the old client (§4.4). |
-| D13 | Logo | Variation D, praying hands over an open journal; final asset set in `docs/flutter-rebuild/logo/` (§7.8). |
+| D13 | Logo | Variation D, praying hands over an open journal; final asset set in the `logo/` folder next to this spec (§7.8). |
 
 ### Still open
 

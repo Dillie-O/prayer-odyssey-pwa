@@ -672,6 +672,15 @@ Lockup (in app, not an image): the transparent mark at 40–56px plus "Prayer Od
 
 Regenerating: the geometry lives in `logo/tool/build_logo.py` (shapely; the thumb and cuff lines are real cut-outs, so the marks are truly transparent). `logo/tool/render_png.sh` rasterizes the PNGs with headless Chromium. Edit the script rather than the SVGs by hand.
 
+### 7.9 Tagline and description (decided)
+
+| Copy | Text | Where it's used |
+|---|---|---|
+| **Tagline** | "See how God answers prayer. Support one another." | Under the logo on the Welcome page, the About header, the login card subtitle, the HTML `<title>` suffix ("Prayer Odyssey · See how God answers prayer. Support one another."), and share text for the app QR/Web Share |
+| **Description** | "A simple and convenient way to see how God answers prayer in your life and to support others." | Welcome page subtitle (under the tagline), About page intro, PWA manifest `description` (shown in install prompts), `<meta name="description">` and Open Graph `og:description` |
+
+Keep these strings in one place (`lib/core/branding.dart` as constants) so screens and `web/index.html`/`manifest.json` stay in sync.
+
 ---
 
 ## 8. Screen specs
@@ -682,13 +691,13 @@ Each screen handles **loading**, **empty**, **error**, and **offline** states (a
 Native HTML splash in the palette colors (like omtb's `flutter_native_splash`), with the logo centered, shown until the first Flutter frame. Then the router splash runs until the auth state resolves.
 
 ### 8.2 Welcome (`/welcome`)
-- Hero: logo, "Prayer Odyssey" (Lora display), tagline "Track your spiritual journey, create prayer groups, and encourage one another."
+- Hero: logo, "Prayer Odyssey" (Lora display), the tagline "See how God answers prayer. Support one another." (titleLarge), and below it the description "A simple and convenient way to see how God answers prayer in your life and to support others." (bodyLarge, `onSurfaceVariant`). See §7.9.
 - Buttons: **Get started** (filled → `/login`), **Learn more** (text → `/about`).
 - Three feature cards (Track Prayers, Groups, Notifications), keeping the current copy.
 - This screen fixes a current bug where the hero text and "Learn more" are white-on-light in light mode.
 
 ### 8.3 Login (`/login`)
-- Card with the logo and a "Welcome back" / "Create account" title.
+- Card with the logo, a "Welcome back" / "Create account" title, and the tagline as a subtitle (§7.9).
 - `AutofillGroup` with email (`AutofillHints.email`) and password (`password` / `newPassword`) so password managers work. Name field in sign-up mode.
 - Primary button: Sign in / Sign up (with loading state). Divider "or". **Continue with Google** (outlined, with the Google "G" logo).
 - Toggle link between sign-in and sign-up. **New:** "Forgot password?" → `sendPasswordResetEmail` (small, cheap, often needed).
@@ -772,7 +781,8 @@ Sections (`ListTile`-based settings page):
 - Signed out: **"Learn more"** on the Welcome page and an "About" link under the Login card.
 - It's a public route, so `/about` also works as a direct link.
 
-- Dillie-O Digital logo, name, "Version 5.x.y" (`package_info_plus`).
+- Header: Prayer Odyssey lockup (mark + name) with the tagline under it, then the description "A simple and convenient way to see how God answers prayer in your life and to support others."
+- Dillie-O Digital logo, "Created by Dillie-O Digital", "Version 5.x.y" (`package_info_plus`).
 - Cards: Website (open link, plus a "Share app" QR dialog), Discord.
 - **Release history**, rendered from `assets/release_notes.json` (`[{version, date, title, items[]}]`), the newest marked "Latest". Show the 5 most recent, with "Show full history" expanding the rest. Seed the JSON with the **entire** user-facing history from 4.0.0 through 4.3.2 (from the old About page and CHANGELOG), then 5.0.0 on top. This removes the hand-edited markup. CHANGELOG.md stays the developer-facing source; the JSON holds the user-facing copy.
 
@@ -820,7 +830,7 @@ Keep today's semantics: cap 10, prune > 30 days, `fcmTokenInfo` without the user
   "display_override": ["window-controls-overlay", "standalone"],
   "background_color": "#F7F4EC",
   "theme_color": "#4E5D3A",
-  "description": "Track your prayers and share with groups.",
+  "description": "A simple and convenient way to see how God answers prayer in your life and to support others.",
   "icons": [192/512 any + 192/512 maskable],
   "screenshots": [wide 1280x720, narrow 720x1280],
   "shortcuts": [
@@ -1102,6 +1112,7 @@ Each milestone ends in a deployable preview channel and a version bump (5.0.0-al
 | D11 | Repo | The owner creates the new repo; the package name defaults to `prayer_odyssey`. |
 | D12 | Backend ownership (default) | Move `functions/` and the Firestore rules/indexes into the new repo under `firebase/`, so there's one source of truth. Until cutover, deploy backend changes only from the new repo, and only the ones marked safe for the old client (§4.4). |
 | D13 | Logo | Variation D, praying hands over an open journal; final asset set in the `logo/` folder next to this spec (§7.8). |
+| D14 | Tagline | "See how God answers prayer. Support one another." plus the longer description "A simple and convenient way to see how God answers prayer in your life and to support others." where there's room (§7.9). |
 
 ### Still open
 

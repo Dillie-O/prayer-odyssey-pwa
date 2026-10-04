@@ -1001,8 +1001,8 @@ Create `CLAUDE.md` (and/or `AGENTS.md`) in the new repo:
 3. Never commit `env/*.json` (except `example.json`) or generated SW files containing config.
 4. Run `dart format`, `flutter analyze`, `flutter test` before pushing.
 5. Widgets don't talk to Firebase directly (see §3.1).
-5a. Use stock Material 3 widgets themed through `ThemeData`. Shared components (§7.6) compose stock widgets; they don't reimplement them (see §7.1).
 6. Colors come only from `Theme.of(context).colorScheme` or `StatusColors`, never as hex literals in widgets.
+7. Use stock Material 3 widgets themed through `ThemeData`. Shared components (§7.6) compose stock widgets; they don't reimplement them (see §7.1).
 
 ---
 
